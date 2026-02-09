@@ -977,14 +977,37 @@
         }
 
         .color-preview input[type="color"] {
-            position: absolute;
-            width: 150%;
-            height: 150%;
-            top: -25%;
-            left: -25%;
-            cursor: pointer;
-            border: none;
-            background: none;
+            display: none;
+        }
+
+        .cp-popup {
+            position: fixed;
+            z-index: 1001;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: var(--shadow);
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            width: 220px;
+        }
+
+        .cp-popup.open { display: flex; }
+
+        .cp-sat-canvas {
+            width: 200px;
+            height: 150px;
+            border-radius: 4px;
+            cursor: crosshair;
+        }
+
+        .cp-hue-canvas {
+            width: 200px;
+            height: 14px;
+            border-radius: 4px;
+            cursor: crosshair;
         }
 
         .color-hex {
@@ -2365,26 +2388,20 @@
                         <label>Icon Fill</label>
                         <div class="color-picker-wrapper">
                             <div class="color-preview" style="background: #000000">
-                                <input type="color" id="fill-color" value="#000000"
-                                    onmousedown="saveSliderState()" ontouchstart="saveSliderState()"
-                                    oninput="updateFillColor(this.value)"
-                                    onchange="updateFillColor(this.value, true)">
+                                <input type="color" id="fill-color" value="#000000">
                             </div>
                             <input type="text" class="color-hex" id="fill-hex" value="#000000"
-                                onchange="updateFillColor(this.value)">
+                                onchange="this.value=normalizeHex(this.value); updateFillColor(this.value)">
                         </div>
                     </div>
                     <div class="color-row" style="margin-top: 8px;">
                         <label>Stroke</label>
                         <div class="color-picker-wrapper">
                             <div class="color-preview" style="background: #000000">
-                                <input type="color" id="stroke-color" value="#000000"
-                                    onmousedown="saveSliderState()" ontouchstart="saveSliderState()"
-                                    oninput="updateStrokeColor(this.value)"
-                                    onchange="updateStrokeColor(this.value, true)">
+                                <input type="color" id="stroke-color" value="#000000">
                             </div>
                             <input type="text" class="color-hex" id="stroke-hex" value="#000000"
-                                onchange="updateStrokeColor(this.value)">
+                                onchange="this.value=normalizeHex(this.value); updateStrokeColor(this.value)">
                         </div>
                     </div>
                     <div class="stroke-row">
@@ -2411,13 +2428,10 @@
                             <label>Color</label>
                             <div class="color-picker-wrapper">
                                 <div class="color-preview" id="bg-color-preview" style="background: #ffffff">
-                                    <input type="color" id="bg-color" value="#ffffff"
-                                        onmousedown="saveSliderState()" ontouchstart="saveSliderState()"
-                                        oninput="updateBgColor(this.value)"
-                                        onchange="updateBgColor(this.value, true)">
+                                    <input type="color" id="bg-color" value="#ffffff">
                                 </div>
                                 <input type="text" class="color-hex" id="bg-hex" value="#ffffff"
-                                    onchange="updateBgColor(this.value)">
+                                    onchange="this.value=normalizeHex(this.value); updateBgColor(this.value)">
                             </div>
                         </div>
                         <div class="shape-options">
@@ -4526,7 +4540,7 @@
          * Called on mousedown/touchstart of sliders
          */
         function saveSliderState() {
-            sliderStateBeforeDrag = getStateSnapshot();
+            if (!sliderStateBeforeDrag) sliderStateBeforeDrag = getStateSnapshot();
         }
 
         /**
@@ -5731,23 +5745,25 @@
 
         function updateFillColor(color, commit = false) {
             if (!isValidColor(color)) return;
-            if (commit) commitSliderState();
+            if (commit) { if (sliderStateBeforeDrag) commitSliderState(); else pushToHistory(); }
             else if (!sliderStateBeforeDrag) pushToHistory();
             state.fillColor = color;
             document.getElementById('fill-color').value = color;
             document.getElementById('fill-hex').value = color;
             document.getElementById('fill-color').parentElement.style.background = color;
+            colorPickerPopup.syncFromHex(color);
             renderPreview();
         }
 
         function updateStrokeColor(color, commit = false) {
             if (!isValidColor(color)) return;
-            if (commit) commitSliderState();
+            if (commit) { if (sliderStateBeforeDrag) commitSliderState(); else pushToHistory(); }
             else if (!sliderStateBeforeDrag) pushToHistory();
             state.strokeColor = color;
             document.getElementById('stroke-color').value = color;
             document.getElementById('stroke-hex').value = color;
             document.getElementById('stroke-color').parentElement.style.background = color;
+            colorPickerPopup.syncFromHex(color);
             renderPreview();
         }
 
@@ -5855,12 +5871,13 @@
 
         function updateBgColor(color, commit = false) {
             if (!isValidColor(color)) return;
-            if (commit) commitSliderState();
+            if (commit) { if (sliderStateBeforeDrag) commitSliderState(); else pushToHistory(); }
             else if (!sliderStateBeforeDrag) pushToHistory();
             state.bgColor = color;
             document.getElementById('bg-color').value = color;
             document.getElementById('bg-hex').value = color;
             document.getElementById('bg-color-preview').style.background = color;
+            colorPickerPopup.syncFromHex(color);
             renderPreview();
         }
 
@@ -7497,10 +7514,44 @@
         // Utility Functions
         // ============================================
 
+        function normalizeHex(value) {
+            const v = value.trim();
+            if (/^[0-9a-fA-F]{3,8}$/.test(v)) return '#' + v;
+            return v;
+        }
+
         function isValidColor(color) {
             const s = new Option().style;
             s.color = color;
             return s.color !== '';
+        }
+
+        function hexToHSV(hex) {
+            let r = parseInt(hex.slice(1, 3), 16) / 255;
+            let g = parseInt(hex.slice(3, 5), 16) / 255;
+            let b = parseInt(hex.slice(5, 7), 16) / 255;
+            let max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+            let h = 0, s = max === 0 ? 0 : d / max, v = max;
+            if (d !== 0) {
+                if (max === r) h = ((g - b) / d + 6) % 6;
+                else if (max === g) h = (b - r) / d + 2;
+                else h = (r - g) / d + 4;
+                h *= 60;
+            }
+            return { h, s, v };
+        }
+
+        function hsvToHex(h, s, v) {
+            let c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c;
+            let r, g, b;
+            if (h < 60) { r = c; g = x; b = 0; }
+            else if (h < 120) { r = x; g = c; b = 0; }
+            else if (h < 180) { r = 0; g = c; b = x; }
+            else if (h < 240) { r = 0; g = x; b = c; }
+            else if (h < 300) { r = x; g = 0; b = c; }
+            else { r = c; g = 0; b = x; }
+            const toHex = n => Math.round((n + m) * 255).toString(16).padStart(2, '0');
+            return '#' + toHex(r) + toHex(g) + toHex(b);
         }
 
         function updateSizeInfo() {
@@ -8464,12 +8515,248 @@
             }
         }
 
+        // ============================================
+        // Custom Color Picker Popup
+        // ============================================
+        var colorPickerPopup = (function () {
+            var popup, satCanvas, satCtx, hueCanvas, hueCtx;
+            var hsv = { h: 0, s: 0, v: 0 };
+            var currentBinding = null;
+            var dragging = null; // 'sat' | 'hue' | null
+
+            function init() {
+                popup = document.createElement('div');
+                popup.className = 'cp-popup';
+                popup.innerHTML =
+                    '<canvas class="cp-sat-canvas" width="200" height="150"></canvas>' +
+                    '<canvas class="cp-hue-canvas" width="200" height="14"></canvas>';
+                document.body.appendChild(popup);
+
+                satCanvas = popup.querySelector('.cp-sat-canvas');
+                hueCanvas = popup.querySelector('.cp-hue-canvas');
+                satCtx = satCanvas.getContext('2d');
+                hueCtx = hueCanvas.getContext('2d');
+
+                satCanvas.addEventListener('pointerdown', function (e) {
+                    dragging = 'sat';
+                    satCanvas.setPointerCapture(e.pointerId);
+                    pickSat(e);
+                });
+                satCanvas.addEventListener('pointermove', function (e) {
+                    if (dragging === 'sat') pickSat(e);
+                });
+                satCanvas.addEventListener('pointerup', function () {
+                    if (dragging === 'sat') { dragging = null; applyColor(true); }
+                });
+
+                hueCanvas.addEventListener('pointerdown', function (e) {
+                    dragging = 'hue';
+                    hueCanvas.setPointerCapture(e.pointerId);
+                    pickHue(e);
+                });
+                hueCanvas.addEventListener('pointermove', function (e) {
+                    if (dragging === 'hue') pickHue(e);
+                });
+                hueCanvas.addEventListener('pointerup', function () {
+                    if (dragging === 'hue') { dragging = null; applyColor(true); }
+                });
+
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape' && popup.classList.contains('open')) {
+                        e.stopPropagation();
+                        close();
+                    }
+                });
+
+                document.addEventListener('pointerdown', function (e) {
+                    if (!popup.classList.contains('open')) return;
+                    if (popup.contains(e.target)) return;
+                    // Allow click on the swatch that opened us to act as toggle
+                    if (currentBinding) {
+                        var swatch = document.getElementById(currentBinding.colorId).parentElement;
+                        if (swatch.contains(e.target)) return;
+                    }
+                    close();
+                });
+            }
+
+            function open(binding, anchorEl) {
+                if (currentBinding === binding && popup.classList.contains('open')) {
+                    close();
+                    return;
+                }
+                currentBinding = binding;
+                saveSliderState();
+
+                var hex = document.getElementById(binding.hexId).value;
+                if (!isValidColor(hex)) hex = '#000000';
+                hex = normalizeHex(hex);
+                // Ensure full 7-char hex
+                if (hex.length === 4) {
+                    hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+                }
+                hsv = hexToHSV(hex);
+
+                var rect = anchorEl.getBoundingClientRect();
+                popup.style.left = Math.max(0, Math.min(rect.left, window.innerWidth - 230)) + 'px';
+                popup.style.top = (rect.bottom + 6) + 'px';
+
+                // If popup would go off bottom, position above
+                if (rect.bottom + 6 + 190 > window.innerHeight) {
+                    popup.style.top = (rect.top - 190 - 6) + 'px';
+                }
+
+                popup.classList.add('open');
+                drawSatPanel();
+                drawHueBar();
+            }
+
+            function close() {
+                if (!popup.classList.contains('open')) return;
+                popup.classList.remove('open');
+                if (dragging) {
+                    dragging = null;
+                    applyColor(true);
+                } else {
+                    commitColor();
+                }
+                currentBinding = null;
+            }
+
+            function pickSat(e) {
+                var r = satCanvas.getBoundingClientRect();
+                var x = Math.max(0, Math.min(e.clientX - r.left, r.width));
+                var y = Math.max(0, Math.min(e.clientY - r.top, r.height));
+                hsv.s = x / r.width;
+                hsv.v = 1 - y / r.height;
+                drawSatPanel();
+                applyColor(false);
+            }
+
+            function pickHue(e) {
+                var r = hueCanvas.getBoundingClientRect();
+                var x = Math.max(0, Math.min(e.clientX - r.left, r.width));
+                hsv.h = (x / r.width) * 360;
+                drawSatPanel();
+                drawHueBar();
+                applyColor(false);
+            }
+
+            function applyColor(commit) {
+                var hex = hsvToHex(hsv.h, hsv.s, hsv.v);
+                if (currentBinding) {
+                    currentBinding.updateFn(hex, commit);
+                }
+            }
+
+            function commitColor() {
+                if (currentBinding) {
+                    var hex = hsvToHex(hsv.h, hsv.s, hsv.v);
+                    currentBinding.updateFn(hex, true);
+                }
+            }
+
+            function drawSatPanel() {
+                var w = satCanvas.width, h = satCanvas.height;
+                // Base hue color
+                var hueColor = hsvToHex(hsv.h, 1, 1);
+
+                // White-to-hue gradient (left to right)
+                var gradH = satCtx.createLinearGradient(0, 0, w, 0);
+                gradH.addColorStop(0, '#ffffff');
+                gradH.addColorStop(1, hueColor);
+                satCtx.fillStyle = gradH;
+                satCtx.fillRect(0, 0, w, h);
+
+                // Black gradient (top to bottom)
+                var gradV = satCtx.createLinearGradient(0, 0, 0, h);
+                gradV.addColorStop(0, 'rgba(0,0,0,0)');
+                gradV.addColorStop(1, 'rgba(0,0,0,1)');
+                satCtx.fillStyle = gradV;
+                satCtx.fillRect(0, 0, w, h);
+
+                // Thumb
+                var tx = hsv.s * w, ty = (1 - hsv.v) * h;
+                satCtx.beginPath();
+                satCtx.arc(tx, ty, 6, 0, Math.PI * 2);
+                satCtx.strokeStyle = '#ffffff';
+                satCtx.lineWidth = 2;
+                satCtx.stroke();
+                satCtx.beginPath();
+                satCtx.arc(tx, ty, 5, 0, Math.PI * 2);
+                satCtx.strokeStyle = '#000000';
+                satCtx.lineWidth = 1;
+                satCtx.stroke();
+            }
+
+            function drawHueBar() {
+                var w = hueCanvas.width, h = hueCanvas.height;
+                var grad = hueCtx.createLinearGradient(0, 0, w, 0);
+                for (var i = 0; i <= 6; i++) {
+                    grad.addColorStop(i / 6, hsvToHex(i * 60, 1, 1));
+                }
+                hueCtx.fillStyle = grad;
+                hueCtx.fillRect(0, 0, w, h);
+
+                // Thumb
+                var tx = (hsv.h / 360) * w;
+                hueCtx.beginPath();
+                hueCtx.rect(tx - 3, 0, 6, h);
+                hueCtx.strokeStyle = '#ffffff';
+                hueCtx.lineWidth = 2;
+                hueCtx.stroke();
+                hueCtx.beginPath();
+                hueCtx.rect(tx - 2, 1, 4, h - 2);
+                hueCtx.strokeStyle = '#000000';
+                hueCtx.lineWidth = 1;
+                hueCtx.stroke();
+            }
+
+            function syncFromHex(hex) {
+                if (!popup.classList.contains('open')) return;
+                if (!isValidColor(hex)) return;
+                hex = normalizeHex(hex);
+                if (hex.length === 4) {
+                    hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+                }
+                hsv = hexToHSV(hex);
+                drawSatPanel();
+                drawHueBar();
+            }
+
+            function isOpenFor(binding) {
+                return popup.classList.contains('open') && currentBinding === binding;
+            }
+
+            return { init: init, open: open, close: close, syncFromHex: syncFromHex, isOpenFor: isOpenFor };
+        })();
+
         document.addEventListener('DOMContentLoaded', function () {
             initEditor();
             sendUsageTracking();
             // Adjust height after a short delay to let parent page (e.g. Squarespace) finish layout
             setTimeout(adjustEditorHeight, 100);
             window.addEventListener('resize', adjustEditorHeight);
+
+            // Custom color picker popup (replaces native input[type="color"])
+            colorPickerPopup.init();
+
+            var cpBindings = [
+                { colorId: 'fill-color', hexId: 'fill-hex', updateFn: updateFillColor },
+                { colorId: 'stroke-color', hexId: 'stroke-hex', updateFn: updateStrokeColor },
+                { colorId: 'bg-color', hexId: 'bg-hex', updateFn: updateBgColor }
+            ];
+            cpBindings.forEach(function (b) {
+                var swatch = document.getElementById(b.colorId).parentElement;
+                swatch.addEventListener('click', function () {
+                    colorPickerPopup.open(b, swatch);
+                });
+                document.getElementById(b.hexId).addEventListener('change', function () {
+                    if (colorPickerPopup.isOpenFor(b)) {
+                        colorPickerPopup.syncFromHex(this.value);
+                    }
+                });
+            });
         });
     </script>
 </body>
