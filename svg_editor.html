@@ -1010,6 +1010,25 @@
             cursor: crosshair;
         }
 
+        .cp-swatches {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .cp-swatch {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            border: 1px solid rgba(128,128,128,0.3);
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .cp-swatch:hover {
+            transform: scale(1.2);
+        }
+
         .color-hex {
             width: 75px;
             padding: 6px;
@@ -8527,10 +8546,37 @@
             function init() {
                 popup = document.createElement('div');
                 popup.className = 'cp-popup';
+                var presetColors = [
+                    // Row 1: grayscale
+                    '#000000','#515151','#7b7b7b','#a5a5a5','#d2d2d2','#ffffff',
+                    // Row 2: saturated
+                    '#ff2600','#ff9300','#fffb00','#00f900','#00fdff','#0432ff','#9b00ff','#ff40ff',
+                    // Row 3: warm tones
+                    '#ff7e79','#ffd479','#fffc79','#d4fb79','#73fcd6','#73fdff','#76d6ff','#7a81ff',
+                    // Row 4: cool/pastel tones
+                    '#ff48b0','#d783ff','#c0c0c0','#808080','#404040','#1a1a1a','#592800','#7b4000'
+                ];
+                var swatchHtml = '<div class="cp-swatches">';
+                for (var i = 0; i < presetColors.length; i++) {
+                    swatchHtml += '<button class="cp-swatch" data-color="' + presetColors[i] + '" style="background:' + presetColors[i] + '"></button>';
+                }
+                swatchHtml += '</div>';
+
                 popup.innerHTML =
                     '<canvas class="cp-sat-canvas" width="200" height="150"></canvas>' +
-                    '<canvas class="cp-hue-canvas" width="200" height="14"></canvas>';
+                    '<canvas class="cp-hue-canvas" width="200" height="14"></canvas>' +
+                    swatchHtml;
                 document.body.appendChild(popup);
+
+                popup.querySelector('.cp-swatches').addEventListener('click', function (e) {
+                    var btn = e.target.closest('.cp-swatch');
+                    if (!btn) return;
+                    var hex = btn.dataset.color;
+                    hsv = hexToHSV(hex);
+                    applyColor(true);
+                    currentBinding = null;
+                    popup.classList.remove('open');
+                });
 
                 satCanvas = popup.querySelector('.cp-sat-canvas');
                 hueCanvas = popup.querySelector('.cp-hue-canvas');
@@ -8597,16 +8643,29 @@
                 }
                 hsv = hexToHSV(hex);
 
-                var rect = anchorEl.getBoundingClientRect();
-                popup.style.left = Math.max(0, Math.min(rect.left, window.innerWidth - 230)) + 'px';
-                popup.style.top = (rect.bottom + 6) + 'px';
+                // Show off-screen to measure, then position
+                popup.style.left = '-9999px';
+                popup.style.top = '-9999px';
+                popup.classList.add('open');
 
-                // If popup would go off bottom, position above
-                if (rect.bottom + 6 + 190 > window.innerHeight) {
-                    popup.style.top = (rect.top - 190 - 6) + 'px';
+                var popupH = popup.offsetHeight;
+                var rect = anchorEl.getBoundingClientRect();
+                var left = Math.max(0, Math.min(rect.left, window.innerWidth - 230));
+                var spaceBelow = window.innerHeight - rect.bottom - 6;
+                var spaceAbove = rect.top - 6;
+
+                var top;
+                if (spaceBelow >= popupH) {
+                    top = rect.bottom + 6;
+                } else if (spaceAbove >= popupH) {
+                    top = rect.top - popupH - 6;
+                } else {
+                    // Neither fits fully — pick whichever side has more room
+                    top = spaceBelow >= spaceAbove ? rect.bottom + 6 : rect.top - popupH - 6;
                 }
 
-                popup.classList.add('open');
+                popup.style.left = left + 'px';
+                popup.style.top = top + 'px';
                 drawSatPanel();
                 drawHueBar();
             }
