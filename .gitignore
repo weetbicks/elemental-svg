@@ -1,0 +1,11 @@
+node_modules/
+
+# macOS system files
+.DS_Store
+
+# Editor-specific
+*.swp
+*.swo
+
+# Claude Code
+.claude/
