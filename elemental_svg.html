@@ -4307,7 +4307,7 @@
     </script>
 
     <script>
-        const EDITOR_VERSION = "1.0.0";
+        const EDITOR_VERSION = "1.0.1";
         const _proxyBase = 'https://elemental-svg-proxy.g7hjmj8t8f.workers.dev';
 
         // ============================================
@@ -5903,11 +5903,14 @@
 
             if (state.fileMakerMode) {
                 // FileMaker mode - send to FileMaker
-                const jsonOutput = JSON.stringify(results.map(r => ({
-                    filename: r.filename,
-                    base64: r.base64
-                })));
-                callFileMaker('SaveSVG', jsonOutput);
+                const jsonOutput = JSON.stringify({
+                    format: 'svg',
+                    icons: results.map(r => ({
+                        filename: r.filename,
+                        base64: r.base64
+                    }))
+                });
+                callFileMaker('Save Icons', jsonOutput);
                 return jsonOutput;
             } else {
                 // Local mode - download files
@@ -5941,11 +5944,14 @@
 
             if (state.fileMakerMode) {
                 // FileMaker mode - send to FileMaker
-                const jsonOutput = JSON.stringify(results.map(r => ({
-                    filename: r.filename.replace(/\.svg$/i, '.png'),
-                    base64: r.base64
-                })));
-                callFileMaker('SavePNG', jsonOutput);
+                const jsonOutput = JSON.stringify({
+                    format: 'png',
+                    icons: results.map(r => ({
+                        filename: r.filename.replace(/\.svg$/i, '.png'),
+                        base64: r.base64
+                    }))
+                });
+                callFileMaker('Save Icons', jsonOutput);
                 return jsonOutput;
             } else {
                 // Local mode - download files
