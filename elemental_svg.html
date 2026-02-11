@@ -4759,6 +4759,7 @@
                 description: document.getElementById('issue-report-details').value.trim() || null,
                 svgCount: svgs.length,
                 svgs: svgs,
+                editorVersion: EDITOR_VERSION,
                 editorState: editorState,
                 userAgent: ua,
                 browser: browserName + (browserVersion ? ' ' + browserVersion : ''),
@@ -9188,6 +9189,7 @@
             indicator.innerHTML = `
                 <span class="update-indicator-label">Update available: v${versionInfo.currentVersion}</span>
                 ${isFileMaker ? '<span class="update-indicator-link">Click to update</span>' : ''}
+                <span class="release-notes-link" onclick="showReleaseNotes()">Release Notes</span>
             `;
 
             if (isFileMaker) {
