@@ -1322,6 +1322,181 @@
             flex-shrink: 0;
         }
 
+        /* Update indicator (in header) */
+        .update-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .update-indicator-label {
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .update-indicator-link {
+            color: var(--text-secondary);
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .update-indicator-link:hover {
+            color: var(--text-primary);
+        }
+
+        .release-notes-link {
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 11px;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .release-notes-link:hover {
+            color: var(--text-primary);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Update result popup banner */
+        .update-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            max-width: 360px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            padding: 16px 40px 16px 16px;
+            z-index: 10000;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+            animation: slideUp 0.3s ease-out;
+            font-family: inherit;
+            color: var(--text-primary);
+        }
+
+        .update-banner-title {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .update-banner-body {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .update-banner-dismiss {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            padding: 4px;
+        }
+
+        .update-banner-dismiss:hover {
+            color: var(--text-primary);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Release Notes Modal */
+        .release-notes-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 540px;
+            width: 90%;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.2s ease;
+        }
+
+        .modal-overlay.visible .release-notes-card {
+            transform: scale(1) translateY(0);
+        }
+
+        .release-notes-list {
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+            margin-bottom: 16px;
+        }
+
+        .release-notes-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .release-notes-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .release-notes-list::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .release-note-entry {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .release-note-entry:last-child {
+            border-bottom: none;
+        }
+
+        .release-note-version {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .release-note-date {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .release-note-body {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .release-notes-loading,
+        .release-notes-error {
+            text-align: center;
+            padding: 32px 0;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .release-notes-error {
+            color: #ef4444;
+        }
+
         .btn {
             padding: 10px 16px;
             border: none;
@@ -2159,6 +2334,7 @@
                         </svg>
                     </a>
                     <span class="header-title">Elemental SVG Editor</span>
+                    <span id="version-area" style="margin-left:8px; display:inline-flex; align-items:center; gap:8px;"></span>
                 </div>
                 <div class="header-row-right">
                     <div class="header-actions">
@@ -2779,6 +2955,19 @@
                 <button class="modal-btn modal-btn-cancel" onclick="hideIssueReport()">Cancel</button>
                 <button class="modal-btn modal-btn-confirm" id="issue-report-submit-btn"
                     onclick="submitIssueReport()">Submit Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Release Notes Modal -->
+    <div class="modal-overlay" id="release-notes-modal">
+        <div class="release-notes-card">
+            <div class="modal-title">Release Notes</div>
+            <div class="release-notes-list" id="release-notes-list">
+                <div class="release-notes-loading">Loading release notes...</div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="hideReleaseNotes()">Close</button>
             </div>
         </div>
     </div>
@@ -4100,6 +4289,7 @@
     </script>
 
     <script>
+        const EDITOR_VERSION = "1.0.0";
         const _proxyBase = 'https://elemental-svg-proxy.g7hjmj8t8f.workers.dev';
 
         // ============================================
@@ -8928,9 +9118,187 @@
             return { init: init, open: open, close: close, syncFromHex: syncFromHex, isOpenFor: isOpenFor };
         })();
 
+        // ===== Version Utilities =====
+
+        function isNewerVersion(remote, local) {
+            const r = remote.split('.').map(Number);
+            const l = local.split('.').map(Number);
+            for (let i = 0; i < 3; i++) {
+                if ((r[i] || 0) > (l[i] || 0)) return true;
+                if ((r[i] || 0) < (l[i] || 0)) return false;
+            }
+            return false;
+        }
+
+        // ===== Version Check =====
+
+        async function checkForUpdate() {
+            try {
+                const resp = await fetch('https://api.github.com/repos/weetbicks/elemental-svg/releases/latest');
+                if (!resp.ok) { showVersionLabel(); return; }
+                const release = await resp.json();
+                const remoteVersion = (release.tag_name || '').replace(/^v/, '');
+                if (remoteVersion && isNewerVersion(remoteVersion, EDITOR_VERSION)) {
+                    const asset = release.assets && release.assets.find(a => a.name === 'elemental_svg.html');
+                    showUpdateNotification({
+                        currentVersion: remoteVersion,
+                        downloadUrl: asset ? asset.browser_download_url : '',
+                        releaseNotes: release.body || ''
+                    });
+                } else {
+                    showVersionLabel();
+                }
+            } catch (e) {
+                showVersionLabel();
+            }
+        }
+
+        function showVersionLabel() {
+            const area = document.getElementById('version-area');
+            if (!area) return;
+            area.innerHTML = `<span class="update-indicator"><span style="color: var(--text-secondary);">v${EDITOR_VERSION}</span><span class="release-notes-link" onclick="showReleaseNotes()">Release Notes</span></span>`;
+        }
+
+        function showUpdateNotification(versionInfo) {
+            const area = document.getElementById('version-area');
+            if (!area) return;
+            area.innerHTML = '';
+
+            const isFileMaker = typeof FileMaker !== 'undefined' && FileMaker.PerformScript;
+            const indicator = document.createElement('span');
+            indicator.className = 'update-indicator';
+            indicator.innerHTML = `
+                <span class="update-indicator-label">Update available: v${versionInfo.currentVersion}</span>
+                ${isFileMaker ? '<span class="update-indicator-link">Click to update</span>' : ''}
+                <span class="release-notes-link" onclick="showReleaseNotes()">Release Notes</span>
+            `;
+
+            if (isFileMaker) {
+                indicator.querySelector('.update-indicator-link').addEventListener('click', () => {
+                    const payload = JSON.stringify({
+                        version: versionInfo.currentVersion,
+                        downloadUrl: versionInfo.downloadUrl || '',
+                        releaseNotes: versionInfo.releaseNotes || ''
+                    });
+                    FileMaker.PerformScript('Update Version', payload);
+                });
+            }
+
+            area.appendChild(indicator);
+        }
+
+        function updateVersionResult(jsonStr) {
+            try {
+                const data = JSON.parse(jsonStr);
+                const success = data.result === 'success';
+
+                const banner = document.createElement('div');
+                banner.className = 'update-banner';
+                banner.style.borderColor = success ? 'var(--success)' : 'var(--danger)';
+                banner.style.cursor = 'default';
+                banner.innerHTML = `
+                    <button class="update-banner-dismiss" title="Dismiss">&times;</button>
+                    <div class="update-banner-title" style="color: ${success ? 'var(--success)' : 'var(--danger)'}">
+                        ${success ? 'Updated to v' + EDITOR_VERSION : 'Update failed'}
+                    </div>
+                    <div class="update-banner-body">
+                        ${success ? 'Editor has been updated successfully.' : 'Something went wrong. Please try again later.'}
+                    </div>
+                `;
+
+                banner.querySelector('.update-banner-dismiss').addEventListener('click', () => {
+                    banner.remove();
+                });
+
+                const existing = document.querySelector('.update-banner');
+                if (existing) existing.remove();
+
+                document.body.appendChild(banner);
+
+                setTimeout(() => { if (banner.parentNode) banner.remove(); }, 5000);
+            } catch (e) {
+                console.error('updateVersionResult: invalid JSON', e);
+            }
+        }
+        window.updateVersionResult = updateVersionResult;
+
+        // --- Release Notes ---
+        let _releaseNotesCache = null;
+
+        function showReleaseNotes() {
+            const modal = document.getElementById('release-notes-modal');
+            modal.classList.add('visible');
+            document.addEventListener('keydown', handleReleaseNotesEscape);
+            modal.addEventListener('click', handleReleaseNotesOverlayClick);
+            fetchReleaseNotes();
+        }
+
+        function hideReleaseNotes() {
+            const modal = document.getElementById('release-notes-modal');
+            modal.classList.remove('visible');
+            document.removeEventListener('keydown', handleReleaseNotesEscape);
+            modal.removeEventListener('click', handleReleaseNotesOverlayClick);
+        }
+
+        function handleReleaseNotesEscape(e) {
+            if (e.key === 'Escape') hideReleaseNotes();
+        }
+
+        function handleReleaseNotesOverlayClick(e) {
+            if (e.target.id === 'release-notes-modal') hideReleaseNotes();
+        }
+
+        function fetchReleaseNotes() {
+            const list = document.getElementById('release-notes-list');
+            if (_releaseNotesCache) {
+                renderReleaseNotes(_releaseNotesCache);
+                return;
+            }
+            list.innerHTML = '<div class="release-notes-loading">Loading release notes...</div>';
+            fetch('https://api.github.com/repos/weetbicks/elemental-svg/releases')
+                .then(r => {
+                    if (!r.ok) throw new Error('Failed to fetch releases');
+                    return r.json();
+                })
+                .then(releases => {
+                    _releaseNotesCache = releases;
+                    renderReleaseNotes(releases);
+                })
+                .catch(() => {
+                    list.innerHTML = '<div class="release-notes-error">Unable to load release notes. Check your internet connection.</div>';
+                });
+        }
+
+        function renderReleaseNotes(releases) {
+            const list = document.getElementById('release-notes-list');
+            if (!releases.length) {
+                list.innerHTML = '<div class="release-notes-loading">No releases found.</div>';
+                return;
+            }
+            list.innerHTML = releases.map(r => {
+                const date = r.published_at ? new Date(r.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+                const body = (r.body || '').trim() || 'No release notes provided.';
+                return `<div class="release-note-entry">
+                    <div class="release-note-version">${r.name || r.tag_name}</div>
+                    ${date ? `<div class="release-note-date">${date}</div>` : ''}
+                    <div class="release-note-body">${simpleMarkdown(body)}</div>
+                </div>`;
+            }).join('');
+        }
+
+        function simpleMarkdown(str) {
+            return str
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                .replace(/`(.+?)`/g, '<code style="background:var(--bg-tertiary);padding:1px 4px;border-radius:3px;font-size:11px;">$1</code>')
+                .replace(/^- (.+)$/gm, '<div style="padding-left:12px;text-indent:-8px;">&#8226; $1</div>');
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             initEditor();
             sendUsageTracking();
+            setTimeout(checkForUpdate, 2000);
             // Adjust height after a short delay to let parent page (e.g. Squarespace) finish layout
             setTimeout(adjustEditorHeight, 100);
             window.addEventListener('resize', adjustEditorHeight);
