@@ -1,5 +1,5 @@
 node_modules/
-claudes plan for update.txt
+docs/
 
 # macOS system files
 .DS_Store
@@ -10,3 +10,9 @@ claudes plan for update.txt
 
 # Claude Code
 .claude/
+CLAUDE.md
+
+# Other
+portrace.js
+package.json
+package-lock.json
