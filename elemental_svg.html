@@ -1025,7 +1025,9 @@
             width: 220px;
         }
 
-        .cp-popup.open { display: flex; }
+        .cp-popup.open {
+            display: flex;
+        }
 
         .cp-sat-canvas {
             width: 200px;
@@ -1051,7 +1053,7 @@
             width: 20px;
             height: 20px;
             border-radius: 3px;
-            border: 1px solid rgba(128,128,128,0.3);
+            border: 1px solid rgba(128, 128, 128, 0.3);
             cursor: pointer;
             padding: 0;
         }
@@ -1360,8 +1362,13 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         /* Update result popup banner */
@@ -1411,8 +1418,15 @@
         }
 
         @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         /* Release Notes Modal */
@@ -2334,7 +2348,8 @@
                         </svg>
                     </a>
                     <span class="header-title">Elemental SVG Editor</span>
-                    <span id="version-area" style="margin-left:8px; display:inline-flex; align-items:center; gap:8px;"></span>
+                    <span id="version-area"
+                        style="margin-left:8px; display:inline-flex; align-items:center; gap:8px;"></span>
                 </div>
                 <div class="header-row-right">
                     <div class="header-actions">
@@ -2346,7 +2361,8 @@
                             </svg>
                             Load SVGs
                         </button>
-                        <label class="auto-convert-toggle" title="Automatically save converted files when SVGs are loaded">
+                        <label class="auto-convert-toggle"
+                            title="Automatically save converted files when SVGs are loaded">
                             <span class="toggle-switch">
                                 <input type="checkbox" id="auto-convert" onchange="toggleAutoConvert(this.checked)">
                                 <span class="toggle-slider"></span>
@@ -2636,7 +2652,8 @@
                             <span id="copy-btn-text">Copy</span>
                         </button>
                         <button class="btn btn-primary" id="save-btn" onclick="saveSVG()" disabled>
-                            <svg id="save-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg id="save-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
                                 <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1-2-2h11l5 5v11a2 2 0 0 1-2 2z" />
                                 <polyline points="17 21 17 13 7 13 7 21" />
                                 <polyline points="7 3 7 8 15 8" />
@@ -2880,7 +2897,8 @@
                 undone.
             </div>
             <div class="modal-actions">
-                <button class="modal-btn modal-btn-cancel" id="modal-cancel-btn" onclick="hideConfirmModal()">Cancel</button>
+                <button class="modal-btn modal-btn-cancel" id="modal-cancel-btn"
+                    onclick="hideConfirmModal()">Cancel</button>
                 <button class="modal-btn modal-btn-confirm" id="modal-confirm-btn"
                     onclick="confirmModalAction()">Reset</button>
             </div>
@@ -8876,13 +8894,13 @@
                 popup.className = 'cp-popup';
                 var presetColors = [
                     // Row 1: grayscale
-                    '#000000','#515151','#7b7b7b','#a5a5a5','#d2d2d2','#ffffff',
+                    '#000000', '#515151', '#7b7b7b', '#a5a5a5', '#d2d2d2', '#ffffff',
                     // Row 2: saturated
-                    '#ff2600','#ff9300','#fffb00','#00f900','#00fdff','#0432ff','#9b00ff','#ff40ff',
+                    '#ff2600', '#ff9300', '#fffb00', '#00f900', '#00fdff', '#0432ff', '#9b00ff', '#ff40ff',
                     // Row 3: warm tones
-                    '#ff7e79','#ffd479','#fffc79','#d4fb79','#73fcd6','#73fdff','#76d6ff','#7a81ff',
+                    '#ff7e79', '#ffd479', '#fffc79', '#d4fb79', '#73fcd6', '#73fdff', '#76d6ff', '#7a81ff',
                     // Row 4: cool/pastel tones
-                    '#ff48b0','#d783ff','#c0c0c0','#808080','#404040','#1a1a1a','#592800','#7b4000'
+                    '#ff48b0', '#d783ff', '#c0c0c0', '#808080', '#404040', '#1a1a1a', '#592800', '#7b4000'
                 ];
                 var swatchHtml = '<div class="cp-swatches">';
                 for (var i = 0; i < presetColors.length; i++) {
