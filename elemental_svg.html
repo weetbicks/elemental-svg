@@ -4306,7 +4306,7 @@
     </script>
 
     <script>
-        const EDITOR_VERSION = "1.0.1";
+        const EDITOR_VERSION = "1.0.2";
         const _proxyBase = 'https://elemental-svg-proxy.g7hjmj8t8f.workers.dev';
 
         // ============================================
@@ -5498,6 +5498,10 @@
                     console.error('Invalid SVG data for file:', filename);
                     return false;
                 }
+
+                // Resolve CSS <style> rules into presentation attributes
+                // so editor controls (fill, stroke) work with class-styled SVGs
+                resolveStyleRules(svg);
 
                 // Add to svgItems array
                 state.svgItems.push({
@@ -7060,6 +7064,49 @@
         }
 
         /**
+         * Resolve CSS <style> rules into presentation attributes on matching elements.
+         * Many SVGs (especially from icon libraries) use <style> blocks with class selectors
+         * instead of inline attributes. FileMaker and the editor's fill/stroke controls
+         * only work with XML presentation attributes, so we need to inline these.
+         */
+        function resolveStyleRules(svg) {
+            const styleElements = svg.querySelectorAll('style');
+            if (styleElements.length === 0) return;
+
+            styleElements.forEach(styleEl => {
+                const cssText = styleEl.textContent;
+                const ruleRegex = /([^{]+)\{([^}]+)\}/g;
+                let match;
+                while ((match = ruleRegex.exec(cssText)) !== null) {
+                    const selector = match[1].trim();
+                    const declarations = match[2].trim();
+                    try {
+                        const targets = svg.querySelectorAll(selector);
+                        targets.forEach(el => {
+                            declarations.split(';').forEach(decl => {
+                                const colonIdx = decl.indexOf(':');
+                                if (colonIdx === -1) return;
+                                const prop = decl.substring(0, colonIdx).trim();
+                                let value = decl.substring(colonIdx + 1).trim();
+                                if (!prop || !value) return;
+                                // CSS class rules override presentation attributes (higher specificity)
+                                el.setAttribute(prop, value);
+                            });
+                        });
+                    } catch (e) {
+                        console.warn('Could not apply CSS rule:', selector, e);
+                    }
+                }
+                // Remove the <style> element (and parent <defs> if now empty)
+                const parent = styleEl.parentElement;
+                styleEl.remove();
+                if (parent && parent.tagName.toLowerCase() === 'defs' && parent.children.length === 0) {
+                    parent.remove();
+                }
+            });
+        }
+
+        /**
          * Process SVG for FileMaker compatibility
          * - Adds fm_fill class
          * - Removes hardcoded fills (except fill="none")
@@ -7068,6 +7115,9 @@
          * - Strips units from width/height
          */
         function processSVGForFileMaker(svg) {
+            // Resolve any remaining CSS <style> rules into presentation attributes
+            resolveStyleRules(svg);
+
             // Add fm_fill class and set fill on SVG root for inheritance
             const existingClass = svg.getAttribute('class') || '';
             if (!existingClass.includes('fm_fill')) {
