@@ -676,6 +676,111 @@
             background: var(--accent-hover);
         }
 
+        /* About Button & Modal */
+        .elemental-about-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .elemental-about-btn:hover {
+            background: var(--bg-primary);
+            border-color: var(--accent);
+        }
+
+        [data-theme="light"] .elemental-about-btn {
+            background: #ffffff;
+        }
+
+        .elemental-about-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .about-description {
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            text-align: left;
+        }
+
+        .about-description p {
+            margin: 0 0 10px;
+        }
+
+        .about-description p:last-child {
+            margin-bottom: 0;
+        }
+
+        .about-description strong {
+            color: var(--text-primary);
+        }
+
+        .about-scrollable {
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .about-product-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: var(--bg-tertiary);
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .about-product-item:hover {
+            border-color: var(--accent);
+            background: var(--bg-primary);
+        }
+
+        .about-product-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 10px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .about-product-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .about-product-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: capitalize;
+            margin-bottom: 4px;
+        }
+
+        .about-product-desc {
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
         .zoom-level {
             font-size: 12px;
             color: var(--text-secondary);
@@ -2564,6 +2669,46 @@
                         </svg>
                         Report an Issue
                     </button>
+                    <button class="elemental-about-btn" onclick="showAboutModal()" title="About Elemental FM">
+                        <svg viewBox="0 0 512 512" width="14" height="14">
+                            <polygon style="fill:#BAFFA0;"
+                                points="158.897,273.655 88.276,264.828 61.793,326.621 194.207,494.345 247.172,512" />
+                            <polygon style="fill:#E2FFCB;"
+                                points="88.276,264.828 123.586,308.966 150.069,291.31 158.897,273.655" />
+                            <polygon style="fill:#99DCA3;"
+                                points="123.586,308.966 220.69,503.172 194.207,494.345 61.793,326.621" />
+                            <polygon style="fill:#99DCA3;"
+                                points="370.759,476.69 450.207,335.448 432.552,273.655 353.103,317.793 344.276,476.69" />
+                            <polygon style="fill:#BAFFA0;"
+                                points="397.241,317.793 406.069,361.931 432.552,273.655 397.241,291.31 397.241,308.966" />
+                            <polygon style="fill:#E2FFCB;" points="432.552,273.655 450.207,335.448 406.069,361.931" />
+                            <polygon style="fill:#BAFFA0;"
+                                points="406.069,361.931 353.103,476.69 370.759,476.69 450.207,335.448" />
+                            <polygon style="fill:#3DB9C9;"
+                                points="211.862,52.966 247.172,476.69 282.483,414.897 273.655,97.103" />
+                            <polygon style="fill:#00C39F;"
+                                points="344.276,494.345 432.552,211.862 388.414,123.586 317.793,141.241 247.172,512" />
+                            <polygon style="fill:#67EBBC;"
+                                points="314.489,158.585 370.759,229.517 388.414,123.586 317.793,141.241" />
+                            <polygon style="fill:#64CDF6;"
+                                points="247.172,512 282.483,238.345 344.276,185.379 370.759,256 308.966,512" />
+                            <polygon style="fill:#2CA6DE;"
+                                points="282.483,238.345 317.793,317.793 273.655,512 247.172,512" />
+                            <polygon style="fill:#67EBBC;" points="370.759,229.517 344.276,494.345 432.552,211.862" />
+                            <polygon style="fill:#B8F9D0;" points="432.552,211.862 388.414,123.586 370.759,229.517" />
+                            <polygon style="fill:#A0EBFA;" points="317.793,317.793 344.276,185.379 370.759,256" />
+                            <polygon style="fill:#53DCDC;" points="211.862,52.966 273.655,97.103 256,0" />
+                            <polygon style="fill:#53DCDC;"
+                                points="326.621,61.793 273.655,97.103 264.828,441.379 317.793,220.69" />
+                            <polygon style="fill:#B0F9F9;" points="256,0 273.655,97.103 326.621,61.793" />
+                            <polygon style="fill:#64CDF6;"
+                                points="273.655,512 211.862,158.897 141.241,105.931 114.759,220.69 220.69,512" />
+                            <polygon style="fill:#A0EBFA;" points="141.241,105.931 158.897,220.69 211.862,158.897" />
+                            <polygon style="fill:#2CA6DE;"
+                                points="220.69,512 247.172,512 158.897,220.69 114.759,220.69" />
+                        </svg>
+                        About Elemental FM…
+                    </button>
                 </div>
             </div>
 
@@ -2985,6 +3130,56 @@
             </div>
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="hideReleaseNotes()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Elemental FM Modal -->
+    <div class="modal-overlay" id="about-modal" onclick="if(event.target===this)hideAboutModal()">
+        <div class="modal-card" style="max-width:560px;">
+            <div class="modal-icon">
+                <svg viewBox="0 0 512 512" width="48" height="48">
+                    <polygon style="fill:#BAFFA0;"
+                        points="158.897,273.655 88.276,264.828 61.793,326.621 194.207,494.345 247.172,512" />
+                    <polygon style="fill:#E2FFCB;"
+                        points="88.276,264.828 123.586,308.966 150.069,291.31 158.897,273.655" />
+                    <polygon style="fill:#99DCA3;"
+                        points="123.586,308.966 220.69,503.172 194.207,494.345 61.793,326.621" />
+                    <polygon style="fill:#99DCA3;"
+                        points="370.759,476.69 450.207,335.448 432.552,273.655 353.103,317.793 344.276,476.69" />
+                    <polygon style="fill:#BAFFA0;"
+                        points="397.241,317.793 406.069,361.931 432.552,273.655 397.241,291.31 397.241,308.966" />
+                    <polygon style="fill:#E2FFCB;" points="432.552,273.655 450.207,335.448 406.069,361.931" />
+                    <polygon style="fill:#BAFFA0;"
+                        points="406.069,361.931 353.103,476.69 370.759,476.69 450.207,335.448" />
+                    <polygon style="fill:#3DB9C9;"
+                        points="211.862,52.966 247.172,476.69 282.483,414.897 273.655,97.103" />
+                    <polygon style="fill:#00C39F;"
+                        points="344.276,494.345 432.552,211.862 388.414,123.586 317.793,141.241 247.172,512" />
+                    <polygon style="fill:#67EBBC;"
+                        points="314.489,158.585 370.759,229.517 388.414,123.586 317.793,141.241" />
+                    <polygon style="fill:#64CDF6;"
+                        points="247.172,512 282.483,238.345 344.276,185.379 370.759,256 308.966,512" />
+                    <polygon style="fill:#2CA6DE;" points="282.483,238.345 317.793,317.793 273.655,512 247.172,512" />
+                    <polygon style="fill:#67EBBC;" points="370.759,229.517 344.276,494.345 432.552,211.862" />
+                    <polygon style="fill:#B8F9D0;" points="432.552,211.862 388.414,123.586 370.759,229.517" />
+                    <polygon style="fill:#A0EBFA;" points="317.793,317.793 344.276,185.379 370.759,256" />
+                    <polygon style="fill:#53DCDC;" points="211.862,52.966 273.655,97.103 256,0" />
+                    <polygon style="fill:#53DCDC;"
+                        points="326.621,61.793 273.655,97.103 264.828,441.379 317.793,220.69" />
+                    <polygon style="fill:#B0F9F9;" points="256,0 273.655,97.103 326.621,61.793" />
+                    <polygon style="fill:#64CDF6;"
+                        points="273.655,512 211.862,158.897 141.241,105.931 114.759,220.69 220.69,512" />
+                    <polygon style="fill:#A0EBFA;" points="141.241,105.931 158.897,220.69 211.862,158.897" />
+                    <polygon style="fill:#2CA6DE;" points="220.69,512 247.172,512 158.897,220.69 114.759,220.69" />
+                </svg>
+            </div>
+            <div class="modal-title" id="about-title">Elemental FM</div>
+            <div class="about-description" id="about-description"></div>
+            <hr style="border:none; border-top:1px solid var(--border-color); margin:16px 0;">
+            <div id="about-products" class="about-scrollable"></div>
+            <div class="modal-actions" style="justify-content:flex-end;">
+                <button class="modal-btn modal-btn-cancel" onclick="hideAboutModal()">Close</button>
             </div>
         </div>
     </div>
@@ -4307,6 +4502,7 @@
 
     <script>
         const EDITOR_VERSION = "1.0.2";
+        const PRODUCT_ID = '1322BB7B-1510-4893-BD2D-FF1F19E404F7';
         const _proxyBase = 'https://elemental-svg-proxy.g7hjmj8t8f.workers.dev';
 
         // ============================================
@@ -4753,6 +4949,7 @@
             else if (ua.match(/firefox/i)) { browserName = 'Firefox'; browserVersion = (ua.match(/firefox\/([\d.]+)/i) || [])[1]; }
 
             return {
+                product_id: PRODUCT_ID,
                 timestamp: new Date().toISOString(),
                 email: document.getElementById('issue-report-email').value.trim() || null,
                 description: document.getElementById('issue-report-details').value.trim() || null,
@@ -8902,6 +9099,7 @@
             else if (ua.match(/firefox/i)) { browserName = 'Firefox'; browserVersion = (ua.match(/firefox\/([\d.]+)/i) || [])[1]; }
 
             const payload = {
+                product_id: PRODUCT_ID,
                 timestamp: new Date().toISOString(),
                 userAgent: ua,
                 browser: browserName + (browserVersion ? ' ' + browserVersion : ''),
@@ -9295,6 +9493,94 @@
             }
         }
         window.updateVersionResult = updateVersionResult;
+
+        // --- About Modal ---
+        let _productsCache = null;
+
+        function showAboutModal() {
+            document.getElementById('about-modal').classList.add('visible');
+            document.addEventListener('keydown', handleAboutEscape);
+            loadAboutProducts();
+        }
+
+        function hideAboutModal() {
+            document.getElementById('about-modal').classList.remove('visible');
+            document.removeEventListener('keydown', handleAboutEscape);
+        }
+
+        function handleAboutEscape(e) {
+            if (e.key === 'Escape') hideAboutModal();
+        }
+
+        function computeYearsAt(startDate) {
+            const now = new Date();
+            let years = now.getFullYear() - startDate.getFullYear();
+            if (now < new Date(now.getFullYear(), startDate.getMonth(), startDate.getDate())) years--;
+            return years;
+        }
+
+        async function loadAboutProducts() {
+            const container = document.getElementById('about-products');
+            if (!container) return;
+
+            if (_productsCache) {
+                renderAboutData(_productsCache);
+                return;
+            }
+
+            try {
+                const cached = localStorage.getItem('elemental-products');
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    if (parsed.ts && (Date.now() - parsed.ts) < 86400000) {
+                        _productsCache = parsed.data;
+                        renderAboutData(_productsCache);
+                        return;
+                    }
+                }
+            } catch (e) { }
+
+            container.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-secondary);font-size:12px;">Loading...</div>';
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 10000);
+                const resp = await fetch(_proxyBase + '/products', { signal: controller.signal });
+                clearTimeout(timeout);
+                if (!resp.ok) throw new Error('Failed');
+                const data = await resp.json();
+                _productsCache = data;
+                localStorage.setItem('elemental-products', JSON.stringify({ ts: Date.now(), data: data }));
+                renderAboutData(data);
+            } catch (e) {
+                container.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-secondary);font-size:12px;">Unable to load product information.</div>';
+            }
+        }
+
+        function renderAboutData(data) {
+            const titleEl = document.getElementById('about-title');
+            if (titleEl && data.title) titleEl.textContent = data.title;
+
+            const descEl = document.getElementById('about-description');
+            if (descEl && data.description) {
+                const years = computeYearsAt(new Date(2006, 7, 14));
+                let desc = data.description.replace(/19 years/g, years + ' years');
+                desc = desc.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                descEl.innerHTML = desc;
+            }
+
+            const container = document.getElementById('about-products');
+            if (container && data.products) {
+                container.innerHTML = data.products.map(p => `
+                    <a href="${p.url}" target="_blank" rel="noopener" class="about-product-item">
+                        <img src="data:image/png;base64,${p.image}" alt="${p.name}" class="about-product-icon">
+                        <div class="about-product-info">
+                            <div class="about-product-name">${p.name.replace(/_/g, ' ')}</div>
+                            <div class="about-product-desc">${p.description}</div>
+                        </div>
+                    </a>
+                `).join('');
+            }
+        }
 
         // --- Release Notes ---
         let _releaseNotesCache = null;
