@@ -13,6 +13,7 @@ docs/
 CLAUDE.md
 
 # Other
-portrace.js
+images/
+potrace.js
 package.json
 package-lock.json
