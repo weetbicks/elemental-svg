@@ -40,8 +40,8 @@ Open `elemental_svg.html` in any browser, or visit [elemental-svg.com](https://e
 
 ## Documentation
 
-- [Feature Reference](features.html) — full list of editor capabilities
-- [User Guide](guide.html) — step-by-step usage instructions
+- [Feature Reference](https://www.elemental-svg.com/features) — full list of editor capabilities
+- [User Guide](https://www.elemental-svg.com/guide) — step-by-step usage instructions
 
 ## License
 
