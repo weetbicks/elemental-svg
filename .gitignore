@@ -1,5 +1,5 @@
 node_modules/
-docs/
+docs_internal/
 
 # macOS system files
 .DS_Store

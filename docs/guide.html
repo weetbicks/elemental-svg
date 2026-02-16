@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elemental SVG Editor — User Guide</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f7fa;
+    --bg-surface: #ffffff;
+    --bg-card: #f0f2f5;
+    --text: #1a1a2e;
+    --text-muted: #5a5e6e;
+    --accent: #2563eb;
+    --accent-dim: rgba(37, 99, 235, 0.1);
+    --border: #d5d8e0;
+    --sidebar-w: 260px;
+  }
+
+  html { scroll-behavior: smooth; scroll-padding-top: 2rem; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: var(--sidebar-w);
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--bg-surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1.25rem;
+    z-index: 100;
+  }
+
+  .sidebar h2 {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .sidebar nav a {
+    display: block;
+    padding: 0.4rem 0.75rem;
+    margin-bottom: 2px;
+    border-radius: 6px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .sidebar nav a:hover,
+  .sidebar nav a.active {
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+
+  /* ── Main ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    max-width: 820px;
+    padding: 3rem 2.5rem 6rem;
+  }
+
+  /* ── Header ── */
+  .header { margin-bottom: 3rem; }
+
+  .header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .header h1 span { color: var(--accent); }
+
+  .header .version {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: var(--bg-surface);
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+
+  /* ── Sections ── */
+  .section { margin-bottom: 3rem; }
+
+  .section h2 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--accent);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.25rem;
+  }
+
+  .section h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-top: 1.25rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .section p, .section li {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin-bottom: 0.5rem;
+  }
+
+  .section ul, .section ol {
+    padding-left: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .section li { margin-bottom: 0.35rem; }
+
+  .section strong { color: var(--text); }
+
+  code {
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 0.8rem;
+    background: var(--bg-card);
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    color: var(--accent);
+  }
+
+  pre {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    margin: 0.75rem 0 1rem;
+  }
+
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.8rem;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.85rem 1.1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .card strong {
+    color: var(--text);
+    font-size: 0.9rem;
+  }
+
+  .card p {
+    margin-top: 0.2rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 0;
+  }
+
+  .tip {
+    background: var(--accent-dim);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    margin: 0.75rem 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .tip strong { color: var(--accent); }
+
+  /* ── Shortcuts table ── */
+  .shortcut-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.75rem 0;
+    font-size: 0.85rem;
+  }
+
+  .shortcut-table th,
+  .shortcut-table td {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .shortcut-table th {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .shortcut-table td { color: var(--text-muted); }
+  .shortcut-table td:first-child { color: var(--text); }
+
+  /* ── Mobile ── */
+  .menu-btn {
+    display: none;
+    position: fixed;
+    top: 1rem; left: 1rem;
+    z-index: 200;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  @media (max-width: 768px) {
+    .menu-btn { display: block; }
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; padding: 4.5rem 1.25rem 4rem; }
+    .overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 50;
+    }
+    .overlay.open { display: block; }
+  }
+</style>
+</head>
+<body>
+
+<button class="menu-btn" id="menuBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="overlay" id="overlay"></div>
+
+<aside class="sidebar" id="sidebar">
+  <h2>User Guide</h2>
+  <nav>
+    <a href="#getting-started">Getting Started</a>
+    <a href="#loading">Loading SVGs</a>
+    <a href="#previewing">Previewing &amp; Navigating</a>
+    <a href="#editing">Editing SVGs</a>
+    <a href="#stroke-to-fill">Stroke to Fill Conversion</a>
+    <a href="#exporting">Exporting / Saving</a>
+    <a href="#filemaker">FileMaker Integration</a>
+    <a href="#settings">Settings &amp; Preferences</a>
+    <a href="#shortcuts">Keyboard Shortcuts</a>
+    <a href="#troubleshooting">Troubleshooting &amp; Tips</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <div class="header">
+    <h1><span>Elemental SVG Editor</span> — User Guide</h1>
+    <span class="version">v1.0.2</span>
+  </div>
+
+  <!-- 1. Getting Started -->
+  <section class="section" id="getting-started">
+    <h2>1. Getting Started</h2>
+    <p>Elemental SVG Editor is a single HTML file that lets you load, edit, and export SVG icons. There is nothing to install — just open the file and start working.</p>
+    <ul>
+      <li><strong>In a browser</strong> — Open the HTML file directly, or visit <a href="https://elemental-svg.com" style="color:var(--accent);">elemental-svg.com</a> to use the hosted version online.</li>
+      <li><strong>In FileMaker</strong> — Load the HTML file into a Web Viewer on your layout. The editor automatically detects it is running inside FileMaker and adjusts its behavior accordingly.</li>
+    </ul>
+    <p>No server, no build step, no dependencies. The editor works fully offline once the page has loaded.</p>
+  </section>
+
+  <!-- 2. Loading SVGs -->
+  <section class="section" id="loading">
+    <h2>2. Loading SVGs</h2>
+    <p>There are several ways to get SVGs into the editor:</p>
+
+    <div class="card"><strong>File Picker</strong><p>Click the <strong>Load SVGs</strong> button in the toolbar to open your system file picker. You can select one file or multiple <code>.svg</code> files at once.</p></div>
+
+    <div class="card"><strong>Drag &amp; Drop</strong><p>Drag SVG files from your desktop or file manager directly onto the preview area. Multiple files are supported.</p></div>
+
+    <div class="card"><strong>Paste</strong><p>Click the paste button to paste SVG code from your clipboard. This is especially useful inside FileMaker, where <code>Cmd+V</code> may be intercepted by the host application before it reaches the web viewer.</p></div>
+
+    <div class="card"><strong>From FileMaker (JavaScript API)</strong>
+      <p>SVGs can be loaded programmatically using FileMaker's <em>Perform JavaScript in Web Viewer</em> script step:</p>
+    </div>
+
+    <ul>
+      <li><code>loadSVG(base64String)</code> — Load a single SVG from a Base64-encoded string.</li>
+      <li><code>loadSVGFromString(svgString, 'filename.svg')</code> — Load from a raw SVG markup string.</li>
+      <li><code>loadSVGItems(jsonArray)</code> — Load multiple SVGs from a JSON array of <code>{filename, svg}</code> objects, where <code>svg</code> is Base64-encoded.</li>
+    </ul>
+
+    <p>When multiple SVGs are loaded, they appear in a tile grid so you can view and edit them all at once.</p>
+  </section>
+
+  <!-- 3. Previewing & Navigating -->
+  <section class="section" id="previewing">
+    <h2>3. Previewing &amp; Navigating</h2>
+    <p>Once SVGs are loaded, they appear in the main preview area. A single SVG is shown centered; multiple SVGs appear in a tile grid.</p>
+
+    <div class="card"><strong>Zoom</strong><p>Use the <strong>+</strong> and <strong>-</strong> buttons to zoom in and out. Click <strong>Fit</strong> to fit all icons to the view. You can also hold <code>Cmd</code>, <code>Ctrl</code>, or <code>Shift</code> and scroll with the mouse wheel.</p></div>
+
+    <div class="card"><strong>Reorder</strong><p>Drag tiles to rearrange them in the order you want. This order is preserved when exporting.</p></div>
+
+    <div class="card"><strong>Remove</strong><p>Click the <strong>&times;</strong> button on any tile to remove it from the session.</p></div>
+
+    <div class="card"><strong>Background</strong><p>Click the background button to cycle through preview backgrounds: checkerboard (for seeing transparency), white, black, or a custom color of your choice.</p></div>
+  </section>
+
+  <!-- 4. Editing SVGs -->
+  <section class="section" id="editing">
+    <h2>4. Editing SVGs</h2>
+    <p>All editing controls apply to every loaded SVG at once. Changes are previewed in real time.</p>
+
+    <div class="card"><strong>Fill &amp; Stroke Colors</strong><p>Use the color pickers to choose new fill or stroke colors. You can also type a hex value directly into the input field.</p></div>
+
+    <div class="card"><strong>Stroke Width</strong><p>Adjust from 0 to 10 in 0.5-unit increments using the slider.</p></div>
+
+    <div class="card"><strong>Rotation</strong><p>Rotate using the left/right arrow buttons. Set the rotation increment to 15&deg;, 30&deg;, 45&deg;, or 90&deg; to control how much each click rotates.</p></div>
+
+    <div class="card"><strong>Flip</strong><p>Mirror the icon horizontally or vertically with one click.</p></div>
+
+    <div class="card"><strong>Scale</strong><p>Resize the icon within its viewBox, from 50% down to 150% up. The viewBox dimensions stay the same — only the icon inside gets larger or smaller.</p></div>
+
+    <div class="card"><strong>Offset</strong><p>Reposition the icon within its viewBox using the X and Y offset sliders. Useful for fine-tuning centering.</p></div>
+
+    <div class="card"><strong>Opacity</strong><p>Adjust the icon transparency from 0% (fully transparent) to 100% (fully opaque).</p></div>
+
+    <div class="card"><strong>Invert Colors</strong><p>Quickly swap black and white colors in the SVG. Handy when switching between dark and light contexts.</p></div>
+
+    <div class="card"><strong>Background Shape</strong><p>Add a shape behind the icon — choose from circle, triangle, square, pentagon, or hexagon. You can adjust the corner radius and the padding between the icon and the shape edge.</p></div>
+
+    <div class="card"><strong>Undo / Redo</strong><p>Press <code>Cmd/Ctrl+Z</code> to undo and <code>Cmd/Ctrl+Shift+Z</code> to redo. The editor keeps up to 50 history states.</p></div>
+  </section>
+
+  <!-- 5. Stroke to Fill Conversion -->
+  <section class="section" id="stroke-to-fill">
+    <h2>5. Stroke to Fill Conversion</h2>
+    <p>This is one of the editor's most important features for FileMaker developers.</p>
+    <p>Many popular icon sets (like Lucide, Feather, and Tabler) use <strong>strokes</strong> to draw their outlines. Unfortunately, FileMaker does not render stroke-based SVGs correctly when they are used as button icons — strokes often appear too thin, too thick, or disappear entirely.</p>
+    <p>The editor solves this by converting stroke outlines into <strong>filled vector paths</strong>:</p>
+    <ul>
+      <li>When you load SVGs that use strokes, the editor automatically detects this and shows a <strong>"Convert strokes to fills"</strong> option.</li>
+      <li>Enabling this runs the SVG through a bitmap tracing process (using Potrace) that traces the visual outline and replaces strokes with solid filled paths.</li>
+      <li>The result looks the same visually but works properly inside FileMaker button icons.</li>
+    </ul>
+    <div class="tip"><strong>Tip:</strong> This is similar to using an online tool like "outline-stroke," but it is built directly into the editor so you do not need to leave FileMaker or juggle extra tools.</div>
+  </section>
+
+  <!-- 6. Exporting / Saving -->
+  <section class="section" id="exporting">
+    <h2>6. Exporting / Saving</h2>
+
+    <h3>Output Format</h3>
+    <p>Choose between <strong>SVG</strong> (vector) or <strong>PNG</strong> (raster). When PNG is selected, you can pick a size: 32, 64, 128, 256, 512, or 1024 pixels.</p>
+
+    <h3>Browser Mode</h3>
+    <ul>
+      <li><strong>Save</strong> — Downloads the file(s) to your computer.</li>
+      <li><strong>Copy</strong> — Copies the SVG source code to your clipboard.</li>
+      <li><strong>Code</strong> — Opens a viewer showing the raw SVG source so you can inspect or copy it.</li>
+    </ul>
+
+    <h3>FileMaker Mode</h3>
+    <ul>
+      <li><strong>Save</strong> — Sends the SVG data back to FileMaker via a script call. The data is passed as a Base64-encoded JSON string to a FileMaker script called <code>Save Icons</code>.</li>
+      <li>Your FileMaker solution needs a script by that name to receive and process the data.</li>
+    </ul>
+
+    <h3>Multiple SVGs</h3>
+    <p>When more than one SVG is loaded, you can choose to save all of them or select specific ones to include in the export.</p>
+
+    <h3>Auto-Convert</h3>
+    <p>Enable the <strong>Auto Convert</strong> toggle to automatically save or export as soon as SVGs are loaded. This is useful for batch workflows where you want to skip the manual Save step.</p>
+  </section>
+
+  <!-- 7. FileMaker Integration -->
+  <section class="section" id="filemaker">
+    <h2>7. FileMaker Integration Guide</h2>
+    <p>This section is for developers who want to embed the editor in their own FileMaker solutions.</p>
+
+    <h3>Setting Up the Web Viewer</h3>
+    <ol>
+      <li>Add a Web Viewer to your layout.</li>
+      <li>Set the web address to the HTML file — either stored in a container field or referenced as a file path.</li>
+      <li>The editor auto-detects it is running in FileMaker when <code>FileMaker.PerformScript</code> is available.</li>
+    </ol>
+
+    <h3>Initializing the Editor</h3>
+    <p>After the page loads, call <code>initEditor()</code> via <em>Perform JavaScript in Web Viewer</em> to configure the editor:</p>
+    <pre><code>initEditor({
+    output_mode: 'fm',        // 'fm' or 'browser'
+    style: 'dark',            // 'dark' or 'light'
+    style_colour: 'orange',   // accent color
+    output_format: 'svg',     // 'svg' or 'png'
+    output_size: 512          // PNG size in pixels
+});</code></pre>
+
+    <h3>Loading SVGs into the Editor</h3>
+    <ul>
+      <li>Use <em>Perform JavaScript in Web Viewer</em> to call <code>loadSVG(base64data)</code> for a single icon.</li>
+      <li>For multiple SVGs, call <code>loadSVGItems(jsonArrayString)</code> where the JSON is an array of <code>{"filename": "name.svg", "svg": "base64data"}</code> objects.</li>
+    </ul>
+
+    <h3>Getting SVGs Back</h3>
+    <ul>
+      <li>When the user clicks Save, the editor calls <code>FileMaker.PerformScript('Save Icons', parameter)</code>.</li>
+      <li>The parameter is a Base64-encoded JSON string containing the processed SVG data.</li>
+      <li>Your <code>Save Icons</code> script should decode this and store the SVGs as needed.</li>
+    </ul>
+
+    <h3>FM-Specific Options</h3>
+    <div class="card"><strong>FM Compatibility</strong><p>Adds a CSS class (<code>fm_fill</code>) that lets FileMaker control icon colors via its built-in button icon styling.</p></div>
+    <div class="card"><strong>Dynamic Fill</strong><p>Removes hardcoded fill colors from the SVG so FileMaker can apply colors dynamically at runtime.</p></div>
+    <div class="card"><strong>Dynamic Target</strong><p>Choose whether FileMaker controls the <strong>icon</strong> color or the <strong>background shape</strong> color.</p></div>
+
+    <h3>Version Updates in FileMaker</h3>
+    <p>The editor checks for updates automatically. In FileMaker mode, when a new version is available, it shows a <strong>"Click to update"</strong> link. Clicking it calls <code>FileMaker.PerformScript('Update Version', payload)</code> where the payload contains the download URL for the new HTML file.</p>
+    <p>Your solution needs an <code>Update Version</code> script that downloads the new file and replaces the old one.</p>
+  </section>
+
+  <!-- 8. Settings & Preferences -->
+  <section class="section" id="settings">
+    <h2>8. Settings &amp; Preferences</h2>
+    <p>The following preferences are saved automatically between sessions using browser <code>localStorage</code>:</p>
+    <ul>
+      <li>Theme (dark or light) and accent color</li>
+      <li>FM Compatibility settings</li>
+      <li>Preview background preference</li>
+      <li>Auto-convert toggle</li>
+    </ul>
+    <p>These settings persist as long as the browser storage is not cleared. In FileMaker, localStorage is tied to the web viewer's data storage.</p>
+  </section>
+
+  <!-- 9. Keyboard Shortcuts -->
+  <section class="section" id="shortcuts">
+    <h2>9. Keyboard Shortcuts</h2>
+    <table class="shortcut-table">
+      <thead><tr><th>Shortcut</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td><code>Cmd/Ctrl + Z</code></td><td>Undo</td></tr>
+        <tr><td><code>Cmd/Ctrl + Shift + Z</code></td><td>Redo</td></tr>
+        <tr><td><code>+</code> / <code>-</code></td><td>Zoom in / out</td></tr>
+        <tr><td><code>Escape</code></td><td>Close modals and popups</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 10. Troubleshooting & Tips -->
+  <section class="section" id="troubleshooting">
+    <h2>10. Troubleshooting &amp; Tips</h2>
+
+    <div class="card"><strong>SVGs look wrong in FileMaker?</strong><p>Try enabling <strong>Convert strokes to fills</strong>. Stroke-based SVGs are the most common cause of rendering issues in FileMaker button icons.</p></div>
+
+    <div class="card"><strong>Colors are not matching expectations?</strong><p>Check the <strong>FM Compatibility</strong> and <strong>Dynamic Fill</strong> settings. If Dynamic Fill is on, the SVG's colors are removed so FileMaker can apply its own — this may not be what you want in every case.</p></div>
+
+    <div class="card"><strong>Works offline</strong><p>Once the editor has loaded, it does not need an internet connection. All editing and exporting happens locally in the browser.</p></div>
+
+    <div class="card"><strong>Report issues</strong><p>Click the wrench icon to open the built-in issue reporter. It captures full diagnostic data — editor state, SVG data, and browser information — so problems can be investigated quickly.</p></div>
+  </section>
+
+</main>
+
+<script>
+  // Mobile menu toggle
+  const btn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+
+  btn.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  });
+
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+
+  // Close sidebar on nav click (mobile)
+  sidebar.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+    });
+  });
+
+  // Active link tracking
+  const sections = document.querySelectorAll('.section');
+  const links = document.querySelectorAll('.sidebar nav a');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = sidebar.querySelector(`a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -75% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
