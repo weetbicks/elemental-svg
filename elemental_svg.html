@@ -9689,6 +9689,19 @@
             });
         });
     </script>
+    <script>
+        // Report height to parent frame for auto-resizing iframes
+        (function() {
+            if (window.parent === window) return;
+            function postHeight() {
+                const height = document.documentElement.scrollHeight;
+                window.parent.postMessage({ type: 'elemental-svg-height', height }, '*');
+            }
+            const ro = new ResizeObserver(postHeight);
+            ro.observe(document.documentElement);
+            postHeight();
+        })();
+    </script>
 </body>
 
 </html>
