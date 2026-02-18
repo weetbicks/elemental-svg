@@ -2563,7 +2563,7 @@
                     </div>
                 </div>
                 <a class="btn-coffee"
-                    href="https://giraffe-flounder-f3lg.squarespace.com/checkout/donate?donatePageId=6984434f14f9465769febd49"
+                    href="#"
                     target="_blank" rel="noopener noreferrer">
                     <svg class="coffee-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -9604,13 +9604,23 @@
             if (container && data.products) {
                 container.innerHTML = data.products.map(p => `
                     <a href="${p.url}" target="_blank" rel="noopener" class="about-product-item">
-                        <img src="data:image/png;base64,${p.image}" alt="${p.name}" class="about-product-icon">
+                        <img src="data:image/svg+xml;base64,${p.image}" alt="${p.name}" class="about-product-icon">
                         <div class="about-product-info">
                             <div class="about-product-name">${p.name.replace(/_/g, ' ')}</div>
                             <div class="about-product-desc">${p.description}</div>
                         </div>
                     </a>
                 `).join('');
+            }
+
+            // Update donate button link from product JSON
+            const svgProduct = data.products && data.products.find(p => p.id === PRODUCT_ID);
+            if (svgProduct && svgProduct.pricing && svgProduct.pricing.tiers) {
+                const donateTier = svgProduct.pricing.tiers.find(t => t.hidden);
+                if (donateTier && donateTier.stripe_link) {
+                    const coffeeBtn = document.querySelector('.btn-coffee');
+                    if (coffeeBtn) coffeeBtn.href = donateTier.stripe_link;
+                }
             }
         }
 
@@ -9699,6 +9709,24 @@
             initEditor();
             sendUsageTracking();
             setTimeout(checkForUpdate, 2000);
+
+            // Update donate button from cached products data
+            try {
+                const cached = localStorage.getItem('elemental-products');
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    if (parsed.data && parsed.data.products) {
+                        const svgProduct = parsed.data.products.find(p => p.id === PRODUCT_ID);
+                        if (svgProduct && svgProduct.pricing && svgProduct.pricing.tiers) {
+                            const donateTier = svgProduct.pricing.tiers.find(t => t.hidden);
+                            if (donateTier && donateTier.stripe_link) {
+                                const coffeeBtn = document.querySelector('.btn-coffee');
+                                if (coffeeBtn) coffeeBtn.href = donateTier.stripe_link;
+                            }
+                        }
+                    }
+                }
+            } catch (e) { }
             // Adjust height after a short delay to let parent page (e.g. Squarespace) finish layout
             setTimeout(adjustEditorHeight, 100);
             window.addEventListener('resize', adjustEditorHeight);
