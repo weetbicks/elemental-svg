@@ -4533,7 +4533,7 @@
     </script>
 
     <script>
-        const EDITOR_VERSION = "1.0.4";
+        const EDITOR_VERSION = "1.0.5";
         const PRODUCT_ID = '1322BB7B-1510-4893-BD2D-FF1F19E404F7';
         const _proxyBase = 'https://elemental-svg-proxy.g7hjmj8t8f.workers.dev';
 
@@ -9602,7 +9602,7 @@
 
             const container = document.getElementById('about-products');
             if (container && data.products) {
-                container.innerHTML = data.products.map(p => `
+                container.innerHTML = data.products.filter(p => !p.hidden).map(p => `
                     <a href="${p.url}" target="_blank" rel="noopener" class="about-product-item">
                         <img src="data:image/svg+xml;base64,${p.image}" alt="${p.name}" class="about-product-icon">
                         <div class="about-product-info">
