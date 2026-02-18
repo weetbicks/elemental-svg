@@ -17,3 +17,5 @@ images/
 potrace.js
 package.json
 package-lock.json
+
+.wrangler/
