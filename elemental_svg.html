@@ -799,7 +799,6 @@
             font-size: 13px;
             font-weight: 700;
             color: var(--text-primary);
-            text-transform: capitalize;
             margin-bottom: 4px;
         }
 
@@ -9606,7 +9605,7 @@
                     <a href="${p.url}" target="_blank" rel="noopener" class="about-product-item">
                         <img src="data:image/svg+xml;base64,${p.image}" alt="${p.name}" class="about-product-icon">
                         <div class="about-product-info">
-                            <div class="about-product-name">${p.name.replace(/_/g, ' ')}</div>
+                            <div class="about-product-name">${p.name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).replace(/\b(Svg|Ux|Fm)\b/g, m => m.toUpperCase())}</div>
                             <div class="about-product-desc">${p.description}</div>
                         </div>
                     </a>
