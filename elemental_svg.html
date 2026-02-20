@@ -5,17 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Elemental SVG Editor for FileMaker</title>
-    <meta name="description" content="Free browser-based SVG editor designed for FileMaker. Import, preview, convert and optimise SVG icons for use in FileMaker Pro button icons and layouts.">
+    <meta name="description"
+        content="Free browser-based SVG editor designed for FileMaker. Import, preview, convert and optimise SVG icons for use in FileMaker Pro button icons and layouts.">
     <link rel="canonical" href="https://www.elemental-svg.com/">
     <!-- Open Graph -->
     <meta property="og:title" content="Elemental SVG Editor for FileMaker">
-    <meta property="og:description" content="Free browser-based SVG editor designed for FileMaker. Import, preview, convert and optimise SVG icons for use in FileMaker Pro button icons and layouts.">
+    <meta property="og:description"
+        content="Free browser-based SVG editor designed for FileMaker. Import, preview, convert and optimise SVG icons for use in FileMaker Pro button icons and layouts.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.elemental-svg.com/">
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Elemental SVG Editor for FileMaker">
-    <meta name="twitter:description" content="Free browser-based SVG editor designed for FileMaker. Import, preview, convert and optimise SVG icons for use in FileMaker Pro button icons and layouts.">
+    <meta name="twitter:description"
+        content="Free browser-based SVG editor designed for FileMaker. Import, preview, convert and optimise SVG icons for use in FileMaker Pro button icons and layouts.">
     <!-- Structured Data -->
     <script type="application/ld+json">
     {
@@ -255,12 +258,27 @@
             flex-wrap: wrap;
             align-items: center;
             gap: 8px;
+            position: relative;
         }
 
         .header-row-left {
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        .header-row-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .ib-mode-toggle .increment-btn {
+            min-width: 90px;
+            text-align: center;
+            padding: 10px 16px;
+            font-size: 12px;
+            font-weight: 600;
         }
 
         .header-row-right {
@@ -330,18 +348,12 @@
             }
         }
 
-        .header-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
         .auto-convert-toggle {
             display: flex;
             align-items: center;
             gap: 6px;
             padding: 10px 16px;
-            background: var(--bg-tertiary);
+            background: var(--bg-secondary);
             color: var(--text-primary);
             border: 1px solid var(--border-color);
             border-radius: 6px;
@@ -544,11 +556,26 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        .preview-header h2 {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-secondary);
+        .preview-header .btn {
+            padding: 6px 12px;
+            font-size: 11px;
         }
+
+        .preview-header .btn-secondary {
+            background: var(--bg-secondary);
+        }
+
+        .preview-header .auto-convert-toggle {
+            padding: 6px 10px;
+            font-size: 11px;
+            background: none;
+            border: none;
+        }
+
+        .preview-header .auto-convert-toggle .toggle-slider {
+            background: var(--bg-secondary);
+        }
+
 
         .preview-filename {
             font-size: 14px;
@@ -590,6 +617,15 @@
         .zoom-btn:disabled {
             opacity: 0.3;
             cursor: not-allowed;
+        }
+
+        .ib-select-toggle-btn {
+            width: 80px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            text-align: center;
         }
 
         .history-controls {
@@ -1097,7 +1133,10 @@
             transition: all 0.2s;
         }
 
-        .increment-btn:hover,
+        .increment-btn:hover {
+            background: var(--bg-tertiary);
+        }
+
         .increment-btn.active {
             background: var(--accent);
             border-color: var(--accent);
@@ -1794,10 +1833,6 @@
                 flex-shrink: 0;
             }
 
-            .header-actions {
-                flex-wrap: wrap;
-            }
-
             .controls-panel {
                 flex-direction: column;
                 max-height: 50%;
@@ -2452,10 +2487,336 @@
             height: 20px;
             background: var(--border-color);
         }
+
+        /* ============================================
+           Icon Browser
+           ============================================ */
+        /* Icon Browser — Mode toggle */
+        .ib-mode-toggle {
+            display: inline-flex;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: visible;
+        }
+
+        .ib-mode-toggle .increment-btn {
+            border: none;
+            border-radius: 0;
+            width: 80px;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .ib-mode-toggle .increment-btn:first-child {
+            border-radius: 5px 0 0 5px;
+        }
+
+        .ib-mode-toggle .increment-btn:last-child {
+            border-radius: 0 5px 5px 0;
+        }
+
+        .ib-mode-toggle .increment-btn .ib-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 4px;
+            border-radius: 9px;
+            font-size: 10px;
+            font-weight: 600;
+            line-height: 1;
+            background: color-mix(in srgb, var(--accent) 40%, white);
+            color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+
+        /* Visibility classes for mode switching */
+        body:not([data-mode="library"]) .ib-library-only {
+            display: none !important;
+        }
+
+        body[data-mode="library"] .ib-editor-only {
+            display: none !important;
+        }
+
+        body[data-mode="library"] .tile-actions,
+        body[data-mode="library"] .single-actions,
+        body[data-mode="library"] .single-remove-btn {
+            display: none !important;
+        }
+
+        body[data-mode="library"] .controls-panel {
+            overflow-y: hidden;
+        }
+
+        #ib-library-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow: hidden;
+            min-height: 0;
+            flex: 1;
+        }
+
+        #ib-filter-section {
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+        }
+
+        #ib-filter-section>.control-section-content {
+            max-height: none;
+            overflow: visible;
+        }
+
+        /* Icon Browser — Search in preview header */
+        .ib-search-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 0;
+            max-width: 320px;
+        }
+
+        .ib-search-wrap svg {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .ib-search {
+            width: 100%;
+            padding: 7px 10px 7px 32px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 12px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .ib-search:focus {
+            border-color: var(--accent);
+        }
+
+        .ib-search::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .ib-icon-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            transition: all 0.15s;
+            padding: 0;
+        }
+
+        .ib-icon-btn:hover {
+            background: var(--bg-primary);
+        }
+
+        .ib-icon-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Icon Browser — Sidebar filter items */
+        .ib-sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0;
+            font-size: 12px;
+            color: var(--text-primary);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .ib-sidebar-item input[type="checkbox"] {
+            accent-color: var(--accent);
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .ib-sidebar-count {
+            margin-left: auto;
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        .ib-info-text {
+            font-size: 11px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        /* Icon Browser — Grid container (inside drop-zone) */
+        #ib-grid-container {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg-primary);
+        }
+
+        .ib-scroll-container {
+            flex: 1;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .ib-scroll-spacer {
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .ib-tile-window {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: grid;
+            gap: 4px;
+            padding: 8px 16px;
+            grid-template-columns: repeat(var(--ib-grid-cols, 10), minmax(0, 1fr));
+        }
+
+        /* Tiles */
+        .ib-tile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 4px 6px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: background 0.1s, border-color 0.1s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .ib-tile:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .ib-tile.ib-selected {
+            border-color: var(--accent);
+            background: rgba(var(--accent-rgb), 0.1);
+        }
+
+        .ib-tile-icon {
+            width: var(--ib-icon-size, 32px);
+            height: var(--ib-icon-size, 32px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            flex-shrink: 0;
+        }
+
+        .ib-tile-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .ib-tile-name {
+            margin-top: 4px;
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
+        }
+
+        .ib-tile-placeholder {
+            width: var(--ib-icon-size, 32px);
+            height: var(--ib-icon-size, 32px);
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+
+
+        /* Rubber-band selection box */
+        .ib-rubber-band {
+            position: fixed;
+            border: 1px solid var(--accent);
+            background: rgba(var(--accent-rgb), 0.1);
+            pointer-events: none;
+            z-index: 1200;
+            display: none;
+        }
+
+        /* Loading spinner */
+        .ib-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 12px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .ib-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: ib-spin 0.8s linear infinite;
+        }
+
+        @keyframes ib-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Empty state */
+        .ib-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            padding: 40px;
+        }
+
+        .ib-empty svg {
+            width: 32px;
+            height: 32px;
+            opacity: 0.5;
+        }
     </style>
 </head>
 
-<body data-theme="dark">
+<body data-theme="dark" data-mode="editor">
     <div class="editor-container" id="editor-container">
         <header class="header">
             <div class="header-row">
@@ -2478,92 +2839,66 @@
                                 fill="#ef7a1b" />
                         </svg>
                     </a>
-                    <span class="header-title">Elemental SVG Editor</span>
+                    <span class="header-title">Elemental SVG</span>
                     <span id="version-area"
                         style="margin-left:8px; display:inline-flex; align-items:center; gap:8px;"></span>
                 </div>
+                <div class="header-row-center">
+                    <div class="ib-mode-toggle" id="ib-mode-toggle">
+                        <button class="increment-btn active" id="ib-mode-editor"
+                            onclick="ibSetMode('editor')">Editor<span class="ib-badge" id="ib-editor-badge"
+                                style="display:none"></span></button>
+                        <button class="increment-btn" id="ib-mode-library" onclick="ibSetMode('library')">Icons</button>
+                    </div>
+                </div>
                 <div class="header-row-right">
-                    <div class="header-actions">
-                        <button class="btn btn-primary" onclick="triggerFileLoad()" title="Load SVG files">
-                            <svg viewBox="0 0 1200 1200" fill="currentColor">
-                                <path d="m912.98 167.86v109.88c0 22.219 18.047 40.266 40.266 40.266h109.88zm-426.61 281.72c-26.812-26.812 13.922-67.547 40.734-40.734l175.26 176.58c6.7969 11.531 4.5938 25.734-4.5 34.922l-170.76 170.81c-26.812 26.812-67.547-13.922-40.734-40.734l121.6-121.64h-540.94c-37.922 0-37.922-57.609 0-57.609h540.94zm666.1-123.66 8.9062 20.859v675c0 59.812-49.031 108.75-108.75 108.75l-668.72-0.046875c-59.859 0-108.7-48.891-108.7-108.75v-145.78c0-37.922 57.609-37.922 57.609 0v145.78c0 28.078 23.062 51.141 51.141 51.141h668.76c28.312 0 51.141-23.203 51.141-51.141l-0.046874-646.18h-150.56c-53.766 0-97.875-44.109-97.875-97.875v-150.56h-471.47c-28.266 0-51.141 23.156-51.141 51.141v145.78c0 37.922-57.609 37.922-57.609 0v-145.78c0-59.812 48.984-108.75 108.7-108.75h500.29l20.344 8.4375z" fill-rule="evenodd"/>
+                    <div class="theme-container" id="theme-container">
+                        <button class="btn btn-secondary theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="5" />
+                                <line x1="12" y1="1" x2="12" y2="3" />
+                                <line x1="12" y1="21" x2="12" y2="23" />
+                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                                <line x1="1" y1="12" x2="3" y2="12" />
+                                <line x1="21" y1="12" x2="23" y2="12" />
+                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
                             </svg>
-                            Load SVGs
+                            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                            </svg>
+                            <span class="label-light">Light</span>
+                            <span class="label-dark">Dark</span>
                         </button>
-                        <label class="auto-convert-toggle"
-                            title="Automatically save converted files when SVGs are loaded">
-                            <span class="toggle-switch">
-                                <input type="checkbox" id="auto-convert" onchange="toggleAutoConvert(this.checked)">
-                                <span class="toggle-slider"></span>
-                            </span>
-                            Auto Convert
-                        </label>
-                        <button class="btn btn-secondary" id="clear-btn" onclick="clearAllSVGs()"
-                            title="Clear all loaded SVGs" style="display: none;">
+                        <button class="theme-dropdown-toggle" onclick="toggleThemeDropdown(event)"
+                            title="Color options">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18" />
-                                <line x1="6" y1="6" x2="18" y2="18" />
+                                <polyline points="6 9 12 15 18 9" />
                             </svg>
-                            Clear
                         </button>
-                        <button class="btn btn-secondary" id="reset-btn" onclick="resetAll()" title="Reset all changes"
-                            style="display: none;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                                <path d="M3 3v5h5" />
-                            </svg>
-                            Reset
-                        </button>
-                        <div class="theme-container" id="theme-container">
-                            <button class="btn btn-secondary theme-toggle" onclick="toggleTheme()" title="Toggle theme">
-                                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <circle cx="12" cy="12" r="5" />
-                                    <line x1="12" y1="1" x2="12" y2="3" />
-                                    <line x1="12" y1="21" x2="12" y2="23" />
-                                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                                    <line x1="1" y1="12" x2="3" y2="12" />
-                                    <line x1="21" y1="12" x2="23" y2="12" />
-                                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                                </svg>
-                                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                                </svg>
-                                <span class="label-light">Light</span>
-                                <span class="label-dark">Dark</span>
-                            </button>
-                            <button class="theme-dropdown-toggle" onclick="toggleThemeDropdown(event)"
-                                title="Color options">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="6 9 12 15 18 9" />
-                                </svg>
-                            </button>
-                            <div class="theme-dropdown">
-                                <div class="theme-dropdown-label">Accent Color</div>
-                                <div class="accent-colors">
-                                    <button class="accent-swatch" data-color="red" onclick="setAccentColor('red')"
-                                        title="Red"></button>
-                                    <button class="accent-swatch" data-color="blue" onclick="setAccentColor('blue')"
-                                        title="Blue"></button>
-                                    <button class="accent-swatch" data-color="green" onclick="setAccentColor('green')"
-                                        title="Green"></button>
-                                    <button class="accent-swatch" data-color="purple" onclick="setAccentColor('purple')"
-                                        title="Purple"></button>
-                                    <button class="accent-swatch" data-color="pink" onclick="setAccentColor('pink')"
-                                        title="Pink"></button>
-                                    <button class="accent-swatch active" data-color="orange"
-                                        onclick="setAccentColor('orange')" title="Orange"></button>
-                                </div>
+                        <div class="theme-dropdown">
+                            <div class="theme-dropdown-label">Accent Color</div>
+                            <div class="accent-colors">
+                                <button class="accent-swatch" data-color="red" onclick="setAccentColor('red')"
+                                    title="Red"></button>
+                                <button class="accent-swatch" data-color="blue" onclick="setAccentColor('blue')"
+                                    title="Blue"></button>
+                                <button class="accent-swatch" data-color="green" onclick="setAccentColor('green')"
+                                    title="Green"></button>
+                                <button class="accent-swatch" data-color="purple" onclick="setAccentColor('purple')"
+                                    title="Purple"></button>
+                                <button class="accent-swatch" data-color="pink" onclick="setAccentColor('pink')"
+                                    title="Pink"></button>
+                                <button class="accent-swatch active" data-color="orange"
+                                    onclick="setAccentColor('orange')" title="Orange"></button>
                             </div>
                         </div>
                     </div>
                 </div>
-                <a class="btn-coffee"
-                    href="javascript:void(0)"
-                    target="_blank" rel="noopener noreferrer">
+                <a class="btn-coffee" href="javascript:void(0)" target="_blank" rel="noopener noreferrer">
                     <svg class="coffee-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path class="coffee-steam" d="M6 4c0-1 .5-2 1.5-2s1.5 1 1.5 2" opacity="0.6" />
@@ -2580,12 +2915,68 @@
         <div class="main-content">
             <div class="preview-panel">
                 <div class="preview-header">
-                    <div style="display:flex;align-items:center;gap:4px;min-width:0">
-                        <h2>Preview</h2>
+                    <div class="ib-editor-only" style="display:flex;align-items:center;gap:8px;min-width:0">
+                        <button class="btn btn-primary" onclick="triggerFileLoad()" title="Load SVG files">
+                            <svg viewBox="0 0 1200 1200" fill="currentColor">
+                                <path
+                                    d="m912.98 167.86v109.88c0 22.219 18.047 40.266 40.266 40.266h109.88zm-426.61 281.72c-26.812-26.812 13.922-67.547 40.734-40.734l175.26 176.58c6.7969 11.531 4.5938 25.734-4.5 34.922l-170.76 170.81c-26.812 26.812-67.547-13.922-40.734-40.734l121.6-121.64h-540.94c-37.922 0-37.922-57.609 0-57.609h540.94zm666.1-123.66 8.9062 20.859v675c0 59.812-49.031 108.75-108.75 108.75l-668.72-0.046875c-59.859 0-108.7-48.891-108.7-108.75v-145.78c0-37.922 57.609-37.922 57.609 0v145.78c0 28.078 23.062 51.141 51.141 51.141h668.76c28.312 0 51.141-23.203 51.141-51.141l-0.046874-646.18h-150.56c-53.766 0-97.875-44.109-97.875-97.875v-150.56h-471.47c-28.266 0-51.141 23.156-51.141 51.141v145.78c0 37.922-57.609 37.922-57.609 0v-145.78c0-59.812 48.984-108.75 108.7-108.75h500.29l20.344 8.4375z"
+                                    fill-rule="evenodd" />
+                            </svg>
+                            Load SVGs
+                        </button>
+                        <label class="auto-convert-toggle"
+                            title="Automatically save converted files when SVGs are loaded">
+                            <span class="toggle-switch">
+                                <input type="checkbox" id="auto-convert" onchange="toggleAutoConvert(this.checked)">
+                                <span class="toggle-slider"></span>
+                            </span>
+                            Auto Convert
+                        </label>
                         <span class="preview-filename" id="preview-filename"></span>
+                        <button class="btn btn-secondary" id="clear-btn" onclick="clearAllSVGs()"
+                            title="Clear all loaded SVGs" style="display:none;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                            Clear
+                        </button>
+                    </div>
+                    <div class="ib-library-only" style="display:flex;align-items:center;gap:8px;min-width:0;flex:1">
+                        <div class="ib-search-wrap">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="M21 21l-4.35-4.35" />
+                            </svg>
+                            <input type="text" class="ib-search" id="ib-search" placeholder="Search icons..."
+                                autocomplete="off" spellcheck="false">
+                        </div>
+                        <span id="ib-search-count"
+                            style="display:none;font-size:11px;color:var(--text-secondary);white-space:nowrap;flex-shrink:0;font-variant-numeric:tabular-nums;"></span>
                     </div>
                     <div class="zoom-controls">
-                        <div class="history-controls">
+                        <button class="btn btn-primary ib-library-only ib-preview-btn" id="ib-edit-btn"
+                            onclick="ibEditInEditor()" style="display:none;flex-shrink:0">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                style="width:14px;height:14px;">
+                                <path d="M12 20h9" />
+                                <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+                            </svg>
+                            <span id="ib-edit-btn-label">Open in Editor&hellip;</span>
+                        </button>
+                        <div class="preview-toolbar-separator ib-library-only" id="ib-edit-separator"
+                            style="display:none"></div>
+                        <button class="zoom-btn ib-editor-only" id="reset-btn" onclick="resetAll()"
+                            title="Reset all changes" style="display:none;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
+                                height="16">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                <path d="M3 3v5h5" />
+                            </svg>
+                        </button>
+                        <div class="preview-toolbar-separator ib-editor-only" id="reset-separator"
+                            style="display:none;"></div>
+                        <div class="history-controls ib-editor-only">
                             <button class="zoom-btn" id="undo-btn" onclick="undo()" title="Undo (Ctrl+Z)" disabled>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
                                     height="16">
@@ -2602,7 +2993,7 @@
                                 </svg>
                             </button>
                         </div>
-                        <div class="preview-toolbar">
+                        <div class="preview-toolbar ib-editor-only">
                             <button class="zoom-btn" id="paste-btn" onclick="handlePasteButton()"
                                 title="Paste SVG from clipboard">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
@@ -2655,20 +3046,41 @@
                             </div>
                             <div class="preview-toolbar-separator"></div>
                         </div>
-                        <button class="zoom-btn" onclick="adjustZoom(-0.25)">−</button>
+                        <button class="zoom-btn ib-library-only" id="ib-sort-btn" onclick="ibToggleSort()"
+                            title="Sort order">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
+                                height="16">
+                                <path d="M11 5h10" />
+                                <path d="M11 9h7" />
+                                <path d="M11 13h4" />
+                                <path d="M3 17l3 3 3-3" />
+                                <path d="M6 18V4" />
+                            </svg>
+                        </button>
+                        <div class="preview-toolbar-separator ib-library-only"></div>
+                        <button class="zoom-btn" onclick="ibHandleZoomBtn(-1)">−</button>
                         <span class="zoom-level" id="zoom-level">100%</span>
-                        <button class="zoom-btn" onclick="adjustZoom(0.25)">+</button>
-                        <button class="zoom-btn" onclick="resetZoom()" title="Fit to view">
+                        <button class="zoom-btn" onclick="ibHandleZoomBtn(1)">+</button>
+                        <button class="zoom-btn ib-editor-only" onclick="resetZoom()" title="Fit to view">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
                                 height="16">
                                 <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
                             </svg>
                         </button>
+                        <button class="zoom-btn ib-library-only" onclick="ibResetZoom()" title="Reset zoom">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
+                                height="16">
+                                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                            </svg>
+                        </button>
+                        <div class="preview-toolbar-separator ib-library-only"></div>
+                        <button class="zoom-btn ib-library-only ib-select-toggle-btn" id="ib-select-toggle"
+                            onclick="ibToggleSelectAll()" title="Select all">Select All</button>
                     </div>
                 </div>
                 <div class="preview-container" id="drop-zone">
-                    <div class="preview-bg"></div>
-                    <div class="preview-wrapper" id="preview-wrapper">
+                    <div class="preview-bg ib-editor-only"></div>
+                    <div class="preview-wrapper ib-editor-only" id="preview-wrapper">
                         <div id="preview-svg"></div>
                         <div id="empty-state" class="empty-state" onclick="triggerFileLoad()">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -2677,6 +3089,23 @@
                             </svg>
                             <p>Drag & drop one or more SVG files here</p>
                             <p class="click-hint">or click to browse</p>
+                        </div>
+                    </div>
+                    <div class="ib-library-only" id="ib-grid-container">
+                        <div class="ib-loading" id="ib-loading">
+                            <div class="ib-spinner"></div>
+                            Loading icon library...
+                        </div>
+                        <div class="ib-scroll-container" id="ib-scroll-container" style="display:none;">
+                            <div class="ib-scroll-spacer" id="ib-scroll-spacer"></div>
+                            <div class="ib-tile-window" id="ib-tile-window"></div>
+                        </div>
+                        <div class="ib-empty" id="ib-empty" style="display:none;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="M21 21l-4.35-4.35" />
+                            </svg>
+                            <span>No icons match your search</span>
                         </div>
                     </div>
                 </div>
@@ -2734,9 +3163,12 @@
                         </svg>
                         About Elemental FM…
                     </button>
-                    <button class="elemental-about-btn" onclick="window.open('https://github.com/weetbicks/elemental-svg','_blank')" title="View on GitHub">
+                    <button class="elemental-about-btn"
+                        onclick="window.open('https://github.com/weetbicks/elemental-svg','_blank')"
+                        title="View on GitHub">
                         <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
-                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                            <path
+                                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
                         </svg>
                         View on GitHub…
                     </button>
@@ -2744,8 +3176,88 @@
             </div>
 
             <div class="controls-panel">
+                <!-- Icon Library Sidebar (library mode only) -->
+                <div class="ib-library-only" id="ib-library-sidebar">
+                    <div class="control-section" id="ib-export-section">
+                        <h3>Export Options</h3>
+                        <div style="margin-bottom: 10px;">
+                            <div class="increment-options">
+                                <button class="increment-btn active" id="ib-format-svg"
+                                    onclick="ibSetExportFormat('svg')">SVG</button>
+                                <button class="increment-btn" id="ib-format-png"
+                                    onclick="ibSetExportFormat('png')">PNG</button>
+                            </div>
+                        </div>
+                        <div id="ib-png-size-section" style="display: none; margin-bottom: 10px;">
+                            <label
+                                style="display: block; font-size: 10px; color: var(--text-secondary); margin-bottom: 6px;">PNG
+                                Size</label>
+                            <div class="increment-options" style="flex-wrap: wrap; gap: 4px;">
+                                <button class="increment-btn" id="ib-size-32" onclick="ibSetExportSize(32)">32</button>
+                                <button class="increment-btn" id="ib-size-64" onclick="ibSetExportSize(64)">64</button>
+                                <button class="increment-btn" id="ib-size-128"
+                                    onclick="ibSetExportSize(128)">128</button>
+                                <button class="increment-btn" id="ib-size-256"
+                                    onclick="ibSetExportSize(256)">256</button>
+                                <button class="increment-btn active" id="ib-size-512"
+                                    onclick="ibSetExportSize(512)">512</button>
+                                <button class="increment-btn" id="ib-size-1024"
+                                    onclick="ibSetExportSize(1024)">1024</button>
+                            </div>
+                        </div>
+                        <div class="bg-toggle">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="ib-export-fm" checked onchange="ibSavePrefs()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span title="Adds fm_fill class for FileMaker styling">FileMaker Compatible</span>
+                        </div>
+                        <div class="bg-toggle" style="margin-top: 10px;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="ib-export-dynamic" checked onchange="ibSavePrefs()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span>Dynamic Fill</span>
+                        </div>
+                        <p style="font-size: 10px; color: var(--text-secondary); margin-top: 6px; line-height: 1.3;">
+                            Remove fills so FileMaker can apply colors at runtime. Turn off to keep original colors.</p>
+                        <div id="ib-stroke-convert-section"
+                            style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color);">
+                            <div class="bg-toggle">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="ib-convert-strokes" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span>Convert Strokes to Fills</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
+                            <button class="btn btn-secondary" onclick="ibExportButtonBar(event)" style="width:100%; display:none;"
+                                id="ib-buttonbar-btn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                </svg>
+                                <span id="ib-buttonbar-text">Copy as Button Bar</span>
+                            </button>
+                            <button class="btn btn-primary" onclick="ibDoExport()" style="width:100%"
+                                id="ib-download-btn">
+                                <svg id="ib-download-icon" viewBox="0 0 24 24" fill="currentColor"
+                                    style="display:none;">
+                                    <path d="M11.56 0a3.34 3.34 0 00-.57.043L22.947 12 10.99 23.957c.132.022.307.043.57.043 6.626 0 12-5.375 12-12s-5.374-12-12-12zm-1.535 2.414C4.738 2.414.44 6.713.44 12s4.3 9.588 9.586 9.588c.264 0 .44-.023.57-.045L1.054 12l9.543-9.543a3.337 3.337 0 00-.57-.043zm.746 2.457c-.263 0-.438.021-.57.043L17.287 12l-7.086 7.086c.132.022.307.045.57.045 3.927 0 7.13-3.204 7.13-7.131s-3.203-7.129-7.13-7.129zm-.416 2.434A4.701 4.701 0 005.66 12a4.701 4.701 0 004.695 4.695c.264 0 .44-.023.57-.045L6.274 12l4.653-4.65a3.296 3.296 0 00-.57-.045Z"/>
+                                </svg>
+                                <span id="ib-download-text">Download</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="control-section" id="ib-filter-section">
+                        <h3>Filters</h3>
+                        <div id="ib-filter-content"></div>
+                    </div>
+                </div>
+
                 <!-- Export Options Section -->
-                <div class="control-section">
+                <div class="control-section ib-editor-only">
                     <h3>Export Options</h3>
                     <div style="margin-bottom: 10px;">
                         <div class="increment-options">
@@ -2817,21 +3329,20 @@
                             </p>
                         </div>
                     </div>
-                    <div class="action-buttons" style="margin-top: 10px;">
-                        <button class="btn btn-secondary" id="copy-btn" onclick="copySVGToClipboard()" disabled
-                            title="Copy SVG to clipboard">
+                    <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
+                        <button class="btn btn-secondary" id="editor-buttonbar-btn"
+                            onclick="editorExportButtonBar(event)" style="width:100%; display:none;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                             </svg>
-                            <span id="copy-btn-text">Copy</span>
+                            <span id="editor-buttonbar-text">Copy as Button Bar</span>
                         </button>
-                        <button class="btn btn-primary" id="save-btn" onclick="saveSVG()" disabled>
-                            <svg id="save-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1-2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                                <polyline points="17 21 17 13 7 13 7 21" />
-                                <polyline points="7 3 7 8 15 8" />
+                        <button class="btn btn-primary" id="save-btn" onclick="saveSVG()" disabled
+                            style="width:100%">
+                            <svg id="save-btn-icon" viewBox="0 0 24 24" fill="currentColor"
+                                style="display:none;">
+                                <path d="M11.56 0a3.34 3.34 0 00-.57.043L22.947 12 10.99 23.957c.132.022.307.043.57.043 6.626 0 12-5.375 12-12s-5.374-12-12-12zm-1.535 2.414C4.738 2.414.44 6.713.44 12s4.3 9.588 9.586 9.588c.264 0 .44-.023.57-.045L1.054 12l9.543-9.543a3.337 3.337 0 00-.57-.043zm.746 2.457c-.263 0-.438.021-.57.043L17.287 12l-7.086 7.086c.132.022.307.045.57.045 3.927 0 7.13-3.204 7.13-7.131s-3.203-7.129-7.13-7.129zm-.416 2.434A4.701 4.701 0 005.66 12a4.701 4.701 0 004.695 4.695c.264 0 .44-.023.57-.045L6.274 12l4.653-4.65a3.296 3.296 0 00-.57-.045Z"/>
                             </svg>
                             <span id="save-btn-text">Save SVG</span>
                         </button>
@@ -2839,7 +3350,7 @@
                 </div>
 
                 <!-- Colors Section -->
-                <div class="control-section">
+                <div class="control-section ib-editor-only">
                     <h3>Colors</h3>
                     <div class="color-row">
                         <label>Icon Fill</label>
@@ -2871,7 +3382,7 @@
                 </div>
 
                 <!-- Background Section -->
-                <div class="control-section">
+                <div class="control-section ib-editor-only">
                     <h3>Background</h3>
                     <div class="bg-toggle">
                         <label class="toggle-switch">
@@ -2952,7 +3463,7 @@
                 </div>
 
                 <!-- Rotate & Transform Section -->
-                <div class="control-section">
+                <div class="control-section ib-editor-only">
                     <h3>Rotate & Transform</h3>
                     <div class="rotation-controls">
                         <button class="rotation-btn" onclick="rotate(-1)" title="Rotate Counter-clockwise">
@@ -2995,7 +3506,7 @@
                 </div>
 
                 <!-- Adjustments Section -->
-                <div class="control-section">
+                <div class="control-section ib-editor-only">
                     <h3>Adjustments</h3>
                     <div class="adjustment-row">
                         <label>Opacity</label>
@@ -3211,6 +3722,34 @@
             <div id="about-products" class="about-scrollable"></div>
             <div class="modal-actions" style="justify-content:flex-end;">
                 <button class="modal-btn modal-btn-cancel" onclick="hideAboutModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Modal (stroke conversion) -->
+    <div class="modal-overlay" id="progress-modal">
+        <div class="modal-card" style="max-width: 320px; text-align: center;">
+            <div class="modal-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16 16 12 12 8 8" />
+                    <line x1="12" y1="12" x2="12" y2="21" />
+                    <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
+                </svg>
+            </div>
+            <div class="modal-title" id="progress-title">Converting Icons...</div>
+            <div style="margin: 16px 0 8px;">
+                <div style="background: var(--bg-tertiary); border-radius: 4px; height: 6px; overflow: hidden;">
+                    <div id="progress-bar"
+                        style="height: 100%; background: var(--accent); border-radius: 4px; width: 0%; transition: width 0.15s ease;">
+                    </div>
+                </div>
+            </div>
+            <div id="progress-text"
+                style="font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums;">
+                0 of 0
+            </div>
+            <div class="modal-actions" style="margin-top: 16px; justify-content: center;">
+                <button class="modal-btn modal-btn-cancel" onclick="cancelProgressModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -4532,7 +5071,7 @@
     </script>
 
     <script>
-        const EDITOR_VERSION = "1.0.3";
+        const EDITOR_VERSION = "1.1.0";
         const PRODUCT_ID = '1322BB7B-1510-4893-BD2D-FF1F19E404F7';
         const _proxyBase = 'https://elemental-svg-proxy.g7hjmj8t8f.workers.dev';
 
@@ -4817,7 +5356,11 @@
             const iconEl = document.getElementById('modal-icon');
 
             titleEl.textContent = options.title || 'Confirm';
-            messageEl.textContent = options.message || 'Are you sure?';
+            if (options.messageHtml) {
+                messageEl.innerHTML = options.messageHtml;
+            } else {
+                messageEl.textContent = options.message || 'Are you sure?';
+            }
             confirmBtn.textContent = options.confirmText || 'Confirm';
             modalConfirmCallback = options.onConfirm || null;
 
@@ -4876,6 +5419,39 @@
             if (e.target.id === 'confirm-modal') {
                 hideConfirmModal();
             }
+        }
+
+        // ============================================
+        // Progress Modal (for batch conversion)
+        // ============================================
+
+        let _progressCancelled = false;
+
+        function showProgressModal(title, total) {
+            _progressCancelled = false;
+            const modal = document.getElementById('progress-modal');
+            document.getElementById('progress-title').textContent = title;
+            document.getElementById('progress-text').textContent = `0 of ${total}`;
+            document.getElementById('progress-bar').style.width = '0%';
+            modal.classList.add('visible');
+        }
+
+        function updateProgressModal(current, total) {
+            document.getElementById('progress-text').textContent = `${current} of ${total}`;
+            document.getElementById('progress-bar').style.width = `${Math.round((current / total) * 100)}%`;
+        }
+
+        function hideProgressModal() {
+            document.getElementById('progress-modal').classList.remove('visible');
+        }
+
+        function cancelProgressModal() {
+            _progressCancelled = true;
+            hideProgressModal();
+        }
+
+        function isProgressCancelled() {
+            return _progressCancelled;
         }
 
         // ============================================
@@ -5132,6 +5708,9 @@
 
             // Set output mode - default to browser mode
             state.fileMakerMode = (cfg.output_mode === 'fm');
+
+            // Track whether the BaseElements plugin is available (needed for button bar)
+            state.pluginMissing = (cfg.plugin_missing === 1);
 
             // Set output format - default to 'svg'
             if (cfg.output_format === 'png') {
@@ -5495,8 +6074,9 @@
             const zoomLevel = document.getElementById('zoom-level');
             const previewContainer = document.querySelector('.preview-container');
 
-            // Wheel handler for zooming
+            // Wheel handler for zooming (editor mode only)
             function handleWheelZoom(e) {
+                if (ibIsLibraryMode()) return;
                 e.preventDefault();
 
                 // Determine scroll direction: negative deltaY = scroll up = zoom in
@@ -5511,11 +6091,12 @@
                 zoomLevel.style.cursor = 'ns-resize';
             }
 
-            // Add zoom to the preview container (only when modifier key held)
+            // Add zoom to the preview container (only when modifier key held, editor mode only)
             if (previewContainer) {
                 previewContainer.addEventListener('wheel', function (e) {
-                    // Only zoom when a modifier key is held (Cmd, Ctrl, Shift)
-                    if (!(e.metaKey || e.ctrlKey || e.shiftKey)) return;
+                    if (ibIsLibraryMode()) return;
+                    // Only zoom when Cmd/Ctrl is held
+                    if (!(e.metaKey || e.ctrlKey)) return;
                     // Only handle zoom if SVGs are loaded
                     if (!hasLoadedSVGs()) return;
                     e.preventDefault();
@@ -5713,7 +6294,7 @@
          * @param {string} svgString - Raw SVG string
          * @returns {boolean} - Whether the SVG was added successfully
          */
-        function addSVGItem(filename, svgString) {
+        function addSVGItem(filename, svgString, skipResolve) {
             try {
                 // Parse the SVG
                 const parser = new DOMParser();
@@ -5729,7 +6310,8 @@
 
                 // Resolve CSS <style> rules into presentation attributes
                 // so editor controls (fill, stroke) work with class-styled SVGs
-                resolveStyleRules(svg);
+                // Skip for library icons — they render fine as-is, conversion on export only
+                if (!skipResolve) resolveStyleRules(svg);
 
                 // Add to svgItems array
                 state.svgItems.push({
@@ -5782,33 +6364,34 @@
             // Enable/disable based on whether SVGs are loaded
             btn.disabled = !hasItems;
 
-            // Enable/disable copy button alongside save
-            const copyBtn = document.getElementById('copy-btn');
-            if (copyBtn) {
-                copyBtn.disabled = !hasItems;
-            }
-
             // Enable/disable code view button
             const codeViewBtn = document.getElementById('code-view-btn');
             if (codeViewBtn) {
                 codeViewBtn.disabled = !hasItems;
             }
 
+            // Show/hide editor Button Bar button (FM mode with loaded SVGs)
+            const edBbBtn = document.getElementById('editor-buttonbar-btn');
+            if (edBbBtn) {
+                edBbBtn.style.display = (state.fileMakerMode && hasItems) ? '' : 'none';
+                const edBbText = document.getElementById('editor-buttonbar-text');
+                if (edBbText) edBbText.textContent = count > 1 ? `Copy as Button Bar (${count})` : 'Copy as Button Bar';
+            }
+
             // Update text and icon based on mode, format, and count
             const saveIcon = document.getElementById('save-btn-icon');
             if (state.fileMakerMode) {
                 btnText.textContent = 'Save to FileMaker';
-                if (saveIcon) saveIcon.style.display = 'none';
-            } else if (count > 1) {
                 if (saveIcon) saveIcon.style.display = '';
-                btnText.textContent = `Save ${format}s`;
             } else {
-                if (saveIcon) saveIcon.style.display = '';
-                btnText.textContent = `Save ${format}`;
+                if (saveIcon) saveIcon.style.display = 'none';
+                btnText.textContent = count > 1 ? `Save ${format}s` : `Save ${format}`;
             }
 
             // Also update header buttons (Clear/Reset visibility)
             updateHeaderButtons();
+            // Update editor badge count in mode toggle
+            ibUpdateEditorBadge();
         }
 
         /**
@@ -5817,6 +6400,7 @@
         function updateHeaderButtons() {
             const clearBtn = document.getElementById('clear-btn');
             const resetBtn = document.getElementById('reset-btn');
+            const resetSep = document.getElementById('reset-separator');
             const hasItems = hasLoadedSVGs();
 
             if (clearBtn) {
@@ -5824,6 +6408,9 @@
             }
             if (resetBtn) {
                 resetBtn.style.display = hasItems ? '' : 'none';
+            }
+            if (resetSep) {
+                resetSep.style.display = hasItems ? '' : 'none';
             }
         }
 
@@ -5947,8 +6534,9 @@
          * Load multiple SVGs from JSON array
          * @param {string} jsonString - JSON array string '[{filename, base64}, ...]'
          */
-        function loadSVGItems(jsonString) {
+        function loadSVGItems(jsonString, options) {
             try {
+                const opts = options || {};
                 let items = JSON.parse(jsonString);
 
                 // Handle single object wrapped or not
@@ -5966,7 +6554,7 @@
                 items.forEach(item => {
                     try {
                         const svgString = atob(item.base64);
-                        if (addSVGItem(item.filename || 'untitled.svg', svgString)) {
+                        if (addSVGItem(item.filename || 'untitled.svg', svgString, opts.skipResolve)) {
                             successCount++;
                         }
                     } catch (e) {
@@ -6199,65 +6787,176 @@
          * @param {Array} items - Array of {filename, svgString} objects
          */
         /**
+         * Build a ZIP file blob from an array of {name, data} entries.
+         * Uses the STORE method (no compression) for simplicity and speed.
+         * @param {Array} entries - Array of {name: string, data: Uint8Array}
+         * @returns {Blob} - ZIP file blob
+         */
+        function createZipBlob(entries) {
+            // CRC-32 lookup table
+            const crcTable = new Uint32Array(256);
+            for (let i = 0; i < 256; i++) {
+                let c = i;
+                for (let j = 0; j < 8; j++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+                crcTable[i] = c;
+            }
+            function crc32(data) {
+                let crc = 0xFFFFFFFF;
+                for (let i = 0; i < data.length; i++) crc = crcTable[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
+                return (crc ^ 0xFFFFFFFF) >>> 0;
+            }
+
+            const encoder = new TextEncoder();
+            const parts = [];
+            const centralDir = [];
+            let offset = 0;
+
+            for (const entry of entries) {
+                const nameBytes = encoder.encode(entry.name);
+                const data = entry.data;
+                const crc = crc32(data);
+
+                // Local file header (30 bytes + name)
+                const local = new Uint8Array(30 + nameBytes.length);
+                const lv = new DataView(local.buffer);
+                lv.setUint32(0, 0x04034b50, true);   // signature
+                lv.setUint16(4, 20, true);            // version needed
+                lv.setUint16(6, 0, true);             // flags
+                lv.setUint16(8, 0, true);             // compression: STORE
+                lv.setUint16(10, 0, true);            // mod time
+                lv.setUint16(12, 0, true);            // mod date
+                lv.setUint32(14, crc, true);          // crc-32
+                lv.setUint32(18, data.length, true);  // compressed size
+                lv.setUint32(22, data.length, true);  // uncompressed size
+                lv.setUint16(26, nameBytes.length, true); // name length
+                lv.setUint16(28, 0, true);            // extra length
+                local.set(nameBytes, 30);
+
+                parts.push(local, data);
+
+                // Central directory entry (46 bytes + name)
+                const cd = new Uint8Array(46 + nameBytes.length);
+                const cv = new DataView(cd.buffer);
+                cv.setUint32(0, 0x02014b50, true);    // signature
+                cv.setUint16(4, 20, true);             // version made by
+                cv.setUint16(6, 20, true);             // version needed
+                cv.setUint16(8, 0, true);              // flags
+                cv.setUint16(10, 0, true);             // compression: STORE
+                cv.setUint16(12, 0, true);             // mod time
+                cv.setUint16(14, 0, true);             // mod date
+                cv.setUint32(16, crc, true);           // crc-32
+                cv.setUint32(20, data.length, true);   // compressed size
+                cv.setUint32(24, data.length, true);   // uncompressed size
+                cv.setUint16(28, nameBytes.length, true); // name length
+                cv.setUint16(30, 0, true);             // extra length
+                cv.setUint16(32, 0, true);             // comment length
+                cv.setUint16(34, 0, true);             // disk number
+                cv.setUint16(36, 0, true);             // internal attrs
+                cv.setUint32(38, 0, true);             // external attrs
+                cv.setUint32(42, offset, true);        // local header offset
+                cd.set(nameBytes, 46);
+                centralDir.push(cd);
+
+                offset += local.length + data.length;
+            }
+
+            // Central directory
+            const cdStart = offset;
+            let cdSize = 0;
+            for (const cd of centralDir) { parts.push(cd); cdSize += cd.length; }
+
+            // End of central directory (22 bytes)
+            const eocd = new Uint8Array(22);
+            const ev = new DataView(eocd.buffer);
+            ev.setUint32(0, 0x06054b50, true);            // signature
+            ev.setUint16(4, 0, true);                      // disk number
+            ev.setUint16(6, 0, true);                      // cd disk number
+            ev.setUint16(8, entries.length, true);          // entries on disk
+            ev.setUint16(10, entries.length, true);         // total entries
+            ev.setUint32(12, cdSize, true);                 // cd size
+            ev.setUint32(16, cdStart, true);                // cd offset
+            ev.setUint16(20, 0, true);                      // comment length
+            parts.push(eocd);
+
+            return new Blob(parts, { type: 'application/zip' });
+        }
+
+        /**
+         * Trigger a single file download
+         */
+        function triggerDownload(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.style.display = 'none';
+            link.addEventListener('click', e => { e.stopPropagation(); e.stopImmediatePropagation(); }, true);
+            document.body.appendChild(link);
+            link.dispatchEvent(new MouseEvent('click', { bubbles: false, cancelable: true, view: window }));
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        /**
          * Download files to the user's computer
          * @param {Array} items - Array of {filename, base64, svgString?} objects
          * @param {string} format - 'svg' or 'png'
          */
         function downloadFiles(items, format) {
-            items.forEach((item, index) => {
-                // Generate modified filename
+            const encoder = new TextEncoder();
+
+            // Build file entries
+            const fileEntries = items.map(item => {
                 const filename = item.filename;
                 const dotIndex = filename.lastIndexOf('.');
                 const baseName = dotIndex > 0 ? filename.substring(0, dotIndex) : filename;
                 const newExtension = format === 'png' ? '.png' : '.svg';
                 const modifiedFilename = baseName + '_modified' + newExtension;
 
-                let blob;
+                let data;
                 if (format === 'png') {
-                    // Convert base64 to blob for PNG
                     const byteCharacters = atob(item.base64);
-                    const byteNumbers = new Array(byteCharacters.length);
-                    for (let i = 0; i < byteCharacters.length; i++) {
-                        byteNumbers[i] = byteCharacters.charCodeAt(i);
-                    }
-                    const byteArray = new Uint8Array(byteNumbers);
-                    blob = new Blob([byteArray], { type: 'image/png' });
+                    const byteArray = new Uint8Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) byteArray[i] = byteCharacters.charCodeAt(i);
+                    data = byteArray;
                 } else {
-                    // SVG - use the string directly
-                    blob = new Blob([item.svgString], { type: 'image/svg+xml' });
+                    data = encoder.encode(item.svgString);
                 }
-
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = modifiedFilename;
-
-                // Prevent parent page (e.g., Squarespace) from intercepting the click
-                link.style.display = 'none';
-                link.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                }, true);
-
-                // Stagger downloads slightly to avoid browser blocking multiple downloads
-                setTimeout(() => {
-                    document.body.appendChild(link);
-                    // Use a non-bubbling click to avoid SPA router interception
-                    const clickEvent = new MouseEvent('click', {
-                        bubbles: false,
-                        cancelable: true,
-                        view: window
-                    });
-                    link.dispatchEvent(clickEvent);
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                }, index * 200);
+                return { name: modifiedFilename, data };
             });
+
+            if (fileEntries.length > 1) {
+                // Multiple files → zip
+                const zipBlob = createZipBlob(fileEntries);
+                triggerDownload(zipBlob, 'elemental_svg_export.zip');
+            } else if (fileEntries.length === 1) {
+                // Single file → direct download
+                const entry = fileEntries[0];
+                const mimeType = format === 'png' ? 'image/png' : 'image/svg+xml';
+                triggerDownload(new Blob([entry.data], { type: mimeType }), entry.name);
+            }
         }
 
         // Keep old function name for backwards compatibility
         function downloadSVGs(items) {
             downloadFiles(items, 'svg');
+        }
+
+        function initExternalLinkHandler() {
+            // In FileMaker mode, intercept all external link clicks and pass to FileMaker
+            // so it can open them in the default browser via Open URL script step.
+            if (!state.fileMakerMode) return;
+
+            document.addEventListener('click', function(evt) {
+                const link = evt.target.closest('a[href]');
+                if (!link) return;
+                const url = link.href;
+                if (!url || url === 'javascript:void(0)' || url.startsWith('#')) return;
+                if (url.startsWith('http://') || url.startsWith('https://')) {
+                    evt.preventDefault();
+                    callFileMaker('Open URL', JSON.stringify({ url: url }));
+                }
+            });
         }
 
         /**
@@ -6635,18 +7334,27 @@
          * @returns {boolean} - True if the SVG is stroke-based
          */
         function isStrokeBasedSVG(svg) {
+            // Check root SVG for inherited stroke/fill (common in Heroicons, Tabler, Lucide)
+            const rootStroke = svg.getAttribute('stroke') || getStyleProperty(svg, 'stroke');
+            const rootFill = svg.getAttribute('fill') || getStyleProperty(svg, 'fill');
+            const rootStrokeWidth = svg.getAttribute('stroke-width') || getStyleProperty(svg, 'stroke-width');
+
+            // If root has stroke + fill="none", all children are stroke-based by inheritance
+            if (rootStroke && rootStroke !== 'none' && rootFill === 'none') {
+                return true;
+            }
+
             // Check all shape elements
             const shapeElements = svg.querySelectorAll('path, circle, rect, ellipse, line, polyline, polygon');
 
             for (const el of shapeElements) {
-                const stroke = el.getAttribute('stroke') || getStyleProperty(el, 'stroke');
-                const fill = el.getAttribute('fill') || getStyleProperty(el, 'fill');
-                const strokeWidth = el.getAttribute('stroke-width') || getStyleProperty(el, 'stroke-width');
+                const stroke = el.getAttribute('stroke') || getStyleProperty(el, 'stroke') || rootStroke;
+                const fill = el.getAttribute('fill') || getStyleProperty(el, 'fill') || rootFill;
+                const strokeWidth = el.getAttribute('stroke-width') || getStyleProperty(el, 'stroke-width') || rootStrokeWidth;
 
                 // Element has a stroke and either no fill or fill="none"
                 if (stroke && stroke !== 'none') {
                     if (!fill || fill === 'none') {
-                        // Has stroke without fill - this is a stroke-based element
                         return true;
                     }
                 }
@@ -7335,10 +8043,327 @@
         }
 
         /**
+         * Convert compound paths with fill-rule="evenodd" to use nonzero fill-rule
+         * by correcting the winding direction of sub-paths.
+         *
+         * FileMaker's button bar SVG renderer doesn't properly support evenodd fill-rule,
+         * causing letter cutouts in compound paths (like Adobe product icons) to disappear.
+         *
+         * With nonzero fill-rule, sub-paths winding in opposite directions create holes.
+         * This function ensures:
+         *   - Even nesting levels (outer shapes): wind in one direction (filled)
+         *   - Odd nesting levels (cutout holes): wind in the opposite direction (not filled)
+         *
+         * Must be called AFTER normalizePath() since it expects absolute commands only.
+         */
+        function convertEvenOddToNonZero(svg) {
+            const evenOddPaths = svg.querySelectorAll('path[fill-rule="evenodd"]');
+            if (evenOddPaths.length === 0) return;
+
+            // Tokenizer for normalized paths (absolute commands only)
+            function tokenize(str) {
+                const tokens = [];
+                const re = /([MLCQAZ])|([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)/g;
+                let m;
+                while ((m = re.exec(str)) !== null) tokens.push(m[0]);
+                return tokens;
+            }
+
+            // Compute the midpoint of an SVG arc using center parameterization.
+            // Needed for polygon approximation — arcs with only 2 endpoints can be
+            // collinear (e.g., circles drawn with 2 semicircular arcs), giving zero
+            // area in the shoelace formula and breaking winding direction detection.
+            function arcMidpoint(x1, y1, rx, ry, angle, largeArc, sweep, x2, y2) {
+                if (rx === 0 || ry === 0) return null;
+                const phi = angle * Math.PI / 180;
+                const cosPhi = Math.cos(phi), sinPhi = Math.sin(phi);
+                const dx2 = (x1 - x2) / 2, dy2 = (y1 - y2) / 2;
+                const x1p = cosPhi * dx2 + sinPhi * dy2;
+                const y1p = -sinPhi * dx2 + cosPhi * dy2;
+                let rxSq = rx * rx, rySq = ry * ry;
+                const x1pSq = x1p * x1p, y1pSq = y1p * y1p;
+                const lambda = x1pSq / rxSq + y1pSq / rySq;
+                if (lambda > 1) {
+                    const s = Math.sqrt(lambda);
+                    rx *= s; ry *= s; rxSq = rx * rx; rySq = ry * ry;
+                }
+                let sq = (rxSq * rySq - rxSq * y1pSq - rySq * x1pSq) / (rxSq * y1pSq + rySq * x1pSq);
+                sq = Math.sqrt(Math.max(0, sq));
+                if (largeArc === sweep) sq = -sq;
+                const cxp = sq * rx * y1p / ry;
+                const cyp = -sq * ry * x1p / rx;
+                const cx = cosPhi * cxp - sinPhi * cyp + (x1 + x2) / 2;
+                const cy = sinPhi * cxp + cosPhi * cyp + (y1 + y2) / 2;
+                function vecAngle(ux, uy, vx, vy) {
+                    const dot = ux * vx + uy * vy;
+                    const len = Math.sqrt(ux * ux + uy * uy) * Math.sqrt(vx * vx + vy * vy);
+                    let a = Math.acos(Math.max(-1, Math.min(1, dot / (len || 1))));
+                    if (ux * vy - uy * vx < 0) a = -a;
+                    return a;
+                }
+                const theta1 = vecAngle(1, 0, (x1p - cxp) / rx, (y1p - cyp) / ry);
+                let dtheta = vecAngle((x1p - cxp) / rx, (y1p - cyp) / ry, (-x1p - cxp) / rx, (-y1p - cyp) / ry);
+                if (!sweep && dtheta > 0) dtheta -= 2 * Math.PI;
+                if (sweep && dtheta < 0) dtheta += 2 * Math.PI;
+                const thetaMid = theta1 + dtheta / 2;
+                const mx = cosPhi * rx * Math.cos(thetaMid) - sinPhi * ry * Math.sin(thetaMid) + cx;
+                const my = sinPhi * rx * Math.cos(thetaMid) + cosPhi * ry * Math.sin(thetaMid) + cy;
+                return [mx, my];
+            }
+
+            // Extract on-curve sample points from a sub-path for polygon approximation.
+            // For straight segments (M, L): adds the endpoint.
+            // For cubic curves (C): adds the on-curve midpoint at t=0.5 (de Casteljau) AND
+            //   the endpoint. NOT control points — those create oversized polygons that break
+            //   containment tests (Bug #1). Midpoints turn a 4-cubic circle from a diamond
+            //   (4 points) into an octagon (8 points), critical for containment accuracy.
+            // For arcs (A): adds the arc midpoint (center parameterization) AND the endpoint.
+            //   Without midpoints, circles drawn with 2 arcs produce collinear endpoints with
+            //   zero shoelace area (Bug #3).
+            function extractEndpoints(subPath) {
+                const points = [];
+                const tokens = tokenize(subPath);
+                let i = 0;
+                let cx = 0, cy = 0; // track current point
+                while (i < tokens.length) {
+                    const cmd = tokens[i++];
+                    switch (cmd) {
+                        case 'M': case 'L':
+                            cx = parseFloat(tokens[i]);
+                            cy = parseFloat(tokens[i + 1]);
+                            points.push([cx, cy]);
+                            i += 2; break;
+                        case 'C': {
+                            // Sample on-curve midpoint at t=0.5 (de Casteljau), then endpoint
+                            const cp1x = parseFloat(tokens[i]), cp1y = parseFloat(tokens[i + 1]);
+                            const cp2x = parseFloat(tokens[i + 2]), cp2y = parseFloat(tokens[i + 3]);
+                            const ex = parseFloat(tokens[i + 4]), ey = parseFloat(tokens[i + 5]);
+                            points.push([
+                                0.125 * cx + 0.375 * cp1x + 0.375 * cp2x + 0.125 * ex,
+                                0.125 * cy + 0.375 * cp1y + 0.375 * cp2y + 0.125 * ey
+                            ]);
+                            cx = ex; cy = ey;
+                            points.push([cx, cy]);
+                            i += 6; break;
+                        }
+                        case 'Q': {
+                            // Sample on-curve midpoint at t=0.5, then endpoint
+                            const qcx = parseFloat(tokens[i]), qcy = parseFloat(tokens[i + 1]);
+                            const qex = parseFloat(tokens[i + 2]), qey = parseFloat(tokens[i + 3]);
+                            points.push([
+                                0.25 * cx + 0.5 * qcx + 0.25 * qex,
+                                0.25 * cy + 0.5 * qcy + 0.25 * qey
+                            ]);
+                            cx = qex; cy = qey;
+                            points.push([cx, cy]);
+                            i += 4; break;
+                        }
+                        case 'A': {
+                            const arx = parseFloat(tokens[i]), ary = parseFloat(tokens[i + 1]);
+                            const aAngle = parseFloat(tokens[i + 2]);
+                            const aLarge = parseFloat(tokens[i + 3]);
+                            const aSweep = parseFloat(tokens[i + 4]);
+                            const ax = parseFloat(tokens[i + 5]), ay = parseFloat(tokens[i + 6]);
+                            // Sample arc midpoint for proper polygon area
+                            const mid = arcMidpoint(cx, cy, arx, ary, aAngle, aLarge, aSweep, ax, ay);
+                            if (mid) points.push(mid);
+                            cx = ax; cy = ay;
+                            points.push([cx, cy]);
+                            i += 7; break;
+                        }
+                        case 'Z': break;
+                    }
+                }
+                return points;
+            }
+
+            // Shoelace formula for signed area
+            // Positive = clockwise in SVG coords (Y-axis down)
+            function signedArea(points) {
+                let area = 0;
+                const n = points.length;
+                for (let i = 0; i < n; i++) {
+                    const j = (i + 1) % n;
+                    area += points[i][0] * points[j][1];
+                    area -= points[j][0] * points[i][1];
+                }
+                return area / 2;
+            }
+
+            // Ray casting point-in-polygon test
+            function isPointInside(point, polygon) {
+                const [px, py] = point;
+                let inside = false;
+                for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+                    const [xi, yi] = polygon[i];
+                    const [xj, yj] = polygon[j];
+                    if ((yi > py) !== (yj > py) &&
+                        px < (xj - xi) * (py - yi) / (yj - yi) + xi) {
+                        inside = !inside;
+                    }
+                }
+                return inside;
+            }
+
+            // Parse segments from a sub-path (for reversal)
+            function parseSegments(subPath) {
+                const tokens = tokenize(subPath);
+                const segments = [];
+                let startPoint = null;
+                let currentPoint = null;
+                let i = 0;
+                while (i < tokens.length) {
+                    const cmd = tokens[i++];
+                    switch (cmd) {
+                        case 'M': {
+                            const x = parseFloat(tokens[i]), y = parseFloat(tokens[i + 1]);
+                            startPoint = [x, y];
+                            currentPoint = [x, y];
+                            i += 2; break;
+                        }
+                        case 'L': {
+                            const x = parseFloat(tokens[i]), y = parseFloat(tokens[i + 1]);
+                            segments.push({ cmd: 'L', from: [...currentPoint], to: [x, y] });
+                            currentPoint = [x, y];
+                            i += 2; break;
+                        }
+                        case 'C': {
+                            const x1 = parseFloat(tokens[i]), y1 = parseFloat(tokens[i + 1]);
+                            const x2 = parseFloat(tokens[i + 2]), y2 = parseFloat(tokens[i + 3]);
+                            const x = parseFloat(tokens[i + 4]), y = parseFloat(tokens[i + 5]);
+                            segments.push({ cmd: 'C', from: [...currentPoint], cp1: [x1, y1], cp2: [x2, y2], to: [x, y] });
+                            currentPoint = [x, y];
+                            i += 6; break;
+                        }
+                        case 'Q': {
+                            const cx = parseFloat(tokens[i]), cy = parseFloat(tokens[i + 1]);
+                            const x = parseFloat(tokens[i + 2]), y = parseFloat(tokens[i + 3]);
+                            segments.push({ cmd: 'Q', from: [...currentPoint], cp: [cx, cy], to: [x, y] });
+                            currentPoint = [x, y];
+                            i += 4; break;
+                        }
+                        case 'A': {
+                            const rx = parseFloat(tokens[i]), ry = parseFloat(tokens[i + 1]);
+                            const angle = parseFloat(tokens[i + 2]);
+                            const largeArc = parseFloat(tokens[i + 3]);
+                            const sweep = parseFloat(tokens[i + 4]);
+                            const x = parseFloat(tokens[i + 5]), y = parseFloat(tokens[i + 6]);
+                            segments.push({ cmd: 'A', from: [...currentPoint], rx, ry, angle, largeArc, sweep, to: [x, y] });
+                            currentPoint = [x, y];
+                            i += 7; break;
+                        }
+                        case 'Z': break;
+                    }
+                }
+                return { startPoint, segments };
+            }
+
+            // Reverse a sub-path's winding direction
+            function reverseSubPath(subPath) {
+                const { startPoint, segments } = parseSegments(subPath);
+                if (segments.length === 0) return subPath;
+
+                const lastPoint = segments[segments.length - 1].to;
+                let result = `M${lastPoint[0]} ${lastPoint[1]}`;
+
+                for (let i = segments.length - 1; i >= 0; i--) {
+                    const seg = segments[i];
+                    switch (seg.cmd) {
+                        case 'L':
+                            result += ` L${seg.from[0]} ${seg.from[1]}`;
+                            break;
+                        case 'C':
+                            // Reverse cubic: swap control points
+                            result += ` C${seg.cp2[0]} ${seg.cp2[1]} ${seg.cp1[0]} ${seg.cp1[1]} ${seg.from[0]} ${seg.from[1]}`;
+                            break;
+                        case 'Q':
+                            // Reverse quadratic: control point stays the same
+                            result += ` Q${seg.cp[0]} ${seg.cp[1]} ${seg.from[0]} ${seg.from[1]}`;
+                            break;
+                        case 'A':
+                            // Reverse arc: flip sweep flag
+                            result += ` A${seg.rx} ${seg.ry} ${seg.angle} ${seg.largeArc} ${1 - seg.sweep} ${seg.from[0]} ${seg.from[1]}`;
+                            break;
+                    }
+                }
+                result += ' Z';
+                return result;
+            }
+
+            evenOddPaths.forEach(pathEl => {
+                const d = pathEl.getAttribute('d');
+                if (!d) return;
+
+                // Split into sub-paths at each M command
+                const rawSubPaths = d.split(/(?=M)/).map(s => s.trim()).filter(s => s.length > 0);
+                if (rawSubPaths.length <= 1) return; // Single sub-path, no conversion needed
+
+                // Analyze each sub-path
+                const subPathData = rawSubPaths.map((sp, idx) => {
+                    const points = extractEndpoints(sp);
+                    // Compute centroid of unique points (exclude closing duplicate)
+                    // Centroid is more reliably interior than startPoint, which can fall
+                    // near polygon edges where the approximation is weakest (Bug #4).
+                    const unique = points.filter((p, i) =>
+                        i === 0 || p[0] !== points[i - 1][0] || p[1] !== points[i - 1][1]);
+                    const n = unique.length || 1;
+                    const centroid = [
+                        unique.reduce((s, p) => s + p[0], 0) / n,
+                        unique.reduce((s, p) => s + p[1], 0) / n
+                    ];
+                    return {
+                        raw: sp,
+                        points: points,
+                        area: signedArea(points),
+                        centroid: centroid,
+                        origIdx: idx
+                    };
+                });
+
+                // Determine nesting level using area-ranked containment.
+                // The sub-path with the largest absolute area is the outermost (level 0).
+                // For each sub-path, count how many LARGER sub-paths contain its centroid.
+                // Uses centroid (not startPoint) because it's more reliably inside the shape,
+                // and less likely to fall in corners cut off by polygon approximation.
+                const byArea = [...subPathData].sort((a, b) => Math.abs(b.area) - Math.abs(a.area));
+                byArea.forEach((sp, rank) => {
+                    let level = 0;
+                    for (let j = 0; j < rank; j++) { // Only check sub-paths with larger area
+                        if (isPointInside(sp.centroid, byArea[j].points)) {
+                            level++;
+                        }
+                    }
+                    sp.nestingLevel = level;
+                });
+
+                // Reference direction from the outermost sub-path (largest area = rank 0)
+                const outer = byArea[0];
+                const outerSign = outer.area >= 0 ? 1 : -1;
+
+                // Correct winding directions based on nesting level
+                const correctedParts = subPathData.map(sp => {
+                    const expectedSign = (sp.nestingLevel % 2 === 0) ? outerSign : -outerSign;
+                    const currentSign = sp.area >= 0 ? 1 : -1;
+
+                    if (currentSign !== expectedSign) {
+                        return reverseSubPath(sp.raw);
+                    }
+                    return sp.raw;
+                });
+
+                // Update the path: corrected winding + nonzero fill-rule (default)
+                pathEl.setAttribute('d', correctedParts.join(' '));
+                pathEl.removeAttribute('fill-rule');
+                pathEl.removeAttribute('clip-rule');
+            });
+        }
+
+        /**
          * Process SVG for FileMaker compatibility
          * - Adds fm_fill class
          * - Removes hardcoded fills (except fill="none")
          * - Normalizes path commands
+         * - Converts evenodd compound paths to nonzero fill-rule
          * - Ensures viewBox is present
          * - Strips units from width/height
          */
@@ -7346,13 +8371,25 @@
             // Resolve any remaining CSS <style> rules into presentation attributes
             resolveStyleRules(svg);
 
-            // Add fm_fill class and set fill on SVG root for inheritance
+            // Add fm_fill class for FileMaker dynamic coloring
             const existingClass = svg.getAttribute('class') || '';
             if (!existingClass.includes('fm_fill')) {
                 svg.setAttribute('class', (existingClass + ' fm_fill').trim());
             }
-            // Set fill on SVG element - FM will override this, children inherit it
-            svg.setAttribute('fill', 'currentColor');
+
+            // Detect if this is a stroke-based (outline) icon
+            // These have fill="none" on root with stroke for drawing — must preserve fill="none"
+            const isStrokeBased = isStrokeBasedSVG(svg);
+
+            if (isStrokeBased) {
+                // For stroke-based icons: keep fill="none" on root, set stroke="currentColor"
+                // FM will control the stroke color via fm_fill class
+                svg.setAttribute('fill', 'none');
+                svg.setAttribute('stroke', 'currentColor');
+            } else {
+                // For fill-based icons: set fill on SVG element - FM will override, children inherit
+                svg.setAttribute('fill', 'currentColor');
+            }
 
             // Ensure viewBox
             let vbW = 24, vbH = 24;
@@ -7530,6 +8567,11 @@
                 }
             });
             console.log(`[processSVGForFileMaker] Normalized: ${normalizedCount}, Failed: ${failedCount}`);
+
+            // Convert evenodd compound paths to nonzero fill-rule
+            // FileMaker button bars don't support evenodd, causing letter cutouts to disappear
+            // (e.g. Adobe product icons where letters are "holes" in a filled background)
+            convertEvenOddToNonZero(svg);
 
             // Ensure xmlns
             if (!svg.getAttribute('xmlns')) {
@@ -8022,14 +9064,19 @@
         function applyFillColor(svg, color) {
             // Apply fill to elements that should be filled
             // For stroke-only elements (fill="none"), apply the color to their stroke instead
+            const svgFill = svg.getAttribute('fill');
+            const svgStroke = svg.getAttribute('stroke');
             const elements = svg.querySelectorAll('path, circle, rect, polygon, polyline, ellipse, line');
             elements.forEach(el => {
                 const currentFill = el.getAttribute('fill');
                 const currentStroke = el.getAttribute('stroke');
+                // Resolve effective fill: element attribute, then inherited from parent SVG
+                const effectiveFill = currentFill || svgFill || '';
+                const effectiveStroke = currentStroke || svgStroke || '';
 
-                if (currentFill === 'none') {
+                if (effectiveFill === 'none') {
                     // This is a stroke-only element - apply color to stroke
-                    if (currentStroke && currentStroke !== 'none') {
+                    if (effectiveStroke && effectiveStroke !== 'none') {
                         el.setAttribute('stroke', color);
                     }
                 } else {
@@ -8041,7 +9088,7 @@
                 if (el.style.fill && el.style.fill !== 'none') {
                     el.style.fill = color;
                 }
-                if (el.style.stroke && el.style.stroke !== 'none' && currentFill === 'none') {
+                if (el.style.stroke && el.style.stroke !== 'none' && effectiveFill === 'none') {
                     el.style.stroke = color;
                 }
             });
@@ -8232,6 +9279,9 @@
 
         function setupKeyboardShortcuts() {
             document.addEventListener('keydown', function (e) {
+                // Skip if in library mode (it has its own keyboard handler)
+                if (ibIsLibraryMode()) return;
+
                 // Skip if focus is in an input, textarea, or select
                 const tag = document.activeElement.tagName.toLowerCase();
                 if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
@@ -8508,7 +9558,8 @@
         function updateControlsPanelVisibility() {
             const panel = document.querySelector('.controls-panel');
             if (panel) {
-                panel.classList.toggle('hidden', !hasLoadedSVGs());
+                // Always show controls panel in library mode (sidebar needs to be visible)
+                panel.classList.toggle('hidden', !ibIsLibraryMode() && !hasLoadedSVGs());
             }
         }
 
@@ -9067,6 +10118,1879 @@
             } else {
                 el.textContent = '';
                 el.title = '';
+            }
+        }
+
+        // ============================================
+        // Icon Browser (Integrated Mode)
+        // ============================================
+
+        const IB_PREFS_KEY = 'elemental-svg-icon-browser-prefs';
+        const IB_MANIFEST_KEY = 'elemental-svg-icon-manifest';
+
+        const ibState = {
+            manifest: null,         // { icons: [...], categories: [...], libraries: [...] }
+            filtered: [],           // filtered icon list (indices into manifest.icons)
+            selected: new Set(),    // set of icon ids (e.g. "lucide/arrow-left")
+            lastClickIdx: -1,       // for shift-click range select
+            search: '',
+            categories: {},         // { arrows: true, navigation: true, ... } multi-select
+            libraries: {},          // { lucide: true, ... }
+            types: {},              // { outline: true, filled: true, solid: true }
+            sortAsc: true,
+            zoom: 1.5,              // 0.5 to 3, default larger
+            svgCache: new Map(),    // id -> svg string
+            batchQueue: new Set(),  // ids awaiting fetch
+            batchTimer: null,
+            scrollRaf: false,
+            exportFormat: 'svg',
+            exportSize: 512,
+            manifestLoading: false,
+            initialized: false,
+            prefetching: false,
+        };
+
+        // -- Mode Toggle --
+
+        function ibSetMode(mode) {
+            document.body.dataset.mode = mode;
+            document.getElementById('ib-mode-editor').classList.toggle('active', mode === 'editor');
+            document.getElementById('ib-mode-library').classList.toggle('active', mode === 'library');
+            if (mode === 'library') {
+                if (!ibState.manifest && !ibState.manifestLoading) {
+                    ibLoadManifest();
+                } else if (ibState.manifest) {
+                    if (!ibState.initialized) ibInit();
+                    else ibRecalculateGrid();
+                }
+                ibUpdateZoomDisplay();
+                ibUpdateSizeInfo();
+                ibUpdateSearchPlaceholder();
+            } else {
+                // Restore editor zoom display and size info
+                updateZoomDisplay();
+                updateSizeInfo();
+            }
+            updateControlsPanelVisibility();
+            ibSavePrefs();
+        }
+
+        function ibIsLibraryMode() {
+            return document.body.dataset.mode === 'library';
+        }
+
+        // -- Zoom button handler (shared +/- buttons) --
+
+        function ibHandleZoomBtn(dir) {
+            if (ibIsLibraryMode()) {
+                ibZoom(dir);
+            } else {
+                adjustZoom(dir > 0 ? 0.25 : -0.25);
+            }
+        }
+
+        function ibUpdateZoomDisplay() {
+            const pct = Math.round(ibState.zoom * 100);
+            document.getElementById('zoom-level').textContent = pct + '%';
+        }
+
+        // -- Preferences persistence --
+
+        function ibSavePrefs() {
+            try {
+                localStorage.setItem(IB_PREFS_KEY, JSON.stringify({
+                    mode: document.body.dataset.mode || 'editor',
+                    search: ibState.search,
+                    categories: ibState.categories,
+                    libraries: ibState.libraries,
+                    types: ibState.types,
+                    sortAsc: ibState.sortAsc,
+                    zoom: ibState.zoom,
+                    exportFormat: ibState.exportFormat,
+                    exportSize: ibState.exportSize,
+                    exportFm: document.getElementById('ib-export-fm')?.checked ?? true,
+                    exportDynamic: document.getElementById('ib-export-dynamic')?.checked ?? true,
+                    categoryNarrowing: true,
+                }));
+            } catch (e) { }
+        }
+
+        function ibLoadPrefs() {
+            try {
+                const s = localStorage.getItem(IB_PREFS_KEY);
+                return s ? JSON.parse(s) : null;
+            } catch (e) { return null; }
+        }
+
+        // -- Export format/size controls --
+
+        function ibSetExportFormat(fmt) {
+            ibState.exportFormat = fmt;
+            document.getElementById('ib-format-svg').classList.toggle('active', fmt === 'svg');
+            document.getElementById('ib-format-png').classList.toggle('active', fmt === 'png');
+            document.getElementById('ib-png-size-section').style.display = fmt === 'png' ? '' : 'none';
+            // Update button label — respect FM mode
+            const dlText = document.getElementById('ib-download-text');
+            if (dlText) {
+                const isFM = state.fileMakerMode;
+                const count = ibState.selected.size;
+                const suffix = count > 0 ? ` (${count})` : '';
+                if (isFM) {
+                    dlText.textContent = 'Save to FileMaker' + suffix;
+                } else {
+                    dlText.textContent = (fmt === 'png' ? 'Download PNG' : 'Download') + suffix;
+                }
+            }
+            const dlIcon = document.getElementById('ib-download-icon');
+            if (dlIcon) dlIcon.style.display = state.fileMakerMode ? '' : 'none';
+            ibSavePrefs();
+            ibUpdateStrokeToggle();
+        }
+
+        function ibSetExportSize(size) {
+            ibState.exportSize = size;
+            [32, 64, 128, 256, 512, 1024].forEach(s => {
+                const btn = document.getElementById('ib-size-' + s);
+                if (btn) btn.classList.toggle('active', s === size);
+            });
+            ibSavePrefs();
+        }
+
+        // -- Stroke detection for icon library --
+
+        function ibUpdateStrokeToggle() {
+            const section = document.getElementById('ib-stroke-convert-section');
+            if (!section) return;
+            // Only show for SVG format when stroke icons are detected in selection
+            let hasStrokes = false;
+            if (ibState.exportFormat === 'svg' && ibState.selected.size > 0) {
+                for (const id of ibState.selected) {
+                    const svg = ibState.svgCache.get(id);
+                    if (!svg) continue;
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(svg, 'image/svg+xml');
+                    const svgEl = doc.querySelector('svg');
+                    if (svgEl && isStrokeBasedSVG(svgEl)) {
+                        hasStrokes = true;
+                        break;
+                    }
+                }
+            }
+            section.style.display = hasStrokes ? 'block' : 'none';
+        }
+
+        // -- Manifest loading --
+
+        async function ibLoadManifest() {
+            ibState.manifestLoading = true;
+            document.getElementById('ib-loading').style.display = '';
+            document.getElementById('ib-scroll-container').style.display = 'none';
+            document.getElementById('ib-empty').style.display = 'none';
+
+            // Try localStorage cache, but always check for newer version
+            let cachedData = null;
+            try {
+                const cached = localStorage.getItem(IB_MANIFEST_KEY);
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    if (parsed.ts && (Date.now() - parsed.ts) < 86400000) {
+                        cachedData = parsed.data;
+                    }
+                }
+            } catch (e) { }
+
+            try {
+                const resp = await fetch(_proxyBase + '/icons/manifest');
+                if (!resp.ok) throw new Error('Manifest fetch failed');
+                const data = await resp.json();
+                ibState.manifest = data;
+                try {
+                    localStorage.setItem(IB_MANIFEST_KEY, JSON.stringify({ ts: Date.now(), data }));
+                } catch (e) { }
+                // Clear icon cache if manifest version changed
+                if (cachedData && cachedData.version !== data.version) {
+                    ibState.svgCache.clear();
+                    try { const req = indexedDB.open('elemental-icons', 1); req.onsuccess = (e) => { try { e.target.result.transaction('svgs', 'readwrite').objectStore('svgs').clear(); } catch (ex) { } }; } catch (ex) { }
+                }
+            } catch (e) {
+                // Fall back to cached manifest if available
+                if (cachedData) {
+                    ibState.manifest = cachedData;
+                } else {
+                    document.getElementById('ib-loading').innerHTML =
+                        '<div style="color:var(--text-secondary);font-size:13px;">Failed to load icon library.<br><button class="btn btn-secondary" style="margin-top:12px;" onclick="ibLoadManifest()">Retry</button></div>';
+                    ibState.manifestLoading = false;
+                    return;
+                }
+            }
+            ibState.manifestLoading = false;
+            ibInit();
+        }
+
+        // -- Initialization (after manifest loaded) --
+
+        async function ibInit() {
+            if (!ibState.manifest) return;
+            ibState.initialized = true;
+
+            // Load cached SVGs from IndexedDB (instant on return visits)
+            await ibLoadCacheFromDB();
+
+            const prefs = ibLoadPrefs();
+            const m = ibState.manifest;
+
+            // Build library map from manifest (libraries are objects with id, name, iconCount)
+            const libs = {};
+            (m.libraries || []).forEach(lib => {
+                const id = typeof lib === 'object' ? lib.id : lib;
+                libs[id] = true;
+            });
+
+            // Build categories map — all false by default (unchecked = show all; checking narrows)
+            const cats = {};
+            (m.categories || []).forEach(cat => {
+                const id = typeof cat === 'object' ? cat.id : cat;
+                cats[id] = false;
+            });
+
+            // Build types map from manifest icons — all false by default (narrowing: check to filter)
+            const types = {};
+            m.icons.forEach(ic => { if (ic.type) types[ic.type] = false; });
+
+            // Override with saved prefs if they exist
+            if (prefs) {
+                if (prefs.libraries) {
+                    Object.keys(libs).forEach(k => {
+                        libs[k] = prefs.libraries[k] !== undefined ? prefs.libraries[k] : true;
+                    });
+                }
+                // Only restore category prefs from v2 (narrowing) format
+                // Old prefs had categories=true by default, which breaks narrowing logic
+                if (prefs.categories && prefs.categoryNarrowing) {
+                    Object.keys(cats).forEach(k => {
+                        cats[k] = prefs.categories[k] !== undefined ? prefs.categories[k] : false;
+                    });
+                }
+                if (prefs.types) {
+                    Object.keys(types).forEach(k => {
+                        types[k] = prefs.types[k] !== undefined ? prefs.types[k] : false;
+                    });
+                }
+                ibState.search = prefs.search || '';
+                ibState.sortAsc = prefs.sortAsc !== false;
+                ibState.zoom = prefs.zoom || 1.5;
+                ibState.exportFormat = prefs.exportFormat || 'svg';
+                ibState.exportSize = prefs.exportSize || 512;
+            }
+
+            ibState.libraries = libs;
+            ibState.categories = cats;
+            ibState.types = types;
+
+            // Restore search input
+            document.getElementById('ib-search').value = ibState.search;
+
+            // Restore export settings
+            ibSetExportFormat(ibState.exportFormat);
+            ibSetExportSize(ibState.exportSize);
+            if (prefs) {
+                const fm = document.getElementById('ib-export-fm');
+                if (fm && prefs.exportFm !== undefined) fm.checked = prefs.exportFm;
+                const dyn = document.getElementById('ib-export-dynamic');
+                if (dyn && prefs.exportDynamic !== undefined) dyn.checked = prefs.exportDynamic;
+            }
+
+            // Build sidebar filters
+            ibBuildSidebar();
+
+            // Apply filters & render
+            ibApplyFilters();
+            ibUpdateSortBtn();
+
+            // Set up scroll handler
+            const sc = document.getElementById('ib-scroll-container');
+            sc.addEventListener('scroll', ibOnScroll, { passive: true });
+
+            // Set up search debounce
+            const searchInput = document.getElementById('ib-search');
+            let searchTimer = null;
+            searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => {
+                    ibState.search = searchInput.value.trim().toLowerCase();
+                    ibApplyFilters();
+                    ibSavePrefs();
+                }, 150);
+            });
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    searchInput.value = '';
+                    ibState.search = '';
+                    ibApplyFilters();
+                    ibSavePrefs();
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+
+            // Set up resize handler
+            window.addEventListener('resize', ibOnResize);
+
+            // Set up keyboard handler
+            document.addEventListener('keydown', ibHandleKeydown);
+
+            // Set up tile click delegation + rubber-band
+            ibSetupInteraction();
+
+            // Set up mousewheel zoom for library mode
+            ibSetupWheelZoom();
+
+            // Hide loading, show grid
+            document.getElementById('ib-loading').style.display = 'none';
+
+            // Update zoom display for library mode
+            if (ibIsLibraryMode()) ibUpdateZoomDisplay();
+
+            // Fetch all remaining icons in background (cached in IndexedDB for future visits)
+            ibFetchAllIcons();
+        }
+
+        // -- Sidebar Filters --
+
+        function ibBuildSidebar() {
+            const m = ibState.manifest;
+            const container = document.getElementById('ib-filter-content');
+            let html = '';
+
+            // Library section
+            if (m.libraries && m.libraries.length > 0) {
+                html += '<div style="margin-bottom:12px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-secondary);margin-bottom:6px;">Icon Set</div>';
+                m.libraries.forEach(lib => {
+                    const id = typeof lib === 'object' ? lib.id : lib;
+                    const name = typeof lib === 'object' ? lib.name : lib;
+                    const count = typeof lib === 'object' ? lib.iconCount : m.icons.filter(ic => ic.library === id).length;
+                    const checked = ibState.libraries[id] !== false ? 'checked' : '';
+                    html += `<label class="ib-sidebar-item"><input type="checkbox" data-lib="${id}" ${checked}><span>${name}</span><span class="ib-sidebar-count" data-lib-count="${id}" data-lib-total="${count}">${count.toLocaleString()}</span></label>`;
+                });
+                html += '</div>';
+            }
+
+            // Type section (outline/filled/solid)
+            const typeNames = { outline: 'Outline', filled: 'Filled', solid: 'Solid', bold: 'Bold' };
+            const typeEntries = Object.keys(ibState.types);
+            if (typeEntries.length > 1) {
+                html += '<div style="margin-bottom:12px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-secondary);margin-bottom:6px;">Style</div>';
+                typeEntries.forEach(t => {
+                    const count = m.icons.filter(ic => ic.type === t).length;
+                    const checked = ibState.types[t] ? 'checked' : '';
+                    html += `<label class="ib-sidebar-item"><input type="checkbox" data-type="${t}" ${checked}><span>${typeNames[t] || t}</span><span class="ib-sidebar-count" data-type-count="${t}">${count.toLocaleString()}</span></label>`;
+                });
+                html += '</div>';
+            }
+
+            // Category section (checkboxes, multi-select, sorted alphabetically)
+            const categories = [...(m.categories || [])].sort((a, b) => {
+                const la = (typeof a === 'object' ? a.label : a).toLowerCase();
+                const lb = (typeof b === 'object' ? b.label : b).toLowerCase();
+                return la.localeCompare(lb);
+            });
+            if (categories.length > 0) {
+                html += '<div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-secondary);margin-bottom:6px;">Categories</div>';
+                categories.forEach(cat => {
+                    const id = typeof cat === 'object' ? cat.id : cat;
+                    const label = typeof cat === 'object' ? cat.label : cat;
+                    const count = typeof cat === 'object' ? cat.count : m.icons.filter(ic => ic.category === id).length;
+                    const checked = ibState.categories[id] !== false ? 'checked' : '';
+                    html += `<label class="ib-sidebar-item"><input type="checkbox" data-cat="${id}" ${checked}><span>${label}</span><span class="ib-sidebar-count" data-cat-count="${id}">${count.toLocaleString()}</span></label>`;
+                });
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+
+            // Event listeners
+            container.querySelectorAll('input[data-lib]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    ibState.libraries[cb.dataset.lib] = cb.checked;
+                    ibApplyFilters();
+                    ibSavePrefs();
+                });
+            });
+            container.querySelectorAll('input[data-type]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    ibState.types[cb.dataset.type] = cb.checked;
+                    ibApplyFilters();
+                    ibSavePrefs();
+                });
+            });
+            container.querySelectorAll('input[data-cat]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    ibState.categories[cb.dataset.cat] = cb.checked;
+                    ibApplyFilters();
+                    ibSavePrefs();
+                });
+            });
+        }
+
+        // Update style/category counts based on all active filters (cross-filter faceted counts)
+        function ibUpdateSidebarCounts() {
+            const m = ibState.manifest;
+            if (!m) return;
+            const search = ibState.search;
+            const anyCatSelected = Object.values(ibState.categories).some(v => v);
+            const anyTypeSelected = Object.values(ibState.types).some(v => v);
+            const typeCounts = {};
+            const catCounts = {};
+            const libCounts = {};
+            for (let i = 0; i < m.icons.length; i++) {
+                const ic = m.icons[i];
+                if (search) {
+                    const name = ic.name.toLowerCase();
+                    const tags = (ic.tags || []).join(' ').toLowerCase();
+                    if (!name.includes(search) && !tags.includes(search)) continue;
+                }
+                // Library counts always reflect search matches, regardless of library checkbox
+                libCounts[ic.library] = (libCounts[ic.library] || 0) + 1;
+                // Type/category counts respect the library filter
+                if (ibState.libraries[ic.library] === false) continue;
+                if (!anyCatSelected || ibState.categories[ic.category]) {
+                    typeCounts[ic.type] = (typeCounts[ic.type] || 0) + 1;
+                }
+                if (!anyTypeSelected || ibState.types[ic.type]) {
+                    catCounts[ic.category] = (catCounts[ic.category] || 0) + 1;
+                }
+            }
+            document.querySelectorAll('[data-type-count]').forEach(el => {
+                el.textContent = (typeCounts[el.dataset.typeCount] || 0).toLocaleString();
+            });
+            document.querySelectorAll('[data-cat-count]').forEach(el => {
+                el.textContent = (catCounts[el.dataset.catCount] || 0).toLocaleString();
+            });
+            // Library counts: show filtered count when searching, original total otherwise
+            document.querySelectorAll('[data-lib-count]').forEach(el => {
+                if (search) {
+                    el.textContent = (libCounts[el.dataset.libCount] || 0).toLocaleString();
+                } else {
+                    el.textContent = parseInt(el.dataset.libTotal).toLocaleString();
+                }
+            });
+        }
+
+        // -- Filtering & Sorting --
+
+        function ibApplyFilters() {
+            const m = ibState.manifest;
+            if (!m) return;
+            // Clear selection when filters/search change — hidden icons shouldn't stay selected
+            if (ibState.selected.size > 0) {
+                ibState.selected.clear();
+                ibState.lastClickIdx = -1;
+                ibUpdateSelectionCount();
+            }
+            const search = ibState.search;
+            // Narrowing: if any checked, filter to only those; if none checked, show all
+            const anyCatSelected = Object.values(ibState.categories).some(v => v);
+            const anyTypeSelected = Object.values(ibState.types).some(v => v);
+
+            let result = [];
+            for (let i = 0; i < m.icons.length; i++) {
+                const ic = m.icons[i];
+                // Library filter (checked = show, unchecked = hide)
+                if (ibState.libraries[ic.library] === false) continue;
+                // Type filter (narrowing: only filter when types are checked)
+                if (anyTypeSelected && !ibState.types[ic.type]) continue;
+                // Category filter (narrowing: only filter when categories are checked)
+                if (anyCatSelected && !ibState.categories[ic.category]) continue;
+                // Search filter
+                if (search) {
+                    const name = ic.name.toLowerCase();
+                    const tags = (ic.tags || []).join(' ').toLowerCase();
+                    if (!name.includes(search) && !tags.includes(search)) continue;
+                }
+                result.push(i);
+            }
+
+            // Sort
+            result.sort((a, b) => {
+                const na = m.icons[a].name.toLowerCase();
+                const nb = m.icons[b].name.toLowerCase();
+                return ibState.sortAsc ? na.localeCompare(nb) : nb.localeCompare(na);
+            });
+
+            ibState.filtered = result;
+            ibState.lastClickIdx = -1;
+
+            ibUpdateSidebarCounts();
+            ibRecalculateGrid();
+        }
+
+        function ibToggleSort() {
+            ibState.sortAsc = !ibState.sortAsc;
+            ibUpdateSortBtn();
+            ibApplyFilters();
+            ibSavePrefs();
+        }
+
+        function ibUpdateSortBtn() {
+            const btn = document.getElementById('ib-sort-btn');
+            if (btn) {
+                btn.innerHTML = ibState.sortAsc
+                    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M11 5h10"/><path d="M11 9h7"/><path d="M11 13h4"/><path d="M3 17l3 3 3-3"/><path d="M6 18V4"/></svg>'
+                    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M11 5h4"/><path d="M11 9h7"/><path d="M11 13h10"/><path d="M3 17l3 3 3-3"/><path d="M6 18V4"/></svg>';
+            }
+        }
+
+        // -- Virtual Scroll Grid --
+
+        let ibGridCols = 0;
+        let ibTileH = 0;
+        let ibTileW = 0;
+        let ibVisibleStart = 0;
+        let ibVisibleEnd = 0;
+
+        function ibGetTileSize() {
+            const base = 88;
+            return Math.round(base * ibState.zoom);
+        }
+
+        function ibGetIconSize() {
+            return Math.round(32 * ibState.zoom);
+        }
+
+        function ibRecalculateGrid() {
+            const sc = document.getElementById('ib-scroll-container');
+            const emptyEl = document.getElementById('ib-empty');
+            const count = ibState.filtered.length;
+
+            if (count === 0) {
+                sc.style.display = 'none';
+                emptyEl.style.display = '';
+                ibUpdateSelectionCount();
+                return;
+            }
+
+            emptyEl.style.display = 'none';
+            sc.style.display = '';
+
+            const tileSize = ibGetTileSize();
+            const iconSize = ibGetIconSize();
+            const gap = 4;
+            const padX = 16;
+            const padY = 8;
+            const areaW = sc.clientWidth - padX * 2;
+            ibGridCols = Math.max(1, Math.floor((areaW + gap) / (tileSize + gap)));
+            ibTileW = tileSize;
+            ibTileH = iconSize + 38; // icon height + name(~18px) + padding(16px) + border(4px)
+            const rows = Math.ceil(count / ibGridCols);
+            const rowH = ibTileH + gap;
+            const totalH = rows * rowH - gap + padY * 2;
+
+            // Set CSS custom props
+            const tw = document.getElementById('ib-tile-window');
+            tw.style.setProperty('--ib-tile-size', tileSize + 'px');
+            tw.style.setProperty('--ib-icon-size', iconSize + 'px');
+            tw.style.setProperty('--ib-grid-cols', ibGridCols);
+
+            // Spacer for scrollbar height
+            document.getElementById('ib-scroll-spacer').style.height = totalH + 'px';
+
+            ibRenderVisibleTiles();
+            ibUpdateSelectionCount();
+        }
+
+        function ibRenderVisibleTiles() {
+            const sc = document.getElementById('ib-scroll-container');
+            const tw = document.getElementById('ib-tile-window');
+            const count = ibState.filtered.length;
+            if (count === 0) return;
+
+            const gap = 4;
+            const padY = 8;
+            const scrollTop = sc.scrollTop;
+            const viewH = sc.clientHeight;
+            const rowH = ibTileH + gap;
+
+            const startRow = Math.max(0, Math.floor((scrollTop - padY) / rowH) - 3);
+            const endRow = Math.min(Math.ceil(count / ibGridCols), Math.ceil((scrollTop + viewH - padY) / rowH) + 3);
+
+            const startIdx = startRow * ibGridCols;
+            const endIdx = Math.min(count, endRow * ibGridCols);
+
+            ibVisibleStart = startIdx;
+            ibVisibleEnd = endIdx;
+
+            // Position tile window
+            const offsetY = padY + startRow * rowH;
+            tw.style.transform = `translateY(${offsetY}px)`;
+
+            // Build tiles
+            const m = ibState.manifest;
+            const frag = document.createDocumentFragment();
+            const batchIds = [];
+
+            for (let i = startIdx; i < endIdx; i++) {
+                const iconIdx = ibState.filtered[i];
+                const ic = m.icons[iconIdx];
+                const id = ic.id;
+
+                const tile = document.createElement('div');
+                tile.className = 'ib-tile' + (ibState.selected.has(id) ? ' ib-selected' : '');
+                tile.dataset.idx = i;
+                tile.dataset.id = id;
+
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'ib-tile-icon';
+
+                if (ibState.svgCache.has(id)) {
+                    iconDiv.innerHTML = ibState.svgCache.get(id);
+                } else {
+                    iconDiv.innerHTML = '<div class="ib-tile-placeholder"></div>';
+                    batchIds.push(id);
+                }
+
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'ib-tile-name';
+                nameDiv.textContent = ic.name;
+                nameDiv.title = ic.name;
+
+                tile.appendChild(iconDiv);
+                tile.appendChild(nameDiv);
+                frag.appendChild(tile);
+            }
+
+            tw.innerHTML = '';
+            tw.appendChild(frag);
+
+            // Queue batch fetch for any uncached visible tiles
+            if (batchIds.length > 0) {
+                batchIds.forEach(id => ibState.batchQueue.add(id));
+                ibScheduleBatchFetch();
+            }
+        }
+
+        function ibOnScroll() {
+            if (!ibState.scrollRaf) {
+                ibState.scrollRaf = true;
+                requestAnimationFrame(() => {
+                    ibState.scrollRaf = false;
+                    ibRenderVisibleTiles();
+                });
+            }
+        }
+
+        function ibOnResize() {
+            if (ibIsLibraryMode() && ibState.manifest) {
+                ibRecalculateGrid();
+                // Re-render after layout settles to fill any new viewport space
+                requestAnimationFrame(() => ibRenderVisibleTiles());
+            }
+        }
+
+        // -- Zoom --
+
+        function ibSetupWheelZoom() {
+            const zoomLevel = document.getElementById('zoom-level');
+            const sc = document.getElementById('ib-scroll-container');
+
+            function handleLibraryWheel(e) {
+                if (!ibIsLibraryMode()) return;
+                e.preventDefault();
+                ibZoom(e.deltaY < 0 ? 1 : -1);
+            }
+
+            // Wheel on zoom % text always zooms in library mode
+            if (zoomLevel) {
+                zoomLevel.addEventListener('wheel', handleLibraryWheel, { passive: false });
+            }
+
+            // Wheel on scroll container zooms only with Cmd/Ctrl held
+            if (sc) {
+                sc.addEventListener('wheel', function (e) {
+                    if (!ibIsLibraryMode()) return;
+                    if (!(e.metaKey || e.ctrlKey)) return;
+                    e.preventDefault();
+                    ibZoom(e.deltaY < 0 ? 1 : -1);
+                }, { passive: false });
+            }
+        }
+
+        function ibZoom(dir) {
+            const steps = [0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3];
+            let idx = steps.indexOf(ibState.zoom);
+            if (idx === -1) {
+                // Find nearest
+                idx = steps.findIndex(s => s >= ibState.zoom);
+                if (idx === -1) idx = steps.length - 1;
+            }
+            idx += dir;
+            if (idx < 0 || idx >= steps.length) return;
+            ibState.zoom = steps[idx];
+            ibRecalculateGrid();
+            ibUpdateZoomDisplay();
+            ibSavePrefs();
+        }
+
+        // -- SVG Loading (IndexedDB cache + fetch all) --
+
+        const IB_DB_NAME = 'elemental-svg-icons';
+        const IB_DB_VERSION = 1;
+        const IB_STORE_NAME = 'svgs';
+
+        function ibOpenDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(IB_DB_NAME, IB_DB_VERSION);
+                req.onupgradeneeded = () => {
+                    const db = req.result;
+                    if (!db.objectStoreNames.contains(IB_STORE_NAME)) {
+                        db.createObjectStore(IB_STORE_NAME);
+                    }
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function ibLoadCacheFromDB() {
+            try {
+                const db = await ibOpenDB();
+                return new Promise((resolve) => {
+                    const tx = db.transaction(IB_STORE_NAME, 'readonly');
+                    const store = tx.objectStore(IB_STORE_NAME);
+                    const req = store.getAll();
+                    const keyReq = store.getAllKeys();
+                    let keys, values;
+                    keyReq.onsuccess = () => { keys = keyReq.result; };
+                    req.onsuccess = () => { values = req.result; };
+                    tx.oncomplete = () => {
+                        if (keys && values) {
+                            for (let i = 0; i < keys.length; i++) {
+                                ibState.svgCache.set(keys[i], values[i]);
+                            }
+                        }
+                        resolve(ibState.svgCache.size);
+                    };
+                    tx.onerror = () => resolve(0);
+                });
+            } catch (e) { return 0; }
+        }
+
+        async function ibSaveToDB(icons) {
+            try {
+                const db = await ibOpenDB();
+                const tx = db.transaction(IB_STORE_NAME, 'readwrite');
+                const store = tx.objectStore(IB_STORE_NAME);
+                Object.entries(icons).forEach(([id, svg]) => {
+                    store.put(svg, id);
+                });
+            } catch (e) { }
+        }
+
+        // Fetch all icons for the current manifest, in batches of 500
+        async function ibFetchAllIcons() {
+            if (!ibState.manifest || ibState.prefetching) return;
+            ibState.prefetching = true;
+
+            const m = ibState.manifest;
+            const allIds = m.icons.map(ic => ic.id).filter(id => !ibState.svgCache.has(id));
+
+            if (allIds.length === 0) {
+                ibState.prefetching = false;
+                return;
+            }
+
+            for (let i = 0; i < allIds.length; i += 500) {
+                const batch = allIds.slice(i, i + 500);
+                try {
+                    const resp = await fetch(_proxyBase + '/icons/batch', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ids: batch })
+                    });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        if (data.icons) {
+                            Object.entries(data.icons).forEach(([id, svg]) => {
+                                ibState.svgCache.set(id, svg);
+                                ibInjectSVG(id, svg);
+                            });
+                            ibSaveToDB(data.icons);
+                        }
+                    }
+                } catch (e) { }
+            }
+
+            ibState.prefetching = false;
+        }
+
+        function ibScheduleBatchFetch() {
+            clearTimeout(ibState.batchTimer);
+            ibState.batchTimer = setTimeout(ibFlushBatchQueue, 16);
+        }
+
+        async function ibFlushBatchQueue() {
+            if (ibState.batchQueue.size === 0) return;
+            const ids = [...ibState.batchQueue].slice(0, 500);
+            ibState.batchQueue.clear();
+
+            try {
+                const resp = await fetch(_proxyBase + '/icons/batch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids })
+                });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                if (data.icons) {
+                    Object.entries(data.icons).forEach(([id, svg]) => {
+                        ibState.svgCache.set(id, svg);
+                        ibInjectSVG(id, svg);
+                    });
+                    ibSaveToDB(data.icons);
+                }
+            } catch (e) { }
+
+            if (ibState.batchQueue.size > 0) ibScheduleBatchFetch();
+        }
+
+        function ibInjectSVG(id, svg) {
+            const tw = document.getElementById('ib-tile-window');
+            if (!tw) return;
+            const tile = tw.querySelector(`[data-id="${CSS.escape(id)}"] .ib-tile-icon`);
+            if (tile) tile.innerHTML = svg;
+        }
+
+        // -- Selection --
+
+        function ibSetupInteraction() {
+            const tw = document.getElementById('ib-tile-window');
+            const sc = document.getElementById('ib-scroll-container');
+            const DRAG_THRESHOLD = 5;
+
+            // Unified pointer tracking — handles both tile clicks and drag-to-select
+            let rbActive = false;
+            let rbPending = false;
+            let rbStartX = 0, rbStartY = 0;
+            let rbStartScroll = 0;
+            let rbPointerId = null;
+            let rbStartTile = null;  // tile element if drag started on a tile
+            let rbDragged = false;   // true once movement exceeds threshold
+
+            sc.addEventListener('pointerdown', (e) => {
+                if (e.button !== 0) return;
+
+                rbPending = true;
+                rbActive = false;
+                rbDragged = false;
+                rbStartX = e.clientX;
+                rbStartY = e.clientY;
+                rbStartScroll = sc.scrollTop;
+                rbPointerId = e.pointerId;
+                rbStartTile = e.target.closest('.ib-tile');
+            });
+
+            sc.addEventListener('pointermove', (e) => {
+                if (!rbPending && !rbActive) return;
+
+                if (rbPending && !rbActive) {
+                    // Check if this is a scrollbar drag (scrollTop changed)
+                    if (sc.scrollTop !== rbStartScroll) {
+                        rbPending = false;
+                        return;
+                    }
+                    const dx = Math.abs(e.clientX - rbStartX);
+                    const dy = Math.abs(e.clientY - rbStartY);
+                    if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) return;
+
+                    // Movement exceeds threshold — start rubber-band drag-select
+                    rbDragged = true;
+                    rbActive = true;
+                    rbPending = false;
+                    try { sc.setPointerCapture(rbPointerId); } catch (err) { }
+                }
+
+                if (!rbActive) return;
+
+                const scrollDelta = sc.scrollTop - rbStartScroll;
+                const adjustedStartY = rbStartY - scrollDelta;
+
+                const rb = document.getElementById('ib-rubber-band');
+                rb.style.display = 'block';
+                const x = Math.min(rbStartX, e.clientX);
+                const y = Math.min(adjustedStartY, e.clientY);
+                rb.style.left = x + 'px';
+                rb.style.top = y + 'px';
+                rb.style.width = (Math.abs(e.clientX - rbStartX)) + 'px';
+                rb.style.height = (Math.abs(e.clientY - adjustedStartY)) + 'px';
+            });
+
+            const finishRubberBand = (e) => {
+                const wasPending = rbPending;
+                const wasDragged = rbDragged;
+                const startTile = rbStartTile;
+                rbPending = false;
+                rbStartTile = null;
+
+                if (!rbActive) {
+                    // No drag happened — treat as a click if it was on a tile
+                    if (wasPending && !wasDragged && startTile) {
+                        handleTileClick(startTile, e);
+                    }
+                    return;
+                }
+                rbActive = false;
+                rbDragged = false;
+                const rb = document.getElementById('ib-rubber-band');
+                const wasVisible = rb.style.display === 'block';
+                rb.style.display = 'none';
+
+                if (!wasVisible) return;
+
+                // Convert rubber-band from viewport coords to scroll-content coords
+                const scRect = sc.getBoundingClientRect();
+                const scrollDelta = sc.scrollTop - rbStartScroll;
+                const adjustedStartY = rbStartY - scrollDelta;
+
+                const gap = 4, padX = 16, padY = 8;
+                const rowH = ibTileH + gap;
+                const colW = ibTileW + gap;
+
+                // Rubber-band in scroll-content space
+                const selLeft = Math.min(rbStartX, e.clientX) - scRect.left - padX + sc.scrollLeft;
+                const selRight = Math.max(rbStartX, e.clientX) - scRect.left - padX + sc.scrollLeft;
+                // For Y: use the original start position adjusted for scroll
+                const startYContent = (rbStartY - scRect.top) + rbStartScroll - padY;
+                const endYContent = (e.clientY - scRect.top) + sc.scrollTop - padY;
+                const selTop = Math.min(startYContent, endYContent);
+                const selBottom = Math.max(startYContent, endYContent);
+
+                // Calculate row/col ranges that overlap the rubber-band
+                const startCol = Math.max(0, Math.floor(selLeft / colW));
+                const endCol = Math.min(ibGridCols - 1, Math.floor(selRight / colW));
+                const startRow = Math.max(0, Math.floor(selTop / rowH));
+                const endRow = Math.floor(selBottom / rowH);
+
+                const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+                const modKey = isMac ? e.metaKey : e.ctrlKey;
+                if (!modKey) ibState.selected.clear();
+
+                const m = ibState.manifest;
+                const count = ibState.filtered.length;
+                for (let row = startRow; row <= endRow; row++) {
+                    for (let col = startCol; col <= endCol; col++) {
+                        const i = row * ibGridCols + col;
+                        if (i >= count) break;
+                        // Check tile bounds precisely against selection rect
+                        const tileLeft = col * colW;
+                        const tileRight = tileLeft + ibTileW;
+                        const tileTop = row * rowH;
+                        const tileBottom = tileTop + ibTileH;
+                        if (tileRight > selLeft && tileLeft < selRight &&
+                            tileBottom > selTop && tileTop < selBottom) {
+                            ibState.selected.add(m.icons[ibState.filtered[i]].id);
+                        }
+                    }
+                }
+
+                ibUpdateSelectionUI();
+            };
+
+            sc.addEventListener('pointerup', finishRubberBand);
+            sc.addEventListener('pointercancel', finishRubberBand);
+
+            // Prevent default click on tiles — selection is handled via pointerup above
+            tw.addEventListener('click', (e) => {
+                // Only suppress if it's on a tile (drag-select handles tile interaction now)
+                if (e.target.closest('.ib-tile')) e.stopPropagation();
+            });
+
+            // Handle tile click (called from finishRubberBand when no drag occurred)
+            function handleTileClick(tile, e) {
+                const id = tile.dataset.id;
+                const idx = parseInt(tile.dataset.idx, 10);
+                const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+                const modKey = isMac ? e.metaKey : e.ctrlKey;
+
+                if (e.shiftKey && ibState.lastClickIdx >= 0) {
+                    const start = Math.min(ibState.lastClickIdx, idx);
+                    const end = Math.max(ibState.lastClickIdx, idx);
+                    if (!modKey) ibState.selected.clear();
+                    for (let i = start; i <= end; i++) {
+                        const ic = ibState.manifest.icons[ibState.filtered[i]];
+                        ibState.selected.add(ic.id);
+                    }
+                } else if (modKey) {
+                    if (ibState.selected.has(id)) ibState.selected.delete(id);
+                    else ibState.selected.add(id);
+                } else {
+                    ibState.selected.clear();
+                    ibState.selected.add(id);
+                }
+
+                ibState.lastClickIdx = idx;
+                ibUpdateSelectionUI();
+            }
+        }
+
+        function ibSelectAllVisible() {
+            const m = ibState.manifest;
+            ibState.filtered.forEach(i => ibState.selected.add(m.icons[i].id));
+            ibUpdateSelectionUI();
+        }
+
+        function ibSelectNone() {
+            ibState.selected.clear();
+            ibUpdateSelectionUI();
+        }
+
+        function ibUpdateSelectionUI() {
+            const tw = document.getElementById('ib-tile-window');
+            tw.querySelectorAll('.ib-tile').forEach(tile => {
+                tile.classList.toggle('ib-selected', ibState.selected.has(tile.dataset.id));
+            });
+            ibUpdateSelectionCount();
+        }
+
+        function ibUpdateSelectionCount() {
+            const count = ibState.selected.size;
+            const el = document.getElementById('ib-selection-count');
+            if (el) el.textContent = count + ' selected';
+            // Update download button text and disabled state
+            const dlBtn = document.getElementById('ib-download-btn');
+            const dlText = document.getElementById('ib-download-text');
+            if (dlBtn) dlBtn.disabled = count === 0;
+            if (dlText) {
+                const isFM = state.fileMakerMode;
+                const fmt = ibState.exportFormat === 'png' ? 'PNG' : '';
+                const baseLabel = isFM ? 'Save to FileMaker' : `Download${fmt ? ' ' + fmt : ''}`;
+                dlText.textContent = count > 0 ? `${baseLabel} (${count})` : baseLabel;
+            }
+            // Show/hide Claris icon on download button (FM mode only)
+            const dlIcon = document.getElementById('ib-download-icon');
+            if (dlIcon) dlIcon.style.display = state.fileMakerMode ? '' : 'none';
+            // Show/hide Button Bar button (FM mode only)
+            const bbBtn = document.getElementById('ib-buttonbar-btn');
+            if (bbBtn) {
+                bbBtn.style.display = (state.fileMakerMode && count > 0) ? '' : 'none';
+                const bbText = document.getElementById('ib-buttonbar-text');
+                if (bbText) bbText.textContent = count > 0 ? `Copy as Button Bar (${count})` : 'Copy as Button Bar';
+            }
+            // Show/hide Edit Selected button + update label
+            const editBtn = document.getElementById('ib-edit-btn');
+            if (editBtn) {
+                editBtn.style.display = count > 0 ? '' : 'none';
+                const editLabelEl = document.getElementById('ib-edit-btn-label');
+                if (editLabelEl) editLabelEl.textContent = hasLoadedSVGs() ? 'Add to Editor' : 'Open in Editor\u2026';
+            }
+            const editSep = document.getElementById('ib-edit-separator');
+            if (editSep) editSep.style.display = count > 0 ? '' : 'none';
+            // Update Select All/None toggle label
+            const toggleBtn = document.getElementById('ib-select-toggle');
+            if (toggleBtn) {
+                const anySelected = ibState.selected.size > 0;
+                toggleBtn.textContent = anySelected ? 'Select None' : 'Select All';
+                toggleBtn.title = anySelected ? 'Deselect all' : 'Select all';
+            }
+            // Update library size info bar
+            if (ibIsLibraryMode()) ibUpdateSizeInfo();
+            ibUpdateSearchPlaceholder();
+            ibUpdateStrokeToggle();
+        }
+
+        function ibToggleSelectAll() {
+            const m = ibState.manifest;
+            if (!m) return;
+            if (ibState.selected.size > 0) {
+                ibSelectNone();
+            } else {
+                ibSelectAllVisible();
+            }
+        }
+
+        function ibResetZoom() {
+            ibState.zoom = 1.5;
+            ibRecalculateGrid();
+            ibUpdateZoomDisplay();
+            ibSavePrefs();
+        }
+
+        function ibUpdateSizeInfo() {
+            const dimEl = document.getElementById('svg-dimensions');
+            const sizeEl = document.getElementById('svg-size');
+            if (!dimEl || !sizeEl) return;
+            if (!ibState.manifest) {
+                dimEl.style.display = 'none';
+                sizeEl.style.display = 'none';
+                return;
+            }
+            // Bottom-left: only show selection count, hide when nothing selected
+            const selected = ibState.selected.size;
+            dimEl.style.display = 'none';
+            sizeEl.style.display = selected > 0 ? '' : 'none';
+            sizeEl.textContent = selected > 0 ? `${selected.toLocaleString()} selected` : '';
+        }
+
+        function ibUpdateSearchPlaceholder() {
+            const searchInput = document.getElementById('ib-search');
+            if (!searchInput || !ibState.manifest) return;
+            const count = ibState.filtered.length;
+            searchInput.placeholder = `Search ${count.toLocaleString()} icons\u2026`;
+            // Show found count to the right of the search box when searching
+            const countEl = document.getElementById('ib-search-count');
+            if (countEl) {
+                if (ibState.search) {
+                    countEl.textContent = `${count.toLocaleString()} found`;
+                    countEl.style.display = '';
+                } else {
+                    countEl.style.display = 'none';
+                }
+            }
+        }
+
+        function ibUpdateEditorBadge() {
+            const badge = document.getElementById('ib-editor-badge');
+            if (!badge) return;
+            const count = state.svgItems.length;
+            badge.style.display = count > 0 ? '' : 'none';
+            badge.textContent = count;
+        }
+
+        // -- Keyboard shortcuts --
+
+        function ibHandleKeydown(e) {
+            if (!ibIsLibraryMode()) return;
+
+            // Let search input handle its own keys (Escape handled by search's own keydown)
+            if (document.activeElement === document.getElementById('ib-search')) {
+                return;
+            }
+
+            if (e.key === 'Escape') {
+                if (ibState.selected.size > 0) {
+                    ibSelectNone();
+                    e.preventDefault();
+                }
+                return;
+            }
+
+            const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+            const modKey = isMac ? e.metaKey : e.ctrlKey;
+
+            if (modKey && e.key === 'a') {
+                e.preventDefault();
+                ibSelectAllVisible();
+                return;
+            }
+
+            if (e.key === '/' || (e.key === 'f' && modKey)) {
+                e.preventDefault();
+                document.getElementById('ib-search').focus();
+                return;
+            }
+        }
+
+        // -- Export --
+
+        async function ibDoExport() {
+            if (ibState.selected.size === 0) {
+                showToast('Select icons to export');
+                return;
+            }
+
+            const format = ibState.exportFormat;
+            const size = ibState.exportSize;
+            const fmCompat = document.getElementById('ib-export-fm').checked;
+            const dynamicFill = document.getElementById('ib-export-dynamic').checked;
+
+            // Ensure all selected SVGs are cached
+            const needed = [];
+            ibState.selected.forEach(id => {
+                if (!ibState.svgCache.has(id)) needed.push(id);
+            });
+
+            if (needed.length > 0) {
+                showToast('Fetching icon data...');
+                for (let i = 0; i < needed.length; i += 100) {
+                    const batch = needed.slice(i, i + 100);
+                    try {
+                        const resp = await fetch(_proxyBase + '/icons/batch', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ids: batch })
+                        });
+                        if (resp.ok) {
+                            const data = await resp.json();
+                            if (data.icons) {
+                                Object.entries(data.icons).forEach(([id, svg]) => {
+                                    ibState.svgCache.set(id, svg);
+                                });
+                            }
+                        }
+                    } catch (e) { }
+                }
+            }
+
+            const ibConvertStrokes = format === 'svg' && (document.getElementById('ib-convert-strokes')?.checked ?? false);
+
+            // Check if conversion work is needed for loading state
+            let hasStrokeWork = false;
+            if (ibConvertStrokes) {
+                for (const id of ibState.selected) {
+                    const svg = ibState.svgCache.get(id);
+                    if (!svg) continue;
+                    const p = new DOMParser();
+                    const d = p.parseFromString(svg, 'image/svg+xml');
+                    const s = d.querySelector('svg');
+                    if (s && isStrokeBasedSVG(s)) { hasStrokeWork = true; break; }
+                }
+            }
+
+            const dlBtn = document.getElementById('ib-download-btn');
+            const dlBtnText = document.getElementById('ib-download-text');
+            const origDlText = dlBtnText ? dlBtnText.textContent : '';
+            const dlTotal = ibState.selected.size;
+            const dlShowProgress = hasStrokeWork && dlTotal >= 100;
+
+            if (hasStrokeWork && dlBtn && dlBtnText) {
+                dlBtn.disabled = true;
+                dlBtnText.textContent = 'Converting...';
+            }
+            if (dlShowProgress) showProgressModal('Converting Icons...', dlTotal);
+
+            const items = [];
+            let dlProcessed = 0;
+            let dlCancelled = false;
+            try {
+                for (const id of ibState.selected) {
+                    if (dlShowProgress && isProgressCancelled()) { dlCancelled = true; break; }
+
+                    const svg = ibState.svgCache.get(id);
+                    if (!svg) continue;
+                    const name = id.split('/').pop();
+
+                    let parser = new DOMParser();
+                    let doc = parser.parseFromString(svg, 'image/svg+xml');
+                    let svgEl = doc.querySelector('svg');
+                    if (!svgEl) continue;
+
+                    // Convert strokes to fills if enabled and needed
+                    if (ibConvertStrokes && isStrokeBasedSVG(svgEl)) {
+                        const result = await convertStrokeToFill(svg);
+                        if (isProgressCancelled()) { dlCancelled = true; break; }
+                        if (result.success) {
+                            parser = new DOMParser();
+                            doc = parser.parseFromString(result.svg, 'image/svg+xml');
+                            svgEl = doc.querySelector('svg');
+                            if (!svgEl) continue;
+                        }
+                    }
+
+                    if (fmCompat && format !== 'png') {
+                        const origDynamic = state.fmDynamicFill;
+                        state.fmDynamicFill = dynamicFill;
+                        processSVGForFileMaker(svgEl);
+                        state.fmDynamicFill = origDynamic;
+                    }
+
+                    const serializer = new XMLSerializer();
+                    let svgString = serializer.serializeToString(svgEl);
+
+                    // Resolve currentColor to black — required for PNG rendering via
+                    // <img>/canvas where currentColor has no inherited context
+                    if (format === 'png') {
+                        svgString = svgString.replace(/currentColor/gi, '#000000');
+                    }
+
+                    items.push({ filename: name + '.svg', svgString });
+
+                    dlProcessed++;
+                    if (dlShowProgress) updateProgressModal(dlProcessed, dlTotal);
+                }
+            } finally {
+                if (dlShowProgress) hideProgressModal();
+                if (dlBtn && dlBtnText) {
+                    dlBtn.disabled = false;
+                    dlBtnText.textContent = origDlText;
+                }
+            }
+
+            if (dlCancelled) {
+                showToast('Export cancelled');
+                return;
+            }
+
+            if (items.length === 0) {
+                showToast('No icons to export');
+                return;
+            }
+
+            // For PNG, parse the cleaned svgString back to an element for canvas rendering
+            function ibParseSvgEl(svgString) {
+                const doc = new DOMParser().parseFromString(svgString, 'image/svg+xml');
+                return doc.querySelector('svg');
+            }
+
+            if (state.fileMakerMode) {
+                if (format === 'png') {
+                    const pngResults = [];
+                    for (const item of items) {
+                        try {
+                            const b64 = await svgToPng(ibParseSvgEl(item.svgString), size);
+                            pngResults.push({ filename: item.filename.replace('.svg', '.png'), base64: b64 });
+                        } catch (e) { }
+                    }
+                    if (pngResults.length > 0) {
+                        const jsonOutput = JSON.stringify({
+                            format: 'png',
+                            icons: pngResults
+                        });
+                        callFileMaker('Save Icons', jsonOutput);
+                        showToast(`Sent ${pngResults.length} PNG icon(s) to FileMaker`);
+                    }
+                } else {
+                    const svgResults = items.map(item => ({
+                        filename: item.filename,
+                        base64: btoa(unescape(encodeURIComponent(item.svgString)))
+                    }));
+                    const jsonOutput = JSON.stringify({
+                        format: 'svg',
+                        icons: svgResults
+                    });
+                    callFileMaker('Save Icons', jsonOutput);
+                    showToast(`Sent ${svgResults.length} SVG icon(s) to FileMaker`);
+                }
+            } else {
+                // Browser mode — zip multiple files, direct download for single
+                const encoder = new TextEncoder();
+                if (format === 'png') {
+                    const pngEntries = [];
+                    for (const item of items) {
+                        try {
+                            const b64 = await svgToPng(ibParseSvgEl(item.svgString), size);
+                            const bin = atob(b64);
+                            const data = new Uint8Array(bin.length);
+                            for (let i = 0; i < bin.length; i++) data[i] = bin.charCodeAt(i);
+                            pngEntries.push({ name: item.filename.replace('.svg', '.png'), data });
+                        } catch (e) { }
+                    }
+                    if (pngEntries.length > 1) {
+                        triggerDownload(createZipBlob(pngEntries), 'icons_export.zip');
+                    } else if (pngEntries.length === 1) {
+                        triggerDownload(new Blob([pngEntries[0].data], { type: 'image/png' }), pngEntries[0].name);
+                    }
+                    showToast(`Exported ${pngEntries.length} PNG icon(s)`);
+                } else {
+                    const svgEntries = items.map(item => ({
+                        name: item.filename,
+                        data: encoder.encode(item.svgString)
+                    }));
+                    if (svgEntries.length > 1) {
+                        triggerDownload(createZipBlob(svgEntries), 'icons_export.zip');
+                    } else if (svgEntries.length === 1) {
+                        triggerDownload(new Blob([svgEntries[0].data], { type: 'image/svg+xml' }), svgEntries[0].name);
+                    }
+                    showToast(`Exported ${items.length} SVG icon(s)`);
+                }
+            }
+        }
+
+        // Generate FileMaker Button Bar XML from selected icons
+        function checkButtonBarPlugin() {
+            if (!state.fileMakerMode || !state.pluginMissing) return true;
+            // Re-check with FileMaker in case user installed the plugin since launch
+            callFileMaker('Plugin Missing Check', '');
+            // If still missing after a brief moment, show error
+            // (The FM script can call back to clear pluginMissing if installed)
+            if (state.pluginMissing) {
+                showConfirmModal({
+                    title: 'Plugin Required',
+                    icon: '<svg viewBox="0 0 24 24" fill="#ef4444" stroke="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>',
+                    messageHtml: 'The <strong>BaseElements Plugin</strong> from Goya is required to copy Button Bars to the FileMaker clipboard.<br><br>Please <a href="https://github.com/GoyaPtyLtd/BaseElements-Plugin/blob/main/docs/Downloads.md" target="_blank" rel="noopener noreferrer" style="color:var(--accent-color);">download and install the Plugin</a>, then restart FileMaker.',
+                    confirmText: 'OK',
+                    hideCancel: true
+                });
+                return false;
+            }
+            return true;
+        }
+
+        // Called from FileMaker to update plugin status
+        function setPluginStatus(jsonString) {
+            try {
+                const data = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+                state.pluginMissing = (data.plugin_missing === 1);
+            } catch (e) {}
+        }
+
+        async function ibExportButtonBar(evt) {
+            if (!checkButtonBarPlugin()) return;
+            if (ibState.selected.size === 0) {
+                showToast('Select icons to export');
+                return;
+            }
+
+            // Hold Alt/Option to bypass the 400-icon limit
+            const bypassLimit = evt && (evt.altKey || evt.metaKey);
+            if (!bypassLimit && ibState.selected.size > 400) {
+                showToast('Too many icons selected (max 400 for button bar)');
+                return;
+            }
+
+            const dynamicFill = document.getElementById('ib-export-dynamic').checked;
+
+            // Ensure all selected SVGs are cached
+            const needed = [];
+            ibState.selected.forEach(id => {
+                if (!ibState.svgCache.has(id)) needed.push(id);
+            });
+            if (needed.length > 0) {
+                showToast('Fetching icon data...');
+                for (let i = 0; i < needed.length; i += 100) {
+                    const batch = needed.slice(i, i + 100);
+                    try {
+                        const resp = await fetch(_proxyBase + '/icons/batch', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ids: batch })
+                        });
+                        if (resp.ok) {
+                            const data = await resp.json();
+                            if (data.icons) {
+                                Object.entries(data.icons).forEach(([id, svg]) => {
+                                    ibState.svgCache.set(id, svg);
+                                });
+                            }
+                        }
+                    } catch (e) { }
+                }
+            }
+
+            // Check if any selected icons need stroke conversion
+            let bbNeedsConversion = false;
+            for (const id of ibState.selected) {
+                const svg = ibState.svgCache.get(id);
+                if (!svg) continue;
+                const p = new DOMParser();
+                const d = p.parseFromString(svg, 'image/svg+xml');
+                const s = d.querySelector('svg');
+                if (s && isStrokeBasedSVG(s)) { bbNeedsConversion = true; break; }
+            }
+
+            const bbBtn = document.getElementById('ib-buttonbar-btn');
+            const bbBtnText = document.getElementById('ib-buttonbar-text');
+            const bbOrigText = bbBtnText ? bbBtnText.textContent : '';
+            const bbTotal = ibState.selected.size;
+            const bbShowProgress = bbTotal > 10;
+
+            if (bbShowProgress && bbBtn && bbBtnText) {
+                bbBtn.disabled = true;
+                bbBtnText.textContent = 'Processing...';
+            }
+            if (bbShowProgress) showProgressModal('Processing Icons...', bbTotal);
+
+            // Process SVGs for FileMaker (always convert strokes — they don't work in FM button bars)
+            const segments = [];
+            let bbProcessed = 0;
+            let bbCancelled = false;
+            try {
+                for (const id of ibState.selected) {
+                    if (bbShowProgress && isProgressCancelled()) { bbCancelled = true; break; }
+
+                    const svg = ibState.svgCache.get(id);
+                    if (!svg) continue;
+                    const name = id.split('/').pop();
+                    let parser = new DOMParser();
+                    let doc = parser.parseFromString(svg, 'image/svg+xml');
+                    let svgEl = doc.querySelector('svg');
+                    if (!svgEl) continue;
+
+                    // Always convert stroke-based icons for button bars
+                    if (isStrokeBasedSVG(svgEl)) {
+                        const result = await convertStrokeToFill(svg);
+                        if (isProgressCancelled()) { bbCancelled = true; break; }
+                        if (result.success) {
+                            parser = new DOMParser();
+                            doc = parser.parseFromString(result.svg, 'image/svg+xml');
+                            svgEl = doc.querySelector('svg');
+                            if (!svgEl) continue;
+                        }
+                    }
+
+                    const origDynamic = state.fmDynamicFill;
+                    state.fmDynamicFill = dynamicFill;
+                    processSVGForFileMaker(svgEl);
+                    state.fmDynamicFill = origDynamic;
+
+                    const serializer = new XMLSerializer();
+                    const svgString = serializer.serializeToString(svgEl);
+                    segments.push({ name: name + '.svg', svgString });
+
+                    bbProcessed++;
+                    if (bbShowProgress) updateProgressModal(bbProcessed, bbTotal);
+                }
+            } finally {
+                if (bbShowProgress) hideProgressModal();
+                if (bbBtn && bbBtnText) {
+                    bbBtn.disabled = false;
+                    bbBtnText.textContent = bbOrigText;
+                }
+            }
+
+            if (bbCancelled) {
+                showToast('Export cancelled');
+                return;
+            }
+
+            if (segments.length === 0) {
+                showToast('No icons to export');
+                return;
+            }
+
+            const xml = ibBuildButtonBarXML(segments);
+            callFileMaker('Build Button Bar', JSON.stringify({ buttonBarXml: xml }));
+            const numBars = Math.ceil(segments.length / 50);
+            const barLabel = numBars > 1 ? `${numBars} button bars` : 'button bar';
+            showToast(`${segments.length} icon(s) as ${barLabel} sent to FileMaker`);
+        }
+
+        // Export editor SVGs as a FileMaker button bar (same as icon library version but for editor)
+        async function editorExportButtonBar(evt) {
+            if (!checkButtonBarPlugin()) return;
+            if (!hasLoadedSVGs()) {
+                showToast('Load icons to export');
+                return;
+            }
+
+            const dynamicFill = document.getElementById('fm-dynamic-fill')?.checked ?? state.fmDynamicFill;
+
+            const btn = document.getElementById('editor-buttonbar-btn');
+            const btnText = document.getElementById('editor-buttonbar-text');
+            const origText = btnText ? btnText.textContent : '';
+            const total = state.svgItems.length;
+            const showProgress = total > 10;
+
+            if (showProgress && btn && btnText) {
+                btn.disabled = true;
+                btnText.textContent = 'Processing...';
+            }
+            if (showProgress) showProgressModal('Processing Icons...', total);
+
+            const segments = [];
+            let processed = 0;
+            let cancelled = false;
+            try {
+                for (const item of state.svgItems) {
+                    if (showProgress && isProgressCancelled()) { cancelled = true; break; }
+
+                    const serializer = new XMLSerializer();
+
+                    // Convert strokes first (before generateFinalSVG) so background rect
+                    // doesn't interfere with Potrace tracing
+                    let savedCurrentSVG = null;
+                    if (isStrokeBasedSVG(item.currentSVG)) {
+                        const rawStr = serializer.serializeToString(item.currentSVG);
+                        const result = await convertStrokeToFill(rawStr);
+                        if (showProgress && isProgressCancelled()) { cancelled = true; break; }
+                        if (result.success) {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(result.svg, 'image/svg+xml');
+                            const convertedSvg = doc.querySelector('svg');
+                            if (convertedSvg) {
+                                savedCurrentSVG = item.currentSVG;
+                                item.currentSVG = convertedSvg;
+                            }
+                        }
+                    }
+
+                    // Generate final SVG with all editor transformations applied
+                    let svgEl = generateFinalSVG(item);
+
+                    // Restore original currentSVG if we swapped it for conversion
+                    if (savedCurrentSVG) {
+                        item.currentSVG = savedCurrentSVG;
+                    }
+
+                    if (!svgEl) continue;
+
+                    const origDynamic = state.fmDynamicFill;
+                    state.fmDynamicFill = dynamicFill;
+                    processSVGForFileMaker(svgEl);
+                    state.fmDynamicFill = origDynamic;
+
+                    const finalStr = new XMLSerializer().serializeToString(svgEl);
+                    const name = item.filename.replace(/\.svg$/i, '') + '.svg';
+                    segments.push({ name, svgString: finalStr });
+
+                    processed++;
+                    if (showProgress) updateProgressModal(processed, total);
+                }
+            } finally {
+                if (showProgress) hideProgressModal();
+                if (btn && btnText) {
+                    btn.disabled = false;
+                    btnText.textContent = origText;
+                }
+            }
+
+            if (cancelled) { showToast('Export cancelled'); return; }
+            if (segments.length === 0) { showToast('No icons to export'); return; }
+
+            const xml = ibBuildButtonBarXML(segments);
+            callFileMaker('Build Button Bar', JSON.stringify({ buttonBarXml: xml }));
+            const numBars = Math.ceil(segments.length / 50);
+            const barLabel = numBars > 1 ? `${numBars} button bars` : 'button bar';
+            showToast(`${segments.length} icon(s) as ${barLabel} sent to FileMaker`);
+        }
+
+        // Encode a string to hex (each byte → 2 hex chars)
+        function ibStrToHex(str) {
+            let hex = '';
+            for (let i = 0; i < str.length; i++) {
+                hex += str.charCodeAt(i).toString(16).padStart(2, '0').toUpperCase();
+            }
+            return hex;
+        }
+
+        // Encode a filename for FNAM stream (XOR 0x5A per byte)
+        function ibEncodeFNAM(filename) {
+            const type = 'image';
+            const typeBytes = [];
+            for (let i = 0; i < type.length; i++) typeBytes.push((type.charCodeAt(i) ^ 0x5A).toString(16).padStart(2, '0').toUpperCase());
+            const nameBytes = [];
+            for (let i = 0; i < filename.length; i++) nameBytes.push((filename.charCodeAt(i) ^ 0x5A).toString(16).padStart(2, '0').toUpperCase());
+            // Header: 00000001, type length, encoded type, 00, name length, encoded name
+            const typeLen = type.length.toString(16).padStart(2, '0').toUpperCase();
+            const nameLen = filename.length.toString(16).padStart(2, '0').toUpperCase();
+            return '00000001' + typeLen + typeBytes.join('') + '00' + nameLen + nameBytes.join('');
+        }
+
+        // Build FileMaker button bar XML snippet
+        // Build FileMaker button bar XML snippet — template from newbuttonbar.xml (custom theme)
+        // Splits into multiple button bars if segments exceed 50 (FM limit per bar)
+        function ibBuildButtonBarXML(segments) {
+            const MAX_PER_BAR = 50;
+            const segW = 60; // width per segment in points
+            const barH = 60; // outer bar height
+            const barGap = 16; // vertical gap between bars
+            const barSpacing = barH + barGap; // 76pt between bar tops
+
+            const barCSS = 'self:normal .self&#10;{&#10;&#09;border-top-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-right-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-bottom-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-left-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-top-style: solid;&#10;&#09;border-right-style: solid;&#10;&#09;border-bottom-style: solid;&#10;&#09;border-left-style: solid;&#10;&#09;border-top-width: 1pt;&#10;&#09;border-right-width: 1pt;&#10;&#09;border-bottom-width: 1pt;&#10;&#09;border-left-width: 1pt;&#10;&#09;border-top-right-radius: 5pt 5pt;&#10;&#09;border-bottom-right-radius: 5pt 5pt;&#10;&#09;border-bottom-left-radius: 5pt 5pt;&#10;&#09;border-top-left-radius: 5pt 5pt;&#10;&#09;box-shadow: none;&#10;&#09;box-sizing: content-box;&#10;}&#10;self:normal .button_bar_divider&#10;{&#10;&#09;border-top-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-right-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-bottom-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-left-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-top-style: solid;&#10;&#09;border-right-style: solid;&#10;&#09;border-bottom-style: solid;&#10;&#09;border-left-style: solid;&#10;&#09;border-top-width: 1pt;&#10;&#09;border-right-width: 1pt;&#10;&#09;border-bottom-width: 1pt;&#10;&#09;border-left-width: 1pt;&#10;&#09;border-top-right-radius: 0pt 0pt;&#10;&#09;border-bottom-right-radius: 0pt 0pt;&#10;&#09;border-bottom-left-radius: 0pt 0pt;&#10;&#09;border-top-left-radius: 0pt 0pt;&#10;&#09;box-shadow: none;&#10;&#09;box-sizing: content-box;&#10;}&#10;';
+
+            const segCSS = 'self:normal .self&#10;{&#10;&#09;background-image: none;&#10;&#09;background-position: 0% 0%;&#10;&#09;background-size: auto;&#10;&#09;background-repeat: repeat repeat;&#10;&#09;background-origin: padding-box;&#10;&#09;background-clip: border-box;&#10;&#09;background-color: rgba(100%,100%,100%,0);&#10;&#09;border-top-color: rgba(0%,0%,0%,0);&#10;&#09;border-right-color: rgba(0%,0%,0%,0);&#10;&#09;border-bottom-color: rgba(0%,0%,0%,0);&#10;&#09;border-left-color: rgba(0%,0%,0%,0);&#10;&#09;border-top-style: none;&#10;&#09;border-right-style: none;&#10;&#09;border-bottom-style: none;&#10;&#09;border-left-style: none;&#10;&#09;border-top-width: 0pt;&#10;&#09;border-right-width: 0pt;&#10;&#09;border-bottom-width: 0pt;&#10;&#09;border-left-width: 0pt;&#10;&#09;border-top-right-radius: 0pt 0pt;&#10;&#09;border-bottom-right-radius: 0pt 0pt;&#10;&#09;border-bottom-left-radius: 0pt 0pt;&#10;&#09;border-top-left-radius: 0pt 0pt;&#10;&#09;border-image-source: none;&#10;&#09;border-image-slice: 100% 100% 100% 100% fill;&#10;&#09;border-image-width: 1 1 1 1;&#10;&#09;border-image-outset: 0 0 0 0;&#10;&#09;border-image-repeat: stretch stretch;&#10;&#09;outline-width: 0pt;&#10;&#09;outline-style: none;&#10;&#09;outline-color: invert;&#10;&#09;outline-offset: 0pt;&#10;&#09;font-family: -fm-font-family(Helvetica Neue,HelveticaNeue);&#10;&#09;font-weight: normal;&#10;&#09;font-stretch: normal;&#10;&#09;font-style: normal;&#10;&#09;font-variant: normal;&#10;&#09;font-size: 16pt;&#10;&#09;color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;direction: ltr;&#10;&#09;line-height: 1line;&#10;&#09;block-progression: tb;&#10;&#09;text-align: center;&#10;&#09;text-transform: none;&#10;&#09;text-indent: 0pt;&#10;&#09;box-shadow: none;&#10;&#09;box-sizing: content-box;&#10;&#09;vertical-align: baseline;&#10;&#09;-fm-digit-set: roman;&#10;&#09;-fm-space-before: 0line;&#10;&#09;-fm-space-after: 0line;&#10;&#09;-fm-tab-stops: ;&#10;&#09;-fm-strikethrough: false;&#10;&#09;-fm-underline: none;&#10;&#09;-fm-glyph-variant: ;&#10;&#09;-fm-paragraph-margin-left: 0pt;&#10;&#09;-fm-paragraph-margin-right: 0pt;&#10;&#09;-fm-character-direction: ;&#10;&#09;-fm-use-default-appearance: false;&#10;&#09;-fm-override-with-classic: false;&#10;&#09;-fm-baseline-shift: 0pt;&#10;&#09;-fm-fill-effect: 0;&#10;&#09;-fm-highlight-color: rgba(0%,0%,0%,0);&#10;&#09;-fm-text-vertical-align: center;&#10;&#09;-fm-tategaki: false;&#10;&#09;-fm-rotation: 0;&#10;&#09;-fm-borders-between-reps: false;&#10;&#09;-fm-borders-baseline: false;&#10;&#09;-fm-texty-field: false;&#10;&#09;-fm-box-shadow-persist: none;&#10;}&#10;self:hover .self&#10;{&#10;&#09;background-image: none;&#10;&#09;background-color: rgba(100%,100%,100%,1);&#10;&#09;border-image-source: none;&#10;&#09;color: rgba(100%,100%,100%,1);&#10;}&#10;self:pressed .self&#10;{&#10;&#09;background-image: none;&#10;&#09;background-color: rgba(100%,100%,100%,1);&#10;&#09;border-image-source: none;&#10;&#09;color: rgba(100%,100%,100%,1);&#10;}&#10;self:focus .self&#10;{&#10;&#09;background-image: none;&#10;&#09;background-color: rgba(100%,100%,100%,1);&#10;&#09;border-image-source: none;&#10;&#09;color: rgba(100%,100%,100%,1);&#10;}&#10;self:checked .self&#10;{&#10;&#09;background-image: none;&#10;&#09;background-color: rgba(100%,100%,100%,1);&#10;&#09;border-image-source: none;&#10;&#09;color: rgba(100%,100%,100%,1);&#10;}&#10;self:normal .inner_border&#10;{&#10;&#09;border-top-color: rgba(0%,0%,0%,0);&#10;&#09;border-right-color: rgba(0%,0%,0%,0);&#10;&#09;border-bottom-color: rgba(0%,0%,0%,0);&#10;&#09;border-left-color: rgba(0%,0%,0%,0);&#10;&#09;border-top-style: none;&#10;&#09;border-right-style: none;&#10;&#09;border-bottom-style: none;&#10;&#09;border-left-style: none;&#10;&#09;border-top-width: 0pt;&#10;&#09;border-right-width: 0pt;&#10;&#09;border-bottom-width: 0pt;&#10;&#09;border-left-width: 0pt;&#10;&#09;border-top-right-radius: 0pt 0pt;&#10;&#09;border-bottom-right-radius: 0pt 0pt;&#10;&#09;border-bottom-left-radius: 0pt 0pt;&#10;&#09;border-top-left-radius: 0pt 0pt;&#10;&#09;padding-top: 0em;&#10;&#09;padding-right: 0.2em;&#10;&#09;padding-bottom: 0em;&#10;&#09;padding-left: 0.2em;&#10;&#09;margin-top: 0pt;&#10;&#09;margin-right: 0pt;&#10;&#09;margin-bottom: 0pt;&#10;&#09;margin-left: 0pt;&#10;&#09;width: auto;&#10;&#09;height: auto;&#10;&#09;top: auto;&#10;&#09;right: auto;&#10;&#09;bottom: auto;&#10;&#09;left: auto;&#10;&#09;position: static;&#10;&#09;box-shadow: none;&#10;&#09;box-sizing: content-box;&#10;}&#10;self:focus .inner_border&#10;{&#10;&#09;box-shadow: none;&#10;}&#10;self:normal .text&#10;{&#10;&#09;width: 100%;&#10;&#09;height: 100%;&#10;&#09;box-sizing: border-box;&#10;}&#10;self:normal .icon&#10;{&#10;&#09;-fm-icon-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;-fm-icon-padding: 0.5em;&#10;}&#10;self:hover .icon&#10;{&#10;&#09;-fm-icon-color: rgba(40%,69.4118%,19.6078%,1);&#10;}&#10;self:pressed .icon&#10;{&#10;&#09;-fm-icon-color: rgba(99.2157%,60.3922%,0%,1);&#10;}&#10;self:focus .icon&#10;{&#10;&#09;-fm-icon-color: rgba(100%,15.2941%,7.05882%,1);&#10;}&#10;self:checked .icon&#10;{&#10;&#09;-fm-icon-color: rgba(0%,56.8627%,80.7843%,1);&#10;}&#10;self:normal .baseline&#10;{&#10;&#09;border-top-color: rgba(0%,0%,0%,0);&#10;&#09;border-right-color: rgba(0%,0%,0%,0);&#10;&#09;border-bottom-color: rgba(0%,0%,0%,0);&#10;&#09;border-left-color: rgba(0%,0%,0%,0);&#10;&#09;border-top-style: none;&#10;&#09;border-right-style: none;&#10;&#09;border-bottom-style: none;&#10;&#09;border-left-style: none;&#10;&#09;border-top-width: 0pt;&#10;&#09;border-right-width: 0pt;&#10;&#09;border-bottom-width: 0pt;&#10;&#09;border-left-width: 0pt;&#10;}&#10;';
+
+            // Split segments into chunks of MAX_PER_BAR
+            const chunks = [];
+            for (let i = 0; i < segments.length; i += MAX_PER_BAR) {
+                chunks.push(segments.slice(i, i + MAX_PER_BAR));
+            }
+
+            // Find widest bar for enclosing rect
+            const maxChunkLen = Math.max(...chunks.map(c => c.length));
+            const maxBarW = maxChunkLen * segW + 2;
+            const numBars = chunks.length;
+            const totalH = numBars * barH + (numBars - 1) * barGap;
+
+            // Build segment XML for a single button bar segment
+            function buildSegmentXML(seg, localIndex, globalKey) {
+                const left = (localIndex * segW + 1).toFixed(7);
+                const right = ((localIndex + 1) * segW + 1).toFixed(7);
+
+                const fnameHex = ibEncodeFNAM(seg.name);
+                const fnameSize = fnameHex.length / 2;
+                const svgHex = ibStrToHex(seg.svgString);
+                const svgSize = seg.svgString.length;
+
+                return `<Object type="Button" key="${globalKey}" LabelKey="0" flags="65544" rotation="0">
+<Bounds top="1.0000000" left="${left}" bottom="59.0000000" right="${right}"/>
+<TextObj flags="2">
+<ExtendedAttributes fontHeight="10" graphicFormat="5">
+<NumFormat flags="2304" charStyle="0" negativeStyle="0" currencySymbol="$" thousandsSep="44" decimalPoint="46" negativeColor="#DD000000" decimalDigits="2" trueString="Yes" falseString="No"/>
+<DateFormat format="0" charStyle="0" monthStyle="1" dayStyle="1" separator="47">
+<DateElement>3</DateElement>
+<DateElement>1</DateElement>
+<DateElement>6</DateElement>
+<DateElement>8</DateElement>
+<DateElementSep index="0"></DateElementSep>
+<DateElementSep index="1">, </DateElementSep>
+<DateElementSep index="2"> </DateElementSep>
+<DateElementSep index="3"> </DateElementSep>
+<DateElementSep index="4"></DateElementSep>
+</DateFormat>
+<TimeFormat flags="143" charStyle="0" hourStyle="0" minsecStyle="1" separator="58" amString=" AM" pmString=" PM" ampmString=""/>
+<CharacterStyle mask="32695">
+<Font-family codeSet="Other" fontId="0" postScript="HelveticaNeue">Helvetica Neue</Font-family>
+<Font-size>16</Font-size>
+<Face>0</Face>
+<Color>#0091CE</Color>
+</CharacterStyle>
+</ExtendedAttributes>
+<Styles>
+<FullCSS>
+${segCSS}</FullCSS>
+<ThemeName>com.filemaker.theme.custom.E0B203E2_6455_4488_8FAB_92CFB662EFD6</ThemeName></Styles>
+<CharacterStyleVector>
+<Style>
+<Data></Data>
+<CharacterStyle mask="32695">
+<Font-family codeSet="Other" fontId="0" postScript="HelveticaNeue">Helvetica Neue</Font-family>
+<Font-size>16</Font-size>
+<Face>0</Face>
+<Color>#0091CE</Color>
+</CharacterStyle>
+</Style>
+</CharacterStyleVector>
+<ParagraphStyleVector>
+<Style>
+<Data></Data>
+<ParagraphStyle mask="0">
+</ParagraphStyle>
+</Style>
+</ParagraphStyleVector>
+</TextObj>
+<ButtonObj buttonFlags="0" iconSize="48" displayType="1">
+<Step enable="True" id="103" name="Exit Script"></Step>
+<Stream size="${fnameSize}">
+<Type>FNAM</Type>
+<HexData>${fnameHex}</HexData>
+</Stream>
+<Stream size="1">
+<Type>GLPH</Type>
+<HexData>01</HexData>
+</Stream>
+<Stream size="${svgSize}">
+<Type>SVG </Type>
+<HexData>${svgHex}</HexData>
+</Stream>
+</ButtonObj>
+</Object>
+`;
+            }
+
+            // Build each button bar
+            let nextKey = 1; // globally unique key counter
+            let barsXML = '';
+            chunks.forEach((chunk, barIndex) => {
+                const barTop = barIndex * barSpacing;
+                const barBottom = barTop + barH;
+                const thisBarW = chunk.length * segW + 2;
+                const barKey = nextKey++;
+
+                let segsXML = '';
+                chunk.forEach((seg, localIndex) => {
+                    segsXML += buildSegmentXML(seg, localIndex, nextKey++);
+                });
+
+                barsXML += `<Object type="ButtonBar" key="${barKey}" LabelKey="0" flags="0" rotation="0">
+<Bounds top="${barTop}.0000000" left="0.0000000" bottom="${barBottom}.0000000" right="${thisBarW}.0000000"/>
+<Styles>
+<FullCSS>
+${barCSS}</FullCSS>
+<ThemeName>com.filemaker.theme.custom.E0B203E2_6455_4488_8FAB_92CFB662EFD6</ThemeName></Styles>
+<ButtonBarObj flags="0" segmentKey="0">
+${segsXML}</ButtonBarObj>
+</Object>
+`;
+            });
+
+            return `<?xml version="1.0" encoding="UTF-8"?>
+<fmxmlsnippet type="LayoutObjectList">
+<Layout enclosingRectTop="0.0000000" enclosingRectLeft="0.0000000" enclosingRectBottom="${totalH}.0000000" enclosingRectRight="${maxBarW}.0000000">
+${barsXML}</Layout></fmxmlsnippet>`;
+        }
+
+
+
+        // -- Edit in Editor --
+
+        async function ibEditInEditor() {
+            if (ibState.selected.size === 0) {
+                showToast('Select icons to edit');
+                return;
+            }
+
+            // Ensure all selected SVGs are cached
+            const needed = [];
+            ibState.selected.forEach(id => {
+                if (!ibState.svgCache.has(id)) needed.push(id);
+            });
+
+            if (needed.length > 0) {
+                for (let i = 0; i < needed.length; i += 100) {
+                    const batch = needed.slice(i, i + 100);
+                    try {
+                        const resp = await fetch(_proxyBase + '/icons/batch', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ids: batch })
+                        });
+                        if (resp.ok) {
+                            const data = await resp.json();
+                            if (data.icons) {
+                                Object.entries(data.icons).forEach(([id, svg]) => {
+                                    ibState.svgCache.set(id, svg);
+                                });
+                            }
+                        }
+                    } catch (e) { }
+                }
+            }
+
+            const items = [];
+            ibState.selected.forEach(id => {
+                const svg = ibState.svgCache.get(id);
+                if (!svg) return;
+                const name = id.split('/').pop();
+                items.push({
+                    filename: name + '.svg',
+                    base64: btoa(unescape(encodeURIComponent(svg)))
+                });
+            });
+
+            if (items.length === 0) return;
+
+            const editorHasContent = hasLoadedSVGs();
+
+            if (editorHasContent) {
+                // Add to existing editor content — skip duplicates by filename
+                const existing = new Set(state.svgItems.map(i => i.filename));
+                let added = 0;
+                let skipped = 0;
+                items.forEach(item => {
+                    if (existing.has(item.filename)) {
+                        skipped++;
+                        return;
+                    }
+                    const svgString = atob(item.base64);
+                    if (addSVGItem(item.filename, svgString, true)) {
+                        added++;
+                    }
+                });
+                if (added > 0) {
+                    renderPreview();
+                    updateSizeInfo();
+                    updateSaveButton();
+                    detectStrokeSVGs();
+                    setTimeout(autoZoom, 50);
+                }
+                const msg = added > 0 ? `Added ${added} icon(s) to editor` : 'Icons already in editor';
+                if (skipped > 0 && added > 0) {
+                    showToast(`Added ${added}, skipped ${skipped} duplicate(s)`);
+                } else {
+                    showToast(msg);
+                }
+            } else {
+                // Editor empty — load fresh
+                ibSetMode('editor');
+                loadSVGItems(JSON.stringify(items), { skipResolve: true });
+                showToast(`Loaded ${items.length} icon(s) into editor`);
+            }
+        }
+
+        // -- Restore on page load --
+
+        function ibRestoreOnLoad() {
+            const prefs = ibLoadPrefs();
+            if (prefs && prefs.mode === 'library') {
+                ibSetMode('library');
             }
         }
 
@@ -9706,8 +12630,10 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             initEditor();
+            initExternalLinkHandler();
             sendUsageTracking();
             setTimeout(checkForUpdate, 2000);
+            ibRestoreOnLoad();
 
             // Update donate button from cached products data
             try {
@@ -9751,6 +12677,7 @@
             });
         });
     </script>
+    <div class="ib-rubber-band" id="ib-rubber-band"></div>
 </body>
 
 </html>
