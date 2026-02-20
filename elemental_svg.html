@@ -6925,15 +6925,16 @@
                 return { name: modifiedFilename, data };
             });
 
-            if (fileEntries.length > 1) {
-                // Multiple files → zip
+            if (fileEntries.length >= 10) {
+                // 10+ files → zip
                 const zipBlob = createZipBlob(fileEntries);
                 triggerDownload(zipBlob, 'elemental_svg_export.zip');
-            } else if (fileEntries.length === 1) {
-                // Single file → direct download
-                const entry = fileEntries[0];
-                const mimeType = format === 'png' ? 'image/png' : 'image/svg+xml';
-                triggerDownload(new Blob([entry.data], { type: mimeType }), entry.name);
+            } else {
+                // Under 10 → individual downloads
+                for (const entry of fileEntries) {
+                    const mimeType = format === 'png' ? 'image/png' : 'image/svg+xml';
+                    triggerDownload(new Blob([entry.data], { type: mimeType }), entry.name);
+                }
             }
         }
 
@@ -11472,10 +11473,10 @@
                             pngEntries.push({ name: item.filename.replace('.svg', '.png'), data });
                         } catch (e) { }
                     }
-                    if (pngEntries.length > 1) {
+                    if (pngEntries.length >= 10) {
                         triggerDownload(createZipBlob(pngEntries), 'icons_export.zip');
-                    } else if (pngEntries.length === 1) {
-                        triggerDownload(new Blob([pngEntries[0].data], { type: 'image/png' }), pngEntries[0].name);
+                    } else {
+                        for (const e of pngEntries) triggerDownload(new Blob([e.data], { type: 'image/png' }), e.name);
                     }
                     showToast(`Exported ${pngEntries.length} PNG icon(s)`);
                 } else {
@@ -11483,10 +11484,10 @@
                         name: item.filename,
                         data: encoder.encode(item.svgString)
                     }));
-                    if (svgEntries.length > 1) {
+                    if (svgEntries.length >= 10) {
                         triggerDownload(createZipBlob(svgEntries), 'icons_export.zip');
-                    } else if (svgEntries.length === 1) {
-                        triggerDownload(new Blob([svgEntries[0].data], { type: 'image/svg+xml' }), svgEntries[0].name);
+                    } else {
+                        for (const e of svgEntries) triggerDownload(new Blob([e.data], { type: 'image/svg+xml' }), e.name);
                     }
                     showToast(`Exported ${items.length} SVG icon(s)`);
                 }
