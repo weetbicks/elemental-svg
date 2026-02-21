@@ -6,7 +6,8 @@
  * Processes SVGs from multiple icon libraries, categorizes them, and generates
  * a unified manifest JSON plus organized SVG files ready for R2 upload.
  *
- * Libraries: Lucide, Tabler, Heroicons, Phosphor, Bootstrap Icons, Iconoir
+ * Libraries: Lucide, Tabler, Heroicons, Phosphor, Bootstrap Icons, Iconoir,
+ *            Remix Icon, Fluent UI, Material Design Icons, Ionicons, IconPark
  *
  * Usage:
  *   node scripts/process-icons.js
@@ -50,6 +51,22 @@ const BOOTSTRAP_ICONS_DIR = path.join(NODE_MODULES, 'bootstrap-icons', 'icons');
 // Iconoir
 const ICONOIR_REGULAR_DIR = path.join(NODE_MODULES, 'iconoir', 'icons', 'regular');
 const ICONOIR_SOLID_DIR = path.join(NODE_MODULES, 'iconoir', 'icons', 'solid');
+
+// Remix Icon
+const REMIX_ICONS_DIR = path.join(NODE_MODULES, 'remixicon', 'icons');
+
+// Fluent UI Icons
+const FLUENT_ICONS_DIR = path.join(NODE_MODULES, '@fluentui', 'svg-icons', 'icons');
+
+// Material Design Icons
+const MDI_SVG_DIR = path.join(NODE_MODULES, '@mdi', 'svg', 'svg');
+const MDI_META_FILE = path.join(NODE_MODULES, '@mdi', 'svg', 'meta.json');
+
+// Ionicons
+const IONICONS_SVG_DIR = path.join(NODE_MODULES, 'ionicons', 'dist', 'svg');
+
+// IconPark
+const ICONPARK_META_FILE = path.join(NODE_MODULES, '@icon-park', 'svg', 'icons.json');
 
 // ── Categories ──────────────────────────────────────────────────────
 
@@ -321,6 +338,138 @@ const PHOSPHOR_CATEGORY_MAP = {
   'system': 'controls',
   'technology & development': 'development',
   'weather': 'weather',
+};
+
+// Remix Icon's 20 categories → our 20 categories
+const REMIX_CATEGORY_MAP = {
+  'Arrows': 'arrows',
+  'Buildings': 'commerce',
+  'Business': 'commerce',
+  'Communication': 'communication',
+  'Design': 'visual',
+  'Development': 'development',
+  'Device': 'infrastructure',
+  'Document': 'files',
+  'Editor': 'text',
+  'Finance': 'commerce',
+  'Food': 'misc',
+  'Game & Sports': 'misc',
+  'Health & Medical': 'people',
+  'Logos': 'misc',
+  'Map': 'location',
+  'Media': 'media',
+  'Others': 'misc',
+  'System': 'controls',
+  'User & Faces': 'people',
+  'Weather': 'weather',
+};
+
+// MDI's 61 tag categories → our 20 categories
+const MDI_CATEGORY_MAP = {
+  'Account / User': 'people',
+  'Agriculture': 'misc',
+  'Alert / Error': 'notifications',
+  'Alpha / Numeric': 'text',
+  'Animal': 'misc',
+  'Arrange': 'navigation',
+  'Arrow': 'arrows',
+  'Audio': 'media',
+  'Automotive': 'location',
+  'Banking': 'commerce',
+  'Battery': 'infrastructure',
+  'Brand / Logo': 'misc',
+  'Cellphone / Phone': 'infrastructure',
+  'Clothing': 'misc',
+  'Cloud': 'infrastructure',
+  'Color': 'visual',
+  'Currency': 'commerce',
+  'Database': 'infrastructure',
+  'Date / Time': 'datetime',
+  'Developer / Languages': 'development',
+  'Device / Tech': 'infrastructure',
+  'Drawing / Art': 'visual',
+  'Edit / Modify': 'actions',
+  'Emoji': 'people',
+  'Files / Folders': 'files',
+  'Food / Drink': 'misc',
+  'Form': 'controls',
+  'Gaming / RPG': 'misc',
+  'Geographic Information System': 'location',
+  'Hardware / Tools': 'controls',
+  'Health / Beauty': 'people',
+  'Holiday': 'misc',
+  'Home Automation': 'controls',
+  'Lock': 'security',
+  'Math': 'shapes',
+  'Medical / Hospital': 'people',
+  'Music': 'media',
+  'Nature': 'weather',
+  'Navigation': 'navigation',
+  'Notification': 'notifications',
+  'People / Family': 'people',
+  'Photography': 'visual',
+  'Places': 'location',
+  'Printer': 'infrastructure',
+  'Religion': 'misc',
+  'Science': 'misc',
+  'Settings': 'controls',
+  'Shape': 'shapes',
+  'Shopping': 'commerce',
+  'Social Media': 'communication',
+  'Sport': 'misc',
+  'Text / Content / Format': 'text',
+  'Tooltip': 'notifications',
+  'Transportation + Flying': 'location',
+  'Transportation + Other': 'location',
+  'Transportation + Road': 'location',
+  'Transportation + Water': 'location',
+  'Vector': 'visual',
+  'Video / Movie': 'visual',
+  'View': 'actions',
+  'Weather': 'weather',
+};
+
+// IconPark's 39 categories → our 20 categories
+const ICONPARK_CATEGORY_MAP = {
+  'Abstract': 'shapes',
+  'Animals': 'misc',
+  'Arrows': 'arrows',
+  'Baby': 'people',
+  'Base': 'controls',
+  'Brand': 'misc',
+  'Build': 'commerce',
+  'Character': 'text',
+  'Charts': 'infrastructure',
+  'Clothes': 'misc',
+  'Communicate': 'communication',
+  'Components': 'development',
+  'Connect': 'infrastructure',
+  'Constellation': 'misc',
+  'Datas': 'infrastructure',
+  'Edit': 'actions',
+  'Emoji': 'people',
+  'Energy': 'controls',
+  'Foods': 'misc',
+  'Game': 'misc',
+  'Graphics': 'visual',
+  'Hands': 'people',
+  'Hardware': 'infrastructure',
+  'Health': 'people',
+  'Industry': 'commerce',
+  'Life': 'misc',
+  'Makeups': 'misc',
+  'Measurement': 'controls',
+  'Money': 'commerce',
+  'Music': 'media',
+  'Office': 'files',
+  'Operate': 'actions',
+  'Others': 'misc',
+  'Peoples': 'people',
+  'Safe': 'security',
+  'Sports': 'misc',
+  'Time': 'datetime',
+  'Travel': 'location',
+  'Weather': 'weather',
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────
@@ -762,6 +911,326 @@ function processIconoir() {
   return icons;
 }
 
+function processRemixIcon() {
+  console.log('\n── Remix Icon ──────────────────────────────');
+
+  if (!fs.existsSync(REMIX_ICONS_DIR)) {
+    console.log('  SKIPPED: remixicon not installed');
+    return [];
+  }
+
+  const icons = [];
+  const categoryDirs = fs.readdirSync(REMIX_ICONS_DIR).filter(f => {
+    return fs.statSync(path.join(REMIX_ICONS_DIR, f)).isDirectory();
+  });
+  console.log(`  Found ${categoryDirs.length} category directories`);
+
+  for (const catDir of categoryDirs) {
+    const ourCategory = REMIX_CATEGORY_MAP[catDir] || 'misc';
+    const catPath = path.join(REMIX_ICONS_DIR, catDir);
+    const svgFiles = fs.readdirSync(catPath).filter(f => f.endsWith('.svg'));
+
+    for (const file of svgFiles) {
+      const rawName = file.replace('.svg', '');
+      let type, name;
+
+      if (rawName.endsWith('-fill')) {
+        type = 'filled';
+        name = rawName.replace(/-fill$/, '');
+      } else if (rawName.endsWith('-line')) {
+        type = 'outline';
+        name = rawName.replace(/-line$/, '');
+      } else {
+        type = 'outline';
+        name = rawName;
+      }
+
+      const outDir = path.join(OUTPUT_DIR, 'remix', type);
+      fs.mkdirSync(outDir, { recursive: true });
+
+      icons.push({
+        id: `remix/${type}/${name}`,
+        name: toDisplayName(name),
+        library: 'remix',
+        category: ourCategory,
+        type,
+        tags: [],
+      });
+
+      const svgContent = fs.readFileSync(path.join(catPath, file), 'utf8');
+      fs.writeFileSync(path.join(outDir, name + '.svg'), cleanSvg(svgContent));
+    }
+  }
+
+  console.log(`  Total: ${icons.length} icons`);
+  return icons;
+}
+
+function processFluent() {
+  console.log('\n── Fluent UI Icons ─────────────────────────');
+
+  if (!fs.existsSync(FLUENT_ICONS_DIR)) {
+    console.log('  SKIPPED: @fluentui/svg-icons not installed');
+    return [];
+  }
+
+  const allFiles = fs.readdirSync(FLUENT_ICONS_DIR).filter(f => f.endsWith('.svg'));
+  // Only process 24px icons in regular and filled styles
+  const regularFiles = allFiles.filter(f => f.endsWith('_24_regular.svg'));
+  const filledFiles = allFiles.filter(f => f.endsWith('_24_filled.svg'));
+  console.log(`  Found ${regularFiles.length} regular + ${filledFiles.length} filled (24px)`);
+
+  const icons = [];
+
+  // Process regular (outline)
+  const outlineOutDir = path.join(OUTPUT_DIR, 'fluent', 'outline');
+  fs.mkdirSync(outlineOutDir, { recursive: true });
+
+  for (const file of regularFiles) {
+    const name = file.replace('_24_regular.svg', '').replace(/_/g, '-');
+    const category = categorizeByKeywords(name, []);
+
+    icons.push({
+      id: `fluent/outline/${name}`,
+      name: toDisplayName(name),
+      library: 'fluent',
+      category,
+      type: 'outline',
+      tags: [],
+    });
+
+    const svgContent = fs.readFileSync(path.join(FLUENT_ICONS_DIR, file), 'utf8');
+    fs.writeFileSync(path.join(outlineOutDir, name + '.svg'), cleanSvg(svgContent));
+  }
+
+  // Process filled
+  const filledOutDir = path.join(OUTPUT_DIR, 'fluent', 'filled');
+  fs.mkdirSync(filledOutDir, { recursive: true });
+
+  for (const file of filledFiles) {
+    const name = file.replace('_24_filled.svg', '').replace(/_/g, '-');
+    const category = categorizeByKeywords(name, []);
+
+    icons.push({
+      id: `fluent/filled/${name}`,
+      name: toDisplayName(name),
+      library: 'fluent',
+      category,
+      type: 'filled',
+      tags: [],
+    });
+
+    const svgContent = fs.readFileSync(path.join(FLUENT_ICONS_DIR, file), 'utf8');
+    fs.writeFileSync(path.join(filledOutDir, name + '.svg'), cleanSvg(svgContent));
+  }
+
+  console.log(`  Total: ${icons.length} icons`);
+  return icons;
+}
+
+function processMdi() {
+  console.log('\n── Material Design Icons ───────────────────');
+
+  if (!fs.existsSync(MDI_SVG_DIR)) {
+    console.log('  SKIPPED: @mdi/svg not installed');
+    return [];
+  }
+
+  // Load metadata
+  const meta = JSON.parse(fs.readFileSync(MDI_META_FILE, 'utf8'));
+  const metaLookup = {};
+  for (const entry of meta) {
+    metaLookup[entry.name] = entry;
+  }
+  const deprecatedCount = meta.filter(m => m.deprecated).length;
+  console.log(`  Loaded metadata for ${meta.length} icons (${deprecatedCount} deprecated)`);
+
+  const allFiles = fs.readdirSync(MDI_SVG_DIR).filter(f => f.endsWith('.svg')).sort();
+  console.log(`  Found ${allFiles.length} SVG files`);
+
+  const icons = [];
+
+  for (const file of allFiles) {
+    const name = file.replace('.svg', '');
+    const entry = metaLookup[name];
+
+    // Skip deprecated icons
+    if (entry && entry.deprecated) continue;
+
+    const isOutline = name.endsWith('-outline');
+    const type = isOutline ? 'outline' : 'filled';
+    const baseName = isOutline ? name.replace(/-outline$/, '') : name;
+
+    // Map first MDI tag to our category
+    let category = 'misc';
+    if (entry && entry.tags.length > 0) {
+      for (const tag of entry.tags) {
+        if (MDI_CATEGORY_MAP[tag]) {
+          category = MDI_CATEGORY_MAP[tag];
+          break;
+        }
+      }
+    }
+    if (category === 'misc') {
+      category = categorizeByKeywords(baseName, entry?.aliases || []);
+    }
+
+    const outDir = path.join(OUTPUT_DIR, 'mdi', type);
+    fs.mkdirSync(outDir, { recursive: true });
+
+    icons.push({
+      id: `mdi/${type}/${name}`,
+      name: toDisplayName(name),
+      library: 'mdi',
+      category,
+      type,
+      tags: entry?.tags || [],
+    });
+
+    const svgContent = fs.readFileSync(path.join(MDI_SVG_DIR, file), 'utf8');
+    fs.writeFileSync(path.join(outDir, name + '.svg'), cleanSvg(svgContent));
+  }
+
+  console.log(`  Total: ${icons.length} icons`);
+  return icons;
+}
+
+function processIonicons() {
+  console.log('\n── Ionicons ────────────────────────────────');
+
+  if (!fs.existsSync(IONICONS_SVG_DIR)) {
+    console.log('  SKIPPED: ionicons not installed');
+    return [];
+  }
+
+  const allFiles = fs.readdirSync(IONICONS_SVG_DIR).filter(f => f.endsWith('.svg')).sort();
+  console.log(`  Found ${allFiles.length} SVG files`);
+
+  const icons = [];
+
+  for (const file of allFiles) {
+    const rawName = file.replace('.svg', '');
+
+    // Skip brand logos
+    if (rawName.startsWith('logo-')) continue;
+
+    let type, name;
+    if (rawName.endsWith('-outline')) {
+      type = 'outline';
+      name = rawName.replace(/-outline$/, '');
+    } else if (rawName.endsWith('-sharp')) {
+      type = 'sharp';
+      name = rawName.replace(/-sharp$/, '');
+    } else {
+      type = 'filled';
+      name = rawName;
+    }
+
+    const category = categorizeByKeywords(name, []);
+    const outDir = path.join(OUTPUT_DIR, 'ionicons', type);
+    fs.mkdirSync(outDir, { recursive: true });
+
+    icons.push({
+      id: `ionicons/${type}/${name}`,
+      name: toDisplayName(name),
+      library: 'ionicons',
+      category,
+      type,
+      tags: [],
+    });
+
+    const svgContent = fs.readFileSync(path.join(IONICONS_SVG_DIR, file), 'utf8');
+    fs.writeFileSync(path.join(outDir, name + '.svg'), cleanSvg(svgContent));
+  }
+
+  console.log(`  Total: ${icons.length} icons`);
+  return icons;
+}
+
+function processIconPark() {
+  console.log('\n── IconPark ────────────────────────────────');
+
+  if (!fs.existsSync(ICONPARK_META_FILE)) {
+    console.log('  SKIPPED: @icon-park/svg not installed');
+    return [];
+  }
+
+  const iconsMeta = JSON.parse(fs.readFileSync(ICONPARK_META_FILE, 'utf8'));
+  console.log(`  Loaded metadata for ${iconsMeta.length} icons`);
+
+  // Load the library for SVG generation
+  const iconParkLib = require(path.join(NODE_MODULES, '@icon-park', 'svg', 'lib', 'index.js'));
+
+  // Build name → PascalCase export lookup
+  const exportKeys = Object.keys(iconParkLib).filter(k => k !== 'DEFAULT_ICON_CONFIGS' && k !== 'setConfig');
+  const pascalLookup = {};
+  for (const key of exportKeys) {
+    // Convert PascalCase to kebab-case for matching
+    const kebab = key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').replace(/([A-Z])([A-Z][a-z])/g, '$1-$2').toLowerCase();
+    pascalLookup[kebab] = key;
+  }
+
+  const icons = [];
+  const themes = [
+    { theme: 'outline', type: 'outline' },
+    { theme: 'filled', type: 'filled' },
+  ];
+
+  let skipped = 0;
+
+  for (const meta of iconsMeta) {
+    const name = meta.name;
+    const category = ICONPARK_CATEGORY_MAP[meta.category] || 'misc';
+
+    // Find the export function
+    const exportKey = pascalLookup[name];
+    if (!exportKey || typeof iconParkLib[exportKey] !== 'function') {
+      skipped++;
+      continue;
+    }
+
+    for (const { theme, type } of themes) {
+      try {
+        let svg = iconParkLib[exportKey]({
+          theme,
+          size: '24',
+          strokeWidth: 4,
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round',
+        });
+
+        if (!svg || typeof svg !== 'string') continue;
+
+        // Strip XML preamble
+        svg = svg.replace(/<\?xml[^?]*\?>\s*/g, '');
+        svg = cleanSvg(svg);
+
+        const outDir = path.join(OUTPUT_DIR, 'iconpark', type);
+        fs.mkdirSync(outDir, { recursive: true });
+
+        icons.push({
+          id: `iconpark/${type}/${name}`,
+          name: toDisplayName(name),
+          library: 'iconpark',
+          category,
+          type,
+          tags: [],
+        });
+
+        fs.writeFileSync(path.join(outDir, name + '.svg'), svg);
+      } catch (e) {
+        // Some icons may fail to render in certain themes
+      }
+    }
+  }
+
+  if (skipped > 0) {
+    console.log(`  Skipped ${skipped} icons (no matching export)`);
+  }
+  console.log(`  Total: ${icons.length} icons`);
+  return icons;
+}
+
 // ── Main Pipeline ───────────────────────────────────────────────────
 
 function main() {
@@ -776,6 +1245,11 @@ function main() {
     ...processPhosphor(),
     ...processBootstrap(),
     ...processIconoir(),
+    ...processRemixIcon(),
+    ...processFluent(),
+    ...processMdi(),
+    ...processIonicons(),
+    ...processIconPark(),
   ];
 
   // Calculate stats
@@ -868,6 +1342,61 @@ function main() {
         attribution: 'Luca Burgio',
         iconCount: libraryStats['iconoir'] || 0,
         description: 'A high-quality selection of free icons with no premium options',
+      },
+      {
+        id: 'remix',
+        name: 'Remix Icon',
+        version: '4.9.1',
+        url: 'https://remixicon.com',
+        license: 'Apache-2.0',
+        licenseUrl: 'https://github.com/Remix-Design/RemixIcon/blob/master/License',
+        attribution: 'Remix Design',
+        iconCount: libraryStats['remix'] || 0,
+        description: 'Open-source neutral-style system symbols elaborately crafted for designers and developers',
+      },
+      {
+        id: 'fluent',
+        name: 'Fluent UI Icons',
+        version: '1.1.319',
+        url: 'https://github.com/microsoft/fluentui-system-icons',
+        license: 'MIT',
+        licenseUrl: 'https://github.com/microsoft/fluentui-system-icons/blob/main/LICENSE',
+        attribution: 'Microsoft',
+        iconCount: libraryStats['fluent'] || 0,
+        description: 'Fluent System Icons by Microsoft — a collection of familiar, friendly icons',
+      },
+      {
+        id: 'mdi',
+        name: 'Material Design Icons',
+        version: '7.4.47',
+        url: 'https://materialdesignicons.com',
+        license: 'Apache-2.0',
+        licenseUrl: 'https://github.com/Templarian/MaterialDesign/blob/master/LICENSE',
+        attribution: 'Austin Andrews & Contributors',
+        iconCount: libraryStats['mdi'] || 0,
+        description: 'Community-led icon collection with 7000+ icons for Material Design',
+      },
+      {
+        id: 'ionicons',
+        name: 'Ionicons',
+        version: '8.0.13',
+        url: 'https://ionic.io/ionicons',
+        license: 'MIT',
+        licenseUrl: 'https://github.com/ionic-team/ionicons/blob/main/LICENSE',
+        attribution: 'Ionic Team',
+        iconCount: libraryStats['ionicons'] || 0,
+        description: 'Premium designed icons for use in web, iOS, Android, and desktop apps',
+      },
+      {
+        id: 'iconpark',
+        name: 'IconPark',
+        version: '1.4.2',
+        url: 'https://iconpark.oceanengine.com',
+        license: 'Apache-2.0',
+        licenseUrl: 'https://github.com/nicedoc/icon-park/blob/master/LICENSE',
+        attribution: 'ByteDance',
+        iconCount: libraryStats['iconpark'] || 0,
+        description: 'Over 2600 high-quality icons by ByteDance with multiple themes',
       },
     ],
   };
