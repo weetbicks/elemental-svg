@@ -49,31 +49,38 @@ function runAsync(cmd) {
   });
 }
 
-// Run tasks with concurrency limit
-async function parallelMap(items, fn, concurrency) {
+// Run tasks with concurrency limit, returns { completed, failed, failedItems }
+async function parallelMap(items, fn, concurrency, label) {
   let index = 0;
   let completed = 0;
   let failed = 0;
+  const failedItems = [];
   const total = items.length;
   const startTime = Date.now();
 
   async function worker() {
     while (index < total) {
       const i = index++;
-      const ok = await fn(items[i]);
-      if (ok) completed++;
-      else failed++;
+      const item = items[i];
+      const ok = await fn(item);
+      if (ok) {
+        completed++;
+      } else {
+        failed++;
+        failedItems.push(item);
+      }
       const done = completed + failed;
       if (done % 100 === 0 || done === total) {
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
         const rate = (done / (Date.now() - startTime) * 1000).toFixed(1);
-        console.log(`   ... ${done}/${total} (${rate}/s, ${elapsed}s elapsed)`);
+        const prefix = label ? `   [${label}] ` : '   ... ';
+        console.log(`${prefix}${done}/${total} (${rate}/s, ${elapsed}s elapsed)`);
       }
     }
   }
 
   await Promise.all(Array.from({ length: concurrency }, () => worker()));
-  return { completed, failed };
+  return { completed, failed, failedItems };
 }
 
 // Recursively find all SVG files, preserving relative paths
@@ -139,16 +146,36 @@ async function main() {
 
     console.log(`   Uploading ${allSvgs.length} SVG files (${CONCURRENCY} concurrent)...`);
 
-    const { completed, failed } = await parallelMap(
-      allSvgs,
-      ({ localPath, r2Key }) => runAsync(
-        `npx wrangler r2 object put "${R2_BUCKET}/${r2Key}" --file "${localPath}" --remote --content-type "image/svg+xml"`
-      ),
-      CONCURRENCY
+    const uploadFn = ({ localPath, r2Key }) => runAsync(
+      `npx wrangler r2 object put "${R2_BUCKET}/${r2Key}" --file "${localPath}" --remote --content-type "image/svg+xml"`
     );
 
-    console.log(`\n   ✓ ${completed} SVGs uploaded to R2`);
-    if (failed > 0) console.log(`   ✗ ${failed} failed`);
+    const result = await parallelMap(allSvgs, uploadFn, CONCURRENCY, 'upload');
+
+    console.log(`\n   ✓ ${result.completed} SVGs uploaded to R2`);
+    if (result.failed > 0) {
+      console.log(`   ✗ ${result.failed} failed — retrying...`);
+
+      // Retry failed items up to 2 more times
+      let retryItems = result.failedItems;
+      for (let attempt = 1; attempt <= 2 && retryItems.length > 0; attempt++) {
+        console.log(`\n   Retry attempt ${attempt} — ${retryItems.length} items...`);
+        const retry = await parallelMap(retryItems, uploadFn, CONCURRENCY, `retry ${attempt}`);
+        console.log(`   ✓ ${retry.completed} succeeded, ${retry.failed} still failing`);
+        retryItems = retry.failedItems;
+      }
+
+      if (retryItems.length > 0) {
+        console.log(`\n   ✗ ${retryItems.length} items failed after all retries:`);
+        for (const item of retryItems) {
+          console.log(`     - ${item.r2Key}`);
+        }
+        // Write failed list to file
+        const failedFile = path.join(BUILD_DIR, 'failed-uploads.json');
+        fs.writeFileSync(failedFile, JSON.stringify(retryItems.map(i => i.r2Key), null, 2));
+        console.log(`   Failed list saved to ${failedFile}`);
+      }
+    }
   }
 
   console.log('\n' + '═'.repeat(50));
