@@ -5097,7 +5097,7 @@
     </script>
 
     <script>
-        const EDITOR_VERSION = "1.1.3";
+        const EDITOR_VERSION = "1.1.4";
         const PRODUCT_ID = '1322BB7B-1510-4893-BD2D-FF1F19E404F7';
         const _proxyBase = 'https://elemental-svg-proxy.g7hjmj8t8f.workers.dev';
 
@@ -5790,27 +5790,106 @@
 
             // Restore other saved preferences (only on first init, don't override config)
             if (!alreadyInitialized && savedPrefs) {
-                if (savedPrefs.fmCompatible !== undefined) {
-                    state.fmCompatible = savedPrefs.fmCompatible;
-                    const fmCheckbox = document.getElementById('fm-compat');
-                    if (fmCheckbox) fmCheckbox.checked = state.fmCompatible;
+                if (savedPrefs.fmCompatible !== undefined) state.fmCompatible = savedPrefs.fmCompatible;
+                if (savedPrefs.fmDynamicFill !== undefined) state.fmDynamicFill = savedPrefs.fmDynamicFill;
+                if (savedPrefs.previewBg) state.previewBg = savedPrefs.previewBg;
+                if (savedPrefs.previewBgCustomColor) state.previewBgCustomColor = savedPrefs.previewBgCustomColor;
+                if (savedPrefs.autoConvert !== undefined) state.autoConvert = savedPrefs.autoConvert;
+            }
+
+            // ── Editor presets (config overrides saved prefs) ──
+            // Colors
+            if (cfg.fill_color !== undefined) {
+                const c = normalizeHex(String(cfg.fill_color));
+                if (isValidColor(c)) state.fillColor = c;
+            }
+            if (cfg.stroke_color !== undefined) {
+                const c = normalizeHex(String(cfg.stroke_color));
+                if (isValidColor(c)) state.strokeColor = c;
+            }
+            if (cfg.stroke_width !== undefined) {
+                const w = Number(cfg.stroke_width);
+                if (!isNaN(w) && w >= 0 && w <= 10) state.strokeWidth = w;
+            }
+
+            // Opacity, scale, offsets
+            if (cfg.opacity !== undefined) {
+                const v = Number(cfg.opacity);
+                if (!isNaN(v) && v >= 0 && v <= 100) state.opacity = v;
+            }
+            if (cfg.scale !== undefined) {
+                const v = Number(cfg.scale);
+                if (!isNaN(v) && v >= 50 && v <= 150) state.scale = v;
+            }
+            if (cfg.offset_x !== undefined) {
+                const v = Number(cfg.offset_x);
+                if (!isNaN(v) && v >= -50 && v <= 50) state.offsetX = v;
+            }
+            if (cfg.offset_y !== undefined) {
+                const v = Number(cfg.offset_y);
+                if (!isNaN(v) && v >= -50 && v <= 50) state.offsetY = v;
+            }
+
+            // Rotation & transforms
+            if (cfg.rotation !== undefined) {
+                const v = Number(cfg.rotation);
+                if (!isNaN(v)) state.rotation = ((v % 360) + 360) % 360;
+            }
+            if (cfg.rotation_increment !== undefined) {
+                const valid = [15, 30, 45, 90];
+                const v = Number(cfg.rotation_increment);
+                if (valid.includes(v)) state.rotationIncrement = v;
+            }
+            if (cfg.flip_h !== undefined) state.flipH = !!cfg.flip_h;
+            if (cfg.flip_v !== undefined) state.flipV = !!cfg.flip_v;
+
+            // Background
+            if (cfg.bg_enabled !== undefined) state.bgEnabled = !!cfg.bg_enabled;
+            if (cfg.bg_color !== undefined) {
+                const c = normalizeHex(String(cfg.bg_color));
+                if (isValidColor(c)) state.bgColor = c;
+            }
+            if (cfg.bg_edges !== undefined) {
+                const v = Number(cfg.bg_edges);
+                if (v === 0 || (Number.isInteger(v) && v >= 3 && v <= 10)) state.bgEdges = v;
+            }
+            if (cfg.icon_padding !== undefined) {
+                const v = Number(cfg.icon_padding);
+                if (!isNaN(v) && v >= 0 && v <= 30) state.iconPadding = v;
+            }
+            if (cfg.corner_radius !== undefined) {
+                const v = Number(cfg.corner_radius);
+                if (!isNaN(v) && v >= 0 && v <= 50) state.cornerRadius = v;
+            }
+
+            // FileMaker compatibility
+            if (cfg.fm_compatible !== undefined) state.fmCompatible = !!cfg.fm_compatible;
+            if (cfg.fm_dynamic_fill !== undefined) state.fmDynamicFill = !!cfg.fm_dynamic_fill;
+            if (cfg.fm_dynamic_target !== undefined) {
+                if (cfg.fm_dynamic_target === 'icon' || cfg.fm_dynamic_target === 'background') {
+                    state.fmDynamicTarget = cfg.fm_dynamic_target;
                 }
-                if (savedPrefs.fmDynamicFill !== undefined) {
-                    state.fmDynamicFill = savedPrefs.fmDynamicFill;
-                    const dynCheckbox = document.getElementById('fm-dynamic');
-                    if (dynCheckbox) dynCheckbox.checked = state.fmDynamicFill;
-                }
-                if (savedPrefs.previewBg) {
-                    state.previewBg = savedPrefs.previewBg;
-                }
-                if (savedPrefs.previewBgCustomColor) {
-                    state.previewBgCustomColor = savedPrefs.previewBgCustomColor;
-                }
-                if (savedPrefs.autoConvert !== undefined) {
-                    state.autoConvert = savedPrefs.autoConvert;
-                    const acCheckbox = document.getElementById('auto-convert');
-                    if (acCheckbox) acCheckbox.checked = state.autoConvert;
-                }
+            }
+
+            // Conversion options
+            if (cfg.auto_convert !== undefined) state.autoConvert = !!cfg.auto_convert;
+            if (cfg.convert_strokes !== undefined) state.convertStrokesToFills = !!cfg.convert_strokes;
+            if (cfg.normalize_paths !== undefined) state.normalizePaths = !!cfg.normalize_paths;
+
+            // Preview background
+            if (cfg.preview_bg !== undefined) {
+                const validBgs = ['checkerboard', 'white', 'black', 'custom'];
+                if (validBgs.includes(cfg.preview_bg)) state.previewBg = cfg.preview_bg;
+            }
+            if (cfg.preview_bg_color !== undefined) {
+                const c = normalizeHex(String(cfg.preview_bg_color));
+                if (isValidColor(c)) state.previewBgCustomColor = c;
+            }
+
+            // Zoom (as percentage, e.g. 200 = 200%)
+            if (cfg.zoom !== undefined) {
+                const v = Number(cfg.zoom);
+                if (!isNaN(v) && v >= 50 && v <= 400) state.zoom = v / 100;
             }
 
             // One-time setup (only on first init)
@@ -5841,13 +5920,23 @@
             }
 
             // Update UI to reflect current state
+            updateUIFromState();
             updateFormatUI();
             updateSaveButton();
+            updateZoomDisplay();
 
-            // Apply restored preview background
-            if (state.previewBg !== 'checkerboard') {
-                setPreviewBg(state.previewBg);
-            }
+            // Sync auto-convert checkbox
+            const acCheckbox = document.getElementById('auto-convert');
+            if (acCheckbox) acCheckbox.checked = state.autoConvert;
+
+            // Sync FM checkboxes
+            const fmCheckbox = document.getElementById('fm-compat');
+            if (fmCheckbox) fmCheckbox.checked = state.fmCompatible;
+            const dynCheckbox = document.getElementById('fm-dynamic');
+            if (dynCheckbox) dynCheckbox.checked = state.fmDynamicFill;
+
+            // Apply preview background
+            setPreviewBg(state.previewBg);
 
             // Hide controls panel initially when no SVGs loaded
             updateControlsPanelVisibility();
