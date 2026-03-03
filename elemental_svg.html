@@ -5137,7 +5137,8 @@
             convertStrokesToFills: true, // Convert stroke SVGs to filled paths on export
             previewBg: 'checkerboard',  // Preview background: 'checkerboard', 'white', 'black', 'custom'
             previewBgCustomColor: '#808080', // Custom preview background color
-            autoConvert: false              // Auto-save converted files on load (browser mode only)
+            autoConvert: false,             // Auto-save converted files on load (browser mode only)
+            presets: null                   // Editor presets from initEditor() config — used by resetState() as defaults
         };
 
         // ============================================
@@ -5891,6 +5892,30 @@
                 const v = Number(cfg.zoom);
                 if (!isNaN(v) && v >= 50 && v <= 400) state.zoom = v / 100;
             }
+
+            // Store presets snapshot so resetState() resets to these instead of hardcoded defaults
+            state.presets = {
+                rotation: state.rotation,
+                rotationIncrement: state.rotationIncrement,
+                flipH: state.flipH,
+                flipV: state.flipV,
+                fillColor: state.fillColor,
+                strokeColor: state.strokeColor,
+                strokeWidth: state.strokeWidth,
+                opacity: state.opacity,
+                scale: state.scale,
+                offsetX: state.offsetX,
+                offsetY: state.offsetY,
+                bgEnabled: state.bgEnabled,
+                bgColor: state.bgColor,
+                bgEdges: state.bgEdges,
+                iconPadding: state.iconPadding,
+                cornerRadius: state.cornerRadius,
+                zoom: state.zoom,
+                fmCompatible: state.fmCompatible,
+                fmDynamicFill: state.fmDynamicFill,
+                fmDynamicTarget: state.fmDynamicTarget
+            };
 
             // One-time setup (only on first init)
             if (!alreadyInitialized) {
@@ -8821,57 +8846,42 @@
         // ============================================
 
         /**
-         * Reset transformation state (preserves svgItems array)
+         * Reset transformation state (preserves svgItems array).
+         * Uses presets from initEditor() config when available, otherwise hardcoded defaults.
          */
         function resetState() {
-            state.rotation = 0;
-            state.flipH = false;
-            state.flipV = false;
-            state.fillColor = '#000000';
-            state.strokeColor = '#000000';
-            state.strokeWidth = 0;
-            state.bgEnabled = false;
-            state.bgColor = '#ffffff';
-            state.bgEdges = 4;
-            state.iconPadding = 10;
-            state.cornerRadius = 10;
-            state.zoom = 1;
-            state.opacity = 100;
-            state.scale = 100;
-            state.offsetX = 0;
-            state.offsetY = 0;
+            const p = state.presets || {};
+            state.rotation = p.rotation !== undefined ? p.rotation : 0;
+            state.flipH = p.flipH !== undefined ? p.flipH : false;
+            state.flipV = p.flipV !== undefined ? p.flipV : false;
+            state.fillColor = p.fillColor || '#000000';
+            state.strokeColor = p.strokeColor || '#000000';
+            state.strokeWidth = p.strokeWidth !== undefined ? p.strokeWidth : 0;
+            state.bgEnabled = p.bgEnabled !== undefined ? p.bgEnabled : false;
+            state.bgColor = p.bgColor || '#ffffff';
+            state.bgEdges = p.bgEdges !== undefined ? p.bgEdges : 4;
+            state.iconPadding = p.iconPadding !== undefined ? p.iconPadding : 10;
+            state.cornerRadius = p.cornerRadius !== undefined ? p.cornerRadius : 10;
+            state.zoom = p.zoom !== undefined ? p.zoom : 1;
+            state.opacity = p.opacity !== undefined ? p.opacity : 100;
+            state.scale = p.scale !== undefined ? p.scale : 100;
+            state.offsetX = p.offsetX !== undefined ? p.offsetX : 0;
+            state.offsetY = p.offsetY !== undefined ? p.offsetY : 0;
+            state.fmCompatible = p.fmCompatible !== undefined ? p.fmCompatible : true;
+            state.fmDynamicFill = p.fmDynamicFill !== undefined ? p.fmDynamicFill : true;
+            state.fmDynamicTarget = p.fmDynamicTarget || 'icon';
 
-            // Update UI
-            document.getElementById('rotation-value').textContent = '0°';
-            document.getElementById('fill-color').value = '#000000';
-            document.getElementById('fill-hex').value = '#000000';
-            document.getElementById('fill-color').parentElement.style.background = '#000000';
-            document.getElementById('stroke-color').value = '#000000';
-            document.getElementById('stroke-hex').value = '#000000';
-            document.getElementById('stroke-color').parentElement.style.background = '#000000';
-            document.getElementById('stroke-width').value = 0;
-            document.getElementById('stroke-value').textContent = '0';
-            document.getElementById('bg-enabled').checked = false;
-            document.getElementById('bg-options').classList.remove('visible');
-            document.getElementById('bg-color').value = '#ffffff';
-            document.getElementById('bg-hex').value = '#ffffff';
-            document.getElementById('bg-color-preview').style.background = '#ffffff';
-            document.getElementById('icon-padding').value = 10;
-            document.getElementById('padding-value').textContent = '10%';
-            document.getElementById('corner-radius').value = 10;
-            document.getElementById('radius-value').textContent = '10%';
-            document.getElementById('opacity-slider').value = 100;
-            document.getElementById('opacity-value').textContent = '100%';
-            document.getElementById('scale-slider').value = 100;
-            document.getElementById('scale-value').textContent = '100%';
-            document.getElementById('offset-x-slider').value = 0;
-            document.getElementById('offset-x-value').textContent = '0';
-            document.getElementById('offset-y-slider').value = 0;
-            document.getElementById('offset-y-value').textContent = '0';
-            setBgEdges(4);
+            // Update UI from reset state
+            updateUIFromState();
             updateZoomDisplay();
-            // Reset FM target to icon and update visibility
-            setFMTarget('icon');
+
+            // Sync FM checkboxes
+            const fmCheckbox = document.getElementById('fm-compat');
+            if (fmCheckbox) fmCheckbox.checked = state.fmCompatible;
+            const dynCheckbox = document.getElementById('fm-dynamic');
+            if (dynCheckbox) dynCheckbox.checked = state.fmDynamicFill;
+
+            setFMTarget(state.fmDynamicTarget);
             updateFMTargetVisibility();
         }
 
