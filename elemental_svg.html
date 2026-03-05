@@ -2838,6 +2838,179 @@
             height: 32px;
             opacity: 0.5;
         }
+
+        /* ============================================
+           Overlay Mode
+           ============================================ */
+
+        /* Hide editor controls panel sections in overlay mode */
+        [data-overlay] .controls-panel > .ib-editor-only { display: none !important; }
+        /* Hide editor left toolbar (Load SVGs, filename, Clear) in overlay */
+        [data-overlay] .overlay-hide { display: none !important; }
+        /* Hide paste, code view, bg toggle in overlay compose */
+        [data-overlay="compose"] .preview-toolbar { display: none !important; }
+
+        /* Overlay mode banner */
+        .overlay-banner {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        [data-overlay] .overlay-banner { display: flex; }
+        .overlay-banner svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+        /* Overlay left toolbar (Discard/Done) */
+        .overlay-header-left {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+        [data-overlay="compose"] .overlay-header-left { display: flex; }
+        [data-overlay="select"] .overlay-header-left { display: flex; }
+
+        /* Overlay selection - tile badges */
+        .overlay-select-badge {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            pointer-events: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .preview-tile.overlay-selected {
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
+        }
+        .preview-tile.overlay-selectable { cursor: pointer; }
+        .preview-tile.overlay-selectable:hover {
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
+            opacity: 0.85;
+        }
+
+        /* Overlay layer selection box */
+        .overlay-selection-box {
+            position: absolute;
+            pointer-events: none;
+            border: 2px dashed var(--accent);
+            border-radius: 2px;
+            z-index: 20;
+        }
+
+        /* Resize handles */
+        .overlay-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border: 2px solid var(--accent);
+            border-radius: 2px;
+            z-index: 21;
+            pointer-events: all;
+        }
+        .overlay-handle.tl { top: -5px; left: -5px; cursor: nwse-resize; }
+        .overlay-handle.tr { top: -5px; right: -5px; cursor: nesw-resize; }
+        .overlay-handle.bl { bottom: -5px; left: -5px; cursor: nesw-resize; }
+        .overlay-handle.br { bottom: -5px; right: -5px; cursor: nwse-resize; }
+
+        /* Overlay compose controls panel */
+        .overlay-controls-panel {
+            display: none;
+            flex-direction: column;
+            gap: 0;
+        }
+        [data-overlay="compose"] .overlay-controls-panel { display: flex; }
+
+        /* Overlay layer list */
+        .overlay-layer-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-bottom: 8px;
+        }
+        .overlay-layer-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.15s;
+        }
+        .overlay-layer-item:hover:not(.active) { border-color: var(--accent); }
+        .overlay-layer-item.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+        .overlay-layer-num {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .overlay-layer-item.active .overlay-layer-num {
+            background: rgba(255,255,255,0.25);
+        }
+        .overlay-layer-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Nudge buttons grid */
+        .overlay-nudge-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3px;
+            width: 90px;
+            margin: 0 auto;
+        }
+        .overlay-nudge-grid button {
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: background 0.15s;
+        }
+        .overlay-nudge-grid button:hover { background: var(--accent); color: #fff; }
+        .overlay-nudge-grid .nudge-spacer { visibility: hidden; }
     </style>
 </head>
 
@@ -2938,10 +3111,19 @@
             </div>
         </header>
 
+        <!-- Overlay Mode Banner -->
+        <div class="overlay-banner" id="overlay-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="2" width="12" height="12" rx="2" />
+                <rect x="10" y="10" width="12" height="12" rx="2" />
+            </svg>
+            <span id="overlay-banner-text">Overlay Mode — Select 2 icons to combine</span>
+        </div>
+
         <div class="main-content">
             <div class="preview-panel">
                 <div class="preview-header">
-                    <div class="ib-editor-only" style="display:flex;align-items:center;gap:8px;min-width:0">
+                    <div class="ib-editor-only overlay-hide" style="display:flex;align-items:center;gap:8px;min-width:0">
                         <button class="btn btn-primary" onclick="triggerFileLoad()" title="Load SVG files">
                             <svg viewBox="0 0 1200 1200" fill="currentColor">
                                 <path
@@ -2968,6 +3150,24 @@
                             Clear
                         </button>
                     </div>
+                    <!-- Overlay left toolbar (Discard/Done/Begin) -->
+                    <div class="overlay-header-left">
+                        <button class="btn btn-secondary" onclick="overlayDiscard()" title="Cancel overlay mode (Esc)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                            Cancel
+                        </button>
+                        <button class="btn btn-primary" id="overlay-begin-btn" onclick="overlayBeginCompose()"
+                            style="display:none;">
+                            Begin Overlay
+                        </button>
+                        <button class="btn btn-primary" id="overlay-done-btn" onclick="overlayDone()"
+                            style="display:none;">
+                            Done
+                        </button>
+                    </div>
                     <div class="ib-library-only" style="display:flex;align-items:center;gap:8px;min-width:0;flex:1">
                         <div class="ib-search-wrap">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2992,6 +3192,17 @@
                         </button>
                         <div class="preview-toolbar-separator ib-library-only" id="ib-edit-separator"
                             style="display:none"></div>
+                        <!-- Overlay mode button (editor only, 2+ SVGs) -->
+                        <button class="zoom-btn ib-editor-only overlay-hide" id="overlay-btn" onclick="overlayEnterSelect()"
+                            title="Overlay icons" style="display:none;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
+                                height="16">
+                                <rect x="2" y="2" width="11" height="11" rx="2" />
+                                <rect x="11" y="11" width="11" height="11" rx="2" />
+                            </svg>
+                        </button>
+                        <div class="preview-toolbar-separator ib-editor-only overlay-hide" id="overlay-separator"
+                            style="display:none;"></div>
                         <button class="zoom-btn ib-editor-only" id="reset-btn" onclick="resetAll()"
                             title="Reset all changes" style="display:none;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
@@ -3004,16 +3215,16 @@
                             style="display:none;"></div>
                         <div class="history-controls ib-editor-only">
                             <button class="zoom-btn" id="undo-btn" onclick="undo()" title="Undo (Ctrl+Z)" disabled>
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16"
-                                    height="16">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
                                     <path d="M9 14 4 9l5-5" />
                                     <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" />
                                 </svg>
                             </button>
                             <button class="zoom-btn" id="redo-btn" onclick="redo()" title="Redo (Ctrl+Shift+Z)"
                                 disabled>
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16"
-                                    height="16">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
                                     <path d="m15 14 5-5-5-5" />
                                     <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13" />
                                 </svg>
@@ -3587,6 +3798,188 @@
                             </svg>
                             Reset Adj.
                         </button>
+                    </div>
+                </div>
+
+                <!-- Overlay Compose Controls Panel -->
+                <div class="overlay-controls-panel" id="overlay-controls-panel">
+                    <div class="control-section">
+                        <h3>Overlay</h3>
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                            <span id="overlay-selected-layer-name" style="font-size:11px;color:var(--text-secondary);"></span>
+                            <button onclick="overlayRemoveLayer()" title="Remove layer from overlay"
+                                style="background:none;border:none;cursor:pointer;padding:2px;color:var(--text-tertiary);display:flex;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;">
+                                    <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div style="display:flex;gap:4px;margin-bottom:8px;">
+                            <button class="btn btn-secondary" onclick="overlayResetLayer()" style="flex:1;font-size:11px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" />
+                                </svg>
+                                Reset Layer
+                            </button>
+                        </div>
+                        <div style="display:flex;gap:2px;margin-bottom:8px;">
+                            <button class="btn btn-secondary" onclick="overlayMoveLayer('back')" title="Send to back"
+                                style="flex:1;font-size:10px;padding:3px 2px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;">
+                                    <path d="M7 20l5 0M12 20l5 0"/><path d="M7 16l5-12"/><path d="M17 16l-5-12"/>
+                                </svg>
+                                Back
+                            </button>
+                            <button class="btn btn-secondary" onclick="overlayMoveLayer('backward')" title="Send backward"
+                                style="flex:1;font-size:10px;padding:3px 2px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;">
+                                    <path d="M12 19l-5-5h10z"/>
+                                </svg>
+                                &#9661;
+                            </button>
+                            <button class="btn btn-secondary" onclick="overlayMoveLayer('forward')" title="Bring forward"
+                                style="flex:1;font-size:10px;padding:3px 2px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;">
+                                    <path d="M12 5l5 5H7z"/>
+                                </svg>
+                                &#9651;
+                            </button>
+                            <button class="btn btn-secondary" onclick="overlayMoveLayer('front')" title="Bring to front"
+                                style="flex:1;font-size:10px;padding:3px 2px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;">
+                                    <path d="M7 4l5 0M12 4l5 0"/><path d="M7 8l5 12"/><path d="M17 8l-5 12"/>
+                                </svg>
+                                Front
+                            </button>
+                        </div>
+
+                        <div class="adjustment-row">
+                            <label>Scale</label>
+                            <div class="slider-row">
+                                <input type="range" class="stroke-slider" id="overlay-scale-slider" min="10" max="200" step="1"
+                                    value="100" oninput="overlayUpdateScale(this.value)" onchange="overlayUpdateScale(this.value, true)">
+                                <span class="stroke-value" id="overlay-scale-value">100%</span>
+                            </div>
+                        </div>
+                        <div class="adjustment-row">
+                            <label>Opacity</label>
+                            <div class="slider-row">
+                                <input type="range" class="stroke-slider" id="overlay-opacity-slider" min="10" max="100" step="1"
+                                    value="100" oninput="overlayUpdateOpacity(this.value)" onchange="overlayUpdateOpacity(this.value, true)">
+                                <span class="stroke-value" id="overlay-opacity-value">100%</span>
+                            </div>
+                        </div>
+                        <div style="margin-top:6px;">
+                            <label style="display:block;font-size:10px;color:var(--text-secondary);margin-bottom:4px;">Rotation</label>
+                            <div class="rotation-controls">
+                                <button class="rotation-btn" onclick="overlayRotate(-1)">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" />
+                                    </svg>
+                                </button>
+                                <div class="rotation-value" id="overlay-rotation-value">0°</div>
+                                <button class="rotation-btn" onclick="overlayRotate(1)">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="rotation-increment">
+                                <label>Increment</label>
+                                <div class="increment-options">
+                                    <button class="increment-btn" onclick="overlaySetIncrement(15)">15°</button>
+                                    <button class="increment-btn active" onclick="overlaySetIncrement(30)">30°</button>
+                                    <button class="increment-btn" onclick="overlaySetIncrement(45)">45°</button>
+                                    <button class="increment-btn" onclick="overlaySetIncrement(90)">90°</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="transform-grid" style="margin-top: 8px;">
+                            <button class="transform-btn" onclick="overlayFlipH()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 3v18M16 7l4 5-4 5M8 7l-4 5 4 5" />
+                                </svg>Flip H</button>
+                            <button class="transform-btn" onclick="overlayFlipV()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 12h18M7 8l5-4 5 4M7 16l5 4 5-4" />
+                                </svg>Flip V</button>
+                        </div>
+                        <div style="margin-top:10px;">
+                            <label style="display:block;font-size:10px;color:var(--text-secondary);margin-bottom:4px;">Layer Background</label>
+                            <div class="bg-toggle">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="overlay-bg-enabled" onchange="overlayToggleBg(this.checked)">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span>Enable Background</span>
+                            </div>
+                            <div id="overlay-bg-options" style="display:none;margin-top:6px;">
+                                <div class="color-row">
+                                    <label>Color</label>
+                                    <div class="color-picker-wrapper">
+                                        <div class="color-preview" id="overlay-bg-color-preview" style="background:#ffffff">
+                                            <input type="color" id="overlay-bg-color" value="#ffffff"
+                                                onchange="overlayUpdateBgColor(this.value)">
+                                        </div>
+                                        <input type="text" class="color-hex" id="overlay-bg-hex" value="#ffffff"
+                                            onchange="this.value=normalizeHex(this.value); overlayUpdateBgColor(this.value)">
+                                    </div>
+                                </div>
+                                <div class="shape-options" style="margin-top:6px;">
+                                    <button class="shape-btn" onclick="overlaySetBgShape(0)" id="overlay-shape-0">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                                        <span>Circle</span>
+                                    </button>
+                                    <button class="shape-btn active" onclick="overlaySetBgShape(4)" id="overlay-shape-4">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                                        <span>Square</span>
+                                    </button>
+                                    <button class="shape-btn" onclick="overlaySetBgShape(10)" id="overlay-shape-10">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="5"/></svg>
+                                        <span>Rounded</span>
+                                    </button>
+                                </div>
+                                <div class="padding-control" style="margin-top:6px;">
+                                    <label>Padding</label>
+                                    <div class="stroke-row" style="margin-bottom:0;">
+                                        <input type="range" class="stroke-slider" id="overlay-bg-padding" min="0" max="30" step="1"
+                                            value="5" oninput="overlayUpdateBgPadding(this.value)"
+                                            onchange="overlayUpdateBgPadding(this.value, true)">
+                                        <span class="stroke-value" id="overlay-bg-padding-value">5%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top:10px;">
+                            <label style="display:block;font-size:10px;color:var(--text-secondary);margin-bottom:4px;">Position</label>
+                            <div class="adjustment-row">
+                                <label>X</label>
+                                <div class="slider-row">
+                                    <input type="range" class="stroke-slider" id="overlay-x-slider" min="-100" max="100" step="1"
+                                        value="0" oninput="overlayUpdateX(this.value)" onchange="overlayUpdateX(this.value, true)">
+                                    <span class="stroke-value" id="overlay-x-value">0</span>
+                                </div>
+                            </div>
+                            <div class="adjustment-row">
+                                <label>Y</label>
+                                <div class="slider-row">
+                                    <input type="range" class="stroke-slider" id="overlay-y-slider" min="-100" max="100" step="1"
+                                        value="0" oninput="overlayUpdateY(this.value)" onchange="overlayUpdateY(this.value, true)">
+                                    <span class="stroke-value" id="overlay-y-value">0</span>
+                                </div>
+                            </div>
+                            <div class="overlay-nudge-grid" style="margin-top:6px;">
+                                <button class="nudge-spacer"></button>
+                                <button onclick="overlayNudge(0,-1)" title="Up">&#9650;</button>
+                                <button class="nudge-spacer"></button>
+                                <button onclick="overlayNudge(-1,0)" title="Left">&#9664;</button>
+                                <button onclick="overlayNudge(0,0)" title="Center" style="font-size:10px;">&#8226;</button>
+                                <button onclick="overlayNudge(1,0)" title="Right">&#9654;</button>
+                                <button class="nudge-spacer"></button>
+                                <button onclick="overlayNudge(0,1)" title="Down">&#9660;</button>
+                                <button class="nudge-spacer"></button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -5097,7 +5490,7 @@
     </script>
 
     <script>
-        const EDITOR_VERSION = "1.1.4";
+        const EDITOR_VERSION = "1.1.5";
         const PRODUCT_ID = '1322BB7B-1510-4893-BD2D-FF1F19E404F7';
         const _proxyBase = 'https://elemental-svg-proxy.g7hjmj8t8f.workers.dev';
 
@@ -5303,6 +5696,10 @@
          * Undo the last action
          */
         function undo() {
+            if (overlayState.active && overlayState.phase === 'compose') {
+                overlayUndo();
+                return;
+            }
             if (history.undoStack.length === 0) return;
 
             // Save current state to redo stack
@@ -5319,6 +5716,10 @@
          * Redo the last undone action
          */
         function redo() {
+            if (overlayState.active && overlayState.phase === 'compose') {
+                overlayRedo();
+                return;
+            }
             if (history.redoStack.length === 0) return;
 
             // Save current state to undo stack
@@ -5335,6 +5736,10 @@
          * Update the enabled/disabled state of undo/redo buttons
          */
         function updateHistoryButtons() {
+            if (overlayState.active && overlayState.phase === 'compose') {
+                overlayUpdateHistoryButtons();
+                return;
+            }
             const undoBtn = document.getElementById('undo-btn');
             const redoBtn = document.getElementById('redo-btn');
 
@@ -6479,6 +6884,7 @@
          * Clear all loaded SVGs
          */
         function clearAllSVGs() {
+            if (overlayState.active) overlayDiscard();
             state.svgItems = [];
             state.hasStrokeSVGs = false;
             clearHistory();
@@ -6552,6 +6958,7 @@
             if (resetSep) {
                 resetSep.style.display = hasItems ? '' : 'none';
             }
+            updateOverlayButtonVisibility();
         }
 
         // ============================================
@@ -7069,8 +7476,12 @@
                 // 10+ files → zip
                 const zipBlob = createZipBlob(fileEntries);
                 triggerDownload(zipBlob, 'elemental_svg_export.zip');
+            } else if (fileEntries.length > 1) {
+                // 2-9 files → zip to avoid browser blocking multiple downloads
+                const zipBlob = createZipBlob(fileEntries);
+                triggerDownload(zipBlob, 'elemental_svg_export.zip');
             } else {
-                // Under 10 → individual downloads
+                // Single file → direct download
                 for (const entry of fileEntries) {
                     const mimeType = format === 'png' ? 'image/png' : 'image/svg+xml';
                     triggerDownload(new Blob([entry.data], { type: mimeType }), entry.name);
@@ -8886,6 +9297,10 @@
         }
 
         function resetAll() {
+            if (overlayState.active && overlayState.phase === 'compose') {
+                overlayReset();
+                return;
+            }
             if (hasLoadedSVGs()) {
                 // If there are undoable changes, prompt for confirmation
                 if (hasUndoableChanges()) {
@@ -8925,6 +9340,12 @@
 
         function renderPreview() {
             if (!hasLoadedSVGs()) return;
+
+            // Don't render normal preview during overlay compose mode
+            if (overlayState.active && overlayState.phase === 'compose') {
+                overlayRenderWorkspace();
+                return;
+            }
 
             const container = document.getElementById('preview-svg');
             const emptyState = document.getElementById('empty-state');
@@ -9029,6 +9450,21 @@
 
             updateControlsPanelVisibility();
             updatePreviewFilename();
+            updateOverlayButtonVisibility();
+
+            // If in overlay select phase, make tiles selectable
+            if (overlayState.active && overlayState.phase === 'select') {
+                const tiles = document.querySelectorAll('.preview-tile');
+                tiles.forEach(tile => {
+                    tile.classList.add('overlay-selectable');
+                    tile.draggable = false; // Disable drag reorder in overlay select
+                    tile.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        overlayToggleTile(parseInt(tile.dataset.index, 10));
+                    });
+                });
+                overlayUpdateSelectBadges();
+            }
         }
 
         /**
@@ -9454,8 +9890,12 @@
                 const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
                 const modKey = isMac ? e.metaKey : e.ctrlKey;
 
-                // Escape - close code view modal
+                // Escape - close modals or exit overlay mode
                 if (e.key === 'Escape') {
+                    if (overlayState.active) {
+                        overlayDiscard();
+                        return;
+                    }
                     const codeViewModal = document.getElementById('code-view-modal');
                     if (codeViewModal && codeViewModal.classList.contains('visible')) {
                         hideCodeView();
@@ -9466,6 +9906,36 @@
                         hideSVGSelectionModal();
                         return;
                     }
+                }
+
+                // Overlay mode keyboard shortcuts
+                if (overlayState.active && overlayState.phase === 'compose') {
+                    if (modKey && !e.shiftKey && e.key === 'z') {
+                        e.preventDefault();
+                        overlayUndo();
+                        return;
+                    }
+                    if ((modKey && e.shiftKey && e.key === 'z') || (modKey && e.key === 'y')) {
+                        e.preventDefault();
+                        overlayRedo();
+                        return;
+                    }
+                    // Arrow keys for nudging
+                    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                        e.preventDefault();
+                        const step = e.shiftKey ? 5 : 1;
+                        const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0;
+                        const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0;
+                        overlayPushHistory();
+                        const layer = overlayGetActiveLayer();
+                        layer.x += dx;
+                        layer.y += dy;
+                        overlayUpdateControls();
+                        overlayRenderWorkspace();
+                        overlayUpdateHistoryButtons();
+                        return;
+                    }
+                    return; // Don't fall through to normal editor shortcuts in overlay mode
                 }
 
                 // Ctrl/Cmd+Z = Undo
@@ -9723,8 +10193,10 @@
         function updateControlsPanelVisibility() {
             const panel = document.querySelector('.controls-panel');
             if (panel) {
-                // Always show controls panel in library mode (sidebar needs to be visible)
-                panel.classList.toggle('hidden', !ibIsLibraryMode() && !hasLoadedSVGs());
+                // Always show controls panel in library mode, overlay compose, or when SVGs loaded
+                const showPanel = ibIsLibraryMode() || hasLoadedSVGs() ||
+                    (overlayState.active && overlayState.phase === 'compose');
+                panel.classList.toggle('hidden', !showPanel);
             }
         }
 
@@ -10287,6 +10759,936 @@
         }
 
         // ============================================
+        // Overlay Mode
+        // ============================================
+
+        const overlayState = {
+            active: false,
+            phase: 'select',            // 'select' | 'compose'
+            selectedIndices: [],         // indices into state.svgItems during select phase (no max)
+            layers: [],                  // [{svgIndex, x, y, scale, rotation, flipH, flipV, opacity}]
+            selectedLayerIdx: 0,         // index into layers array
+            rotationIncrement: 30,
+            history: { undoStack: [], redoStack: [], maxSize: 50 },
+            canvasSize: 300,
+            viewBoxSize: 200,
+            dragging: false,
+            dragStartX: 0,
+            dragStartY: 0,
+            dragStartLayerX: 0,
+            dragStartLayerY: 0,
+            resizing: false,
+            resizeHandle: null,
+            resizeStartScale: 100,
+            resizeStartX: 0,
+            resizeStartY: 0,
+        };
+
+        function overlayGetActiveLayer() {
+            return overlayState.layers[overlayState.selectedLayerIdx];
+        }
+
+        /**
+         * Enter overlay select phase — user picks icons from the grid
+         */
+        function overlayEnterSelect() {
+            if (state.svgItems.length < 2) {
+                showToast('Need at least 2 SVGs to use overlay mode');
+                return;
+            }
+            overlayState.active = true;
+
+            // If exactly 2 SVGs, skip selection and go straight to compose
+            if (state.svgItems.length === 2) {
+                overlayState.selectedIndices = [0, 1];
+                overlayState.phase = 'select';
+                document.body.dataset.overlay = 'select';
+                overlayBeginCompose();
+                return;
+            }
+
+            overlayState.phase = 'select';
+            overlayState.selectedIndices = [];
+            document.body.dataset.overlay = 'select';
+            document.getElementById('overlay-banner-text').textContent = 'Overlay Mode \u2014 Select 2 or more icons to combine';
+            document.getElementById('overlay-begin-btn').style.display = '';
+            document.getElementById('overlay-begin-btn').disabled = true;
+            document.getElementById('overlay-done-btn').style.display = 'none';
+            renderPreview();
+            updateControlsPanelVisibility();
+            showToast('Click icons to select them for overlay');
+        }
+
+        /**
+         * Handle tile click during overlay select phase
+         */
+        function overlayToggleTile(index) {
+            const idx = overlayState.selectedIndices.indexOf(index);
+            if (idx !== -1) {
+                overlayState.selectedIndices.splice(idx, 1);
+            } else {
+                overlayState.selectedIndices.push(index);
+            }
+            overlayUpdateSelectBadges();
+            const n = overlayState.selectedIndices.length;
+            document.getElementById('overlay-begin-btn').disabled = n < 2;
+            document.getElementById('overlay-banner-text').textContent = n >= 2
+                ? `Overlay Mode \u2014 ${n} icons selected. Click Begin to compose.`
+                : 'Overlay Mode \u2014 Select 2 or more icons to combine';
+        }
+
+        function overlayUpdateSelectBadges() {
+            const tiles = document.querySelectorAll('.preview-tile');
+            tiles.forEach(tile => {
+                const tileIndex = parseInt(tile.dataset.index, 10);
+                const selPos = overlayState.selectedIndices.indexOf(tileIndex);
+                // Remove existing badge
+                const existing = tile.querySelector('.overlay-select-badge');
+                if (existing) existing.remove();
+                tile.classList.remove('overlay-selected');
+                if (selPos !== -1) {
+                    tile.classList.add('overlay-selected');
+                    const badge = document.createElement('div');
+                    badge.className = 'overlay-select-badge';
+                    badge.textContent = selPos + 1;
+                    tile.appendChild(badge);
+                }
+            });
+        }
+
+        /**
+         * Begin compose phase — set up the overlay workspace
+         */
+        function overlayBeginCompose() {
+            if (overlayState.selectedIndices.length < 2) return;
+            overlayState.phase = 'compose';
+            // Create layers — first centered, rest offset
+            overlayState.layers = overlayState.selectedIndices.map((svgIdx, i) => ({
+                svgIndex: svgIdx,
+                x: i === 0 ? 0 : 15 + (i - 1) * 5,
+                y: i === 0 ? 0 : 15 + (i - 1) * 5,
+                scale: i === 0 ? 100 : 60,
+                rotation: 0, flipH: false, flipV: false, opacity: 100,
+                bgEnabled: false, bgColor: '#ffffff', bgShape: 4, bgPadding: 5
+            }));
+            overlayState.selectedLayerIdx = overlayState.layers.length - 1; // select last (front)
+            overlayState.history = { undoStack: [], redoStack: [], maxSize: 50 };
+            document.body.dataset.overlay = 'compose';
+            document.getElementById('overlay-banner-text').textContent =
+                'Overlay Mode \u2014 Drag, resize, and position your icons';
+            document.getElementById('overlay-begin-btn').style.display = 'none';
+            document.getElementById('overlay-done-btn').style.display = '';
+            overlayUpdateLayerList();
+            overlayUpdateControls();
+            overlayRenderWorkspace();
+            updateHistoryButtons();
+            updateControlsPanelVisibility();
+        }
+
+        /**
+         * Render the overlay compose workspace in the preview area
+         */
+        function overlayRenderWorkspace() {
+            const container = document.getElementById('preview-svg');
+            const wrapper = document.getElementById('preview-wrapper');
+            container.innerHTML = '';
+            container.classList.remove('grid-mode');
+            wrapper.style.transform = 'scale(1)';
+            overlayCleanupSelectionBox();
+
+            const vb = overlayState.viewBoxSize;
+
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', `-10 -10 ${vb + 20} ${vb + 20}`);
+            svg.setAttribute('width', overlayState.canvasSize);
+            svg.setAttribute('height', overlayState.canvasSize);
+            svg.style.overflow = 'visible';
+            svg.style.cursor = 'default';
+            svg.id = 'overlay-svg-canvas';
+
+            // Viewport boundary indicator — shows the final SVG bounds
+            const boundary = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            boundary.setAttribute('x', 0);
+            boundary.setAttribute('y', 0);
+            boundary.setAttribute('width', vb);
+            boundary.setAttribute('height', vb);
+            boundary.setAttribute('fill', 'none');
+            boundary.setAttribute('stroke', '#888');
+            boundary.setAttribute('stroke-width', '1.5');
+            boundary.setAttribute('stroke-dasharray', '6 4');
+            svg.appendChild(boundary);
+
+            // Viewport label
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label.setAttribute('x', vb / 2);
+            label.setAttribute('y', -4);
+            label.setAttribute('text-anchor', 'middle');
+            label.setAttribute('font-size', '7');
+            label.setAttribute('fill', '#888');
+            label.setAttribute('font-family', 'system-ui, sans-serif');
+            label.textContent = 'SVG Viewport';
+            svg.appendChild(label);
+
+            // Render all layers (back to front)
+            overlayState.layers.forEach((layer, i) => {
+                const g = overlayCreateLayerGroup(layer, state.svgItems[layer.svgIndex]);
+                g.id = 'overlay-layer-' + i;
+                g.dataset.layerIdx = i;
+                svg.appendChild(g);
+            });
+
+            container.appendChild(svg);
+            overlayDrawSelectionBox();
+            overlaySetupInteraction(svg);
+        }
+
+        function overlayCreateLayerGroup(layerData, svgItem) {
+            const vb = overlayState.viewBoxSize;
+            const srcSvg = svgItem.currentSVG.cloneNode(true);
+
+            let srcViewBox = srcSvg.getAttribute('viewBox');
+            if (!srcViewBox) {
+                const w = parseFloat(srcSvg.getAttribute('width')) || 24;
+                const h = parseFloat(srcSvg.getAttribute('height')) || 24;
+                srcViewBox = `0 0 ${w} ${h}`;
+            }
+            const [sx, sy, sw, sh] = srcViewBox.split(/\s+/).map(parseFloat);
+
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+            // Fit source into viewBox space
+            const fitScale = Math.min(vb / sw, vb / sh);
+            const fitX = (vb - sw * fitScale) / 2;
+            const fitY = (vb - sh * fitScale) / 2;
+
+            // Build transform chain: user transforms + fit
+            const userScale = layerData.scale / 100;
+            const offsetX = (layerData.x / 100) * vb;
+            const offsetY = (layerData.y / 100) * vb;
+
+            let t = '';
+            t += `translate(${offsetX} ${offsetY}) `;
+            if (userScale !== 1) {
+                t += `translate(${vb/2} ${vb/2}) scale(${userScale}) translate(${-vb/2} ${-vb/2}) `;
+            }
+            if (layerData.rotation !== 0) {
+                t += `rotate(${layerData.rotation} ${vb/2} ${vb/2}) `;
+            }
+            if (layerData.flipH || layerData.flipV) {
+                const fsx = layerData.flipH ? -1 : 1;
+                const fsy = layerData.flipV ? -1 : 1;
+                t += `translate(${vb/2} ${vb/2}) scale(${fsx} ${fsy}) translate(${-vb/2} ${-vb/2}) `;
+            }
+            // Fit transform: translate to center then scale source coords
+            t += `translate(${fitX} ${fitY}) scale(${fitScale}) translate(${-sx} ${-sy})`;
+
+            g.setAttribute('transform', t);
+            if (layerData.opacity !== 100) {
+                g.setAttribute('opacity', layerData.opacity / 100);
+            }
+
+            // Invisible hit-area rect covering the source viewBox — makes the full
+            // layer area clickable/draggable, not just painted strokes/fills.
+            // Tagged with data-hit-area so overlayDone() can strip it from output.
+            const hitArea = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            hitArea.setAttribute('x', sx);
+            hitArea.setAttribute('y', sy);
+            hitArea.setAttribute('width', sw);
+            hitArea.setAttribute('height', sh);
+            hitArea.setAttribute('fill', 'transparent');
+            hitArea.setAttribute('data-hit-area', '1');
+            g.appendChild(hitArea);
+
+            // Per-layer background shape (rendered behind icon content)
+            if (layerData.bgEnabled) {
+                const padding = (layerData.bgPadding / 100) * Math.max(sw, sh);
+                const cx = sx + sw / 2;
+                const cy = sy + sh / 2;
+                const halfW = sw / 2 + padding;
+                const halfH = sh / 2 + padding;
+                let bgEl;
+                if (layerData.bgShape === 0) {
+                    // Circle
+                    bgEl = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    bgEl.setAttribute('cx', cx);
+                    bgEl.setAttribute('cy', cy);
+                    bgEl.setAttribute('r', Math.max(halfW, halfH));
+                } else if (layerData.bgShape === 10) {
+                    // Rounded rect
+                    bgEl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    bgEl.setAttribute('x', cx - halfW);
+                    bgEl.setAttribute('y', cy - halfH);
+                    bgEl.setAttribute('width', halfW * 2);
+                    bgEl.setAttribute('height', halfH * 2);
+                    bgEl.setAttribute('rx', Math.min(halfW, halfH) * 0.3);
+                } else {
+                    // Square (default)
+                    bgEl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    bgEl.setAttribute('x', cx - halfW);
+                    bgEl.setAttribute('y', cy - halfH);
+                    bgEl.setAttribute('width', halfW * 2);
+                    bgEl.setAttribute('height', halfH * 2);
+                }
+                bgEl.setAttribute('fill', layerData.bgColor);
+                bgEl.setAttribute('data-layer-bg', '1');
+                g.appendChild(bgEl);
+            }
+
+            // Get inherited attributes from source SVG root
+            const rootFill = srcSvg.getAttribute('fill');
+            const rootStroke = srcSvg.getAttribute('stroke');
+            const rootStrokeWidth = srcSvg.getAttribute('stroke-width');
+            const rootStrokeLinecap = srcSvg.getAttribute('stroke-linecap');
+            const rootStrokeLinejoin = srcSvg.getAttribute('stroke-linejoin');
+
+            // Copy children, pushing inherited attrs down to elements
+            Array.from(srcSvg.childNodes).forEach(child => {
+                if (child.nodeType !== 1) return;
+                const clone = child.cloneNode(true);
+                // Push inherited presentation attrs from root SVG onto child elements
+                const targets = clone.matches('path,circle,rect,polygon,polyline,ellipse,line,g')
+                    ? [clone, ...clone.querySelectorAll('path,circle,rect,polygon,polyline,ellipse,line,g')]
+                    : [...clone.querySelectorAll('path,circle,rect,polygon,polyline,ellipse,line,g')];
+                targets.forEach(el => {
+                    // Fill: only set if element doesn't have its own and root has one
+                    if (rootFill && !el.getAttribute('fill') && !el.style.fill) {
+                        el.setAttribute('fill', rootFill === 'currentColor' ? '#000000' : rootFill);
+                    }
+                    // Stroke
+                    if (rootStroke && !el.getAttribute('stroke') && !el.style.stroke) {
+                        el.setAttribute('stroke', rootStroke === 'currentColor' ? '#000000' : rootStroke);
+                    }
+                    if (rootStrokeWidth && !el.getAttribute('stroke-width')) {
+                        el.setAttribute('stroke-width', rootStrokeWidth);
+                    }
+                    if (rootStrokeLinecap && !el.getAttribute('stroke-linecap')) {
+                        el.setAttribute('stroke-linecap', rootStrokeLinecap);
+                    }
+                    if (rootStrokeLinejoin && !el.getAttribute('stroke-linejoin')) {
+                        el.setAttribute('stroke-linejoin', rootStrokeLinejoin);
+                    }
+                    // Resolve any currentColor values
+                    ['fill', 'stroke'].forEach(a => {
+                        if (el.getAttribute(a) === 'currentColor') el.setAttribute(a, '#000000');
+                    });
+                });
+                g.appendChild(clone);
+            });
+
+            return g;
+        }
+
+        function overlayDrawSelectionBox() {
+            overlayCleanupSelectionBox();
+            const canvas = document.getElementById('overlay-svg-canvas');
+            if (!canvas) return;
+            const layerG = document.getElementById('overlay-layer-' + overlayState.selectedLayerIdx);
+            if (!layerG) return;
+
+            const canvasRect = canvas.getBoundingClientRect();
+            const layerRect = layerG.getBoundingClientRect();
+            const wrapperRect = document.getElementById('preview-wrapper').getBoundingClientRect();
+
+            const box = document.createElement('div');
+            box.className = 'overlay-selection-box';
+            box.style.left = (layerRect.left - wrapperRect.left) + 'px';
+            box.style.top = (layerRect.top - wrapperRect.top) + 'px';
+            box.style.width = layerRect.width + 'px';
+            box.style.height = layerRect.height + 'px';
+
+            ['tl', 'tr', 'bl', 'br'].forEach(pos => {
+                const handle = document.createElement('div');
+                handle.className = 'overlay-handle ' + pos;
+                handle.dataset.handle = pos;
+                handle.addEventListener('mousedown', overlayHandleResizeStart);
+                handle.addEventListener('touchstart', overlayHandleTouchResizeStart, { passive: false });
+                box.appendChild(handle);
+            });
+
+            document.getElementById('preview-wrapper').appendChild(box);
+        }
+
+        /**
+         * Set up mouse/touch interaction on the overlay canvas
+         */
+        function overlaySetupInteraction(svg) {
+            svg.addEventListener('mousedown', overlayMouseDown);
+            svg.addEventListener('touchstart', overlayTouchStart, { passive: false });
+
+            // Use document-level move/up for drag reliability
+            document.addEventListener('mousemove', overlayMouseMove);
+            document.addEventListener('mouseup', overlayMouseUp);
+            document.addEventListener('touchmove', overlayTouchMove, { passive: false });
+            document.addEventListener('touchend', overlayTouchEnd);
+        }
+
+        function overlayCleanupInteraction() {
+            document.removeEventListener('mousemove', overlayMouseMove);
+            document.removeEventListener('mouseup', overlayMouseUp);
+            document.removeEventListener('touchmove', overlayTouchMove);
+            document.removeEventListener('touchend', overlayTouchEnd);
+        }
+
+        function overlayMouseDown(e) {
+            if (overlayState.resizing) return;
+            const svg = document.getElementById('overlay-svg-canvas');
+            if (!svg) return;
+
+            // Determine which layer was clicked using hit-test against bounding boxes
+            // This allows dragging anywhere inside a layer's bounds, not just on filled areas
+            const canvas = svg;
+            const canvasRect = canvas.getBoundingClientRect();
+            const clickX = e.clientX;
+            const clickY = e.clientY;
+
+            // Check layers in reverse order (front to back) for click priority
+            let clickedIdx = -1;
+            for (let i = overlayState.layers.length - 1; i >= 0; i--) {
+                const layerG = document.getElementById('overlay-layer-' + i);
+                if (!layerG) continue;
+                const rect = layerG.getBoundingClientRect();
+                if (clickX >= rect.left && clickX <= rect.right &&
+                    clickY >= rect.top && clickY <= rect.bottom) {
+                    clickedIdx = i;
+                    break;
+                }
+            }
+
+            if (clickedIdx >= 0 && clickedIdx !== overlayState.selectedLayerIdx) {
+                overlaySelectLayer(clickedIdx);
+            }
+
+            // Start drag on selected layer (only if click is within its bounds)
+            const layer = overlayGetActiveLayer();
+            const activeG = document.getElementById('overlay-layer-' + overlayState.selectedLayerIdx);
+            if (activeG) {
+                const activeRect = activeG.getBoundingClientRect();
+                if (clickX < activeRect.left || clickX > activeRect.right ||
+                    clickY < activeRect.top || clickY > activeRect.bottom) {
+                    // Click is outside the selected layer's bounds — don't drag
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            overlayState.dragging = true;
+            overlayState.dragStartX = e.clientX;
+            overlayState.dragStartY = e.clientY;
+            overlayState.dragStartLayerX = layer.x;
+            overlayState.dragStartLayerY = layer.y;
+            overlayPushHistory();
+            e.preventDefault();
+        }
+
+        function overlayMouseMove(e) {
+            if (overlayState.resizing) {
+                overlayHandleResizeMove(e.clientX, e.clientY);
+                return;
+            }
+            if (!overlayState.dragging) return;
+
+            const canvas = document.getElementById('overlay-svg-canvas');
+            if (!canvas) return;
+
+            const canvasRect = canvas.getBoundingClientRect();
+            const dx = e.clientX - overlayState.dragStartX;
+            const dy = e.clientY - overlayState.dragStartY;
+
+            // Convert pixel delta to viewBox percentage
+            const pxPerUnit = canvasRect.width / overlayState.viewBoxSize;
+            const layer = overlayGetActiveLayer();
+            layer.x = overlayState.dragStartLayerX + (dx / pxPerUnit / overlayState.viewBoxSize) * 100;
+            layer.y = overlayState.dragStartLayerY + (dy / pxPerUnit / overlayState.viewBoxSize) * 100;
+
+            overlayRenderWorkspace();
+            overlayUpdateControls();
+        }
+
+        function overlayMouseUp(e) {
+            if (overlayState.resizing) {
+                overlayState.resizing = false;
+                return;
+            }
+            if (!overlayState.dragging) return;
+
+            // Check if it was just a click (no movement) — don't push undo for clicks
+            const dx = Math.abs(e.clientX - overlayState.dragStartX);
+            const dy = Math.abs(e.clientY - overlayState.dragStartY);
+            if (dx < 3 && dy < 3) {
+                // No real drag — pop the history entry we pre-pushed
+                overlayState.history.undoStack.pop();
+            }
+            overlayState.dragging = false;
+            overlayUpdateHistoryButtons();
+        }
+
+        // Touch equivalents
+        function overlayTouchStart(e) {
+            if (e.touches.length !== 1) return;
+            const touch = e.touches[0];
+            overlayMouseDown({ clientX: touch.clientX, clientY: touch.clientY, target: document.elementFromPoint(touch.clientX, touch.clientY), preventDefault: () => e.preventDefault() });
+        }
+        function overlayTouchMove(e) {
+            if (e.touches.length !== 1) return;
+            e.preventDefault();
+            overlayMouseMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
+        }
+        function overlayTouchEnd(e) {
+            overlayMouseUp({ clientX: 0, clientY: 0 });
+        }
+
+        // Resize handles
+        function overlayHandleResizeStart(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            overlayPushHistory();
+            overlayState.resizing = true;
+            overlayState.resizeHandle = e.target.dataset.handle;
+            overlayState.resizeStartScale = overlayGetActiveLayer().scale;
+            overlayState.resizeStartX = e.clientX;
+            overlayState.resizeStartY = e.clientY;
+        }
+
+        function overlayHandleTouchResizeStart(e) {
+            if (e.touches.length !== 1) return;
+            e.stopPropagation();
+            e.preventDefault();
+            overlayPushHistory();
+            overlayState.resizing = true;
+            overlayState.resizeHandle = e.target.dataset.handle;
+            overlayState.resizeStartScale = overlayGetActiveLayer().scale;
+            overlayState.resizeStartX = e.touches[0].clientX;
+            overlayState.resizeStartY = e.touches[0].clientY;
+        }
+
+        function overlayHandleResizeMove(clientX, clientY) {
+            const dx = clientX - overlayState.resizeStartX;
+            const dy = clientY - overlayState.resizeStartY;
+            // Use the diagonal distance for scaling
+            const handle = overlayState.resizeHandle;
+            let delta;
+            if (handle === 'br') delta = dx + dy;
+            else if (handle === 'tl') delta = -(dx + dy);
+            else if (handle === 'tr') delta = dx - dy;
+            else if (handle === 'bl') delta = -dx + dy;
+            else delta = dx + dy;
+
+            const scaleDelta = delta * 0.5; // sensitivity
+            const newScale = Math.max(10, Math.min(200, overlayState.resizeStartScale + scaleDelta));
+            overlayGetActiveLayer().scale = Math.round(newScale);
+            overlayRenderWorkspace();
+            overlayUpdateControls();
+        }
+
+        /**
+         * Select which layer to edit
+         */
+        function overlaySelectLayer(idx) {
+            overlayState.selectedLayerIdx = idx;
+            overlayUpdateLayerList();
+            overlayUpdateControls();
+            if (overlayState.phase === 'compose') {
+                overlayDrawSelectionBox();
+            }
+        }
+
+        function overlayUpdateLayerList() {
+            const el = document.getElementById('overlay-selected-layer-name');
+            if (!el) return;
+            const idx = overlayState.selectedLayerIdx;
+            const layer = overlayState.layers[idx];
+            if (!layer) return;
+            const name = state.svgItems[layer.svgIndex]?.filename || 'Layer ' + (idx + 1);
+            const pos = idx === 0 ? 'Back' : idx === overlayState.layers.length - 1 ? 'Front' : 'Layer ' + (idx + 1);
+            el.textContent = name.replace(/\.svg$/i, '') + ' (' + pos + ')';
+        }
+
+        function overlayResetLayer() {
+            overlayPushHistory();
+            const idx = overlayState.selectedLayerIdx;
+            const layer = overlayState.layers[idx];
+            layer.x = 0;
+            layer.y = 0;
+            layer.scale = 100;
+            layer.rotation = 0;
+            layer.flipH = false;
+            layer.flipV = false;
+            layer.opacity = 100;
+            layer.bgEnabled = false;
+            layer.bgColor = '#ffffff';
+            layer.bgShape = 4;
+            layer.bgPadding = 5;
+            overlayUpdateControls();
+            overlayRenderWorkspace();
+            overlayUpdateHistoryButtons();
+        }
+
+        function overlayRemoveLayer() {
+            if (overlayState.layers.length <= 1) {
+                // Last layer — treat as cancel
+                overlayDiscard();
+                return;
+            }
+            overlayPushHistory();
+            overlayState.layers.splice(overlayState.selectedLayerIdx, 1);
+            // Select the last layer (front) or clamp
+            overlayState.selectedLayerIdx = Math.min(
+                overlayState.selectedLayerIdx,
+                overlayState.layers.length - 1
+            );
+            overlayUpdateLayerList();
+            overlayUpdateControls();
+            overlayRenderWorkspace();
+            overlayUpdateHistoryButtons();
+        }
+
+        function overlayMoveLayer(direction) {
+            const idx = overlayState.selectedLayerIdx;
+            const layers = overlayState.layers;
+            let newIdx = idx;
+            if (direction === 'front') newIdx = layers.length - 1;
+            else if (direction === 'back') newIdx = 0;
+            else if (direction === 'forward') newIdx = Math.min(idx + 1, layers.length - 1);
+            else if (direction === 'backward') newIdx = Math.max(idx - 1, 0);
+            if (newIdx === idx) return;
+            overlayPushHistory();
+            const [layer] = layers.splice(idx, 1);
+            layers.splice(newIdx, 0, layer);
+            overlayState.selectedLayerIdx = newIdx;
+            overlayUpdateLayerList();
+            overlayRenderWorkspace();
+            overlayUpdateHistoryButtons();
+        }
+
+        // Overlay per-layer background
+        function overlayToggleBg(enabled) {
+            overlayPushHistory();
+            overlayGetActiveLayer().bgEnabled = enabled;
+            document.getElementById('overlay-bg-options').style.display = enabled ? '' : 'none';
+            overlayRenderWorkspace();
+            overlayUpdateHistoryButtons();
+        }
+
+        function overlayUpdateBgColor(val) {
+            overlayPushHistory();
+            const layer = overlayGetActiveLayer();
+            layer.bgColor = val;
+            document.getElementById('overlay-bg-color').value = val;
+            document.getElementById('overlay-bg-hex').value = val;
+            document.getElementById('overlay-bg-color-preview').style.background = val;
+            overlayRenderWorkspace();
+            overlayUpdateHistoryButtons();
+        }
+
+        function overlaySetBgShape(edges) {
+            overlayPushHistory();
+            overlayGetActiveLayer().bgShape = edges;
+            document.querySelectorAll('#overlay-controls-panel .shape-btn').forEach(btn => {
+                const id = btn.id;
+                if (id && id.startsWith('overlay-shape-')) {
+                    const e = parseInt(id.replace('overlay-shape-', ''), 10);
+                    btn.classList.toggle('active', e === edges);
+                }
+            });
+            overlayRenderWorkspace();
+            overlayUpdateHistoryButtons();
+        }
+
+        function overlayUpdateBgPadding(val, commit) {
+            if (commit) overlayPushHistory();
+            overlayGetActiveLayer().bgPadding = parseInt(val, 10);
+            document.getElementById('overlay-bg-padding-value').textContent = val + '%';
+            overlayRenderWorkspace();
+        }
+
+        function truncateFilename(name, max) {
+            // Strip extension
+            const base = name.replace(/\.svg$/i, '');
+            if (base.length <= max) return base;
+            return base.substring(0, max - 1) + '\u2026';
+        }
+
+        /**
+         * Update the overlay controls panel to reflect current layer state
+         */
+        function overlayUpdateControls() {
+            const layer = overlayGetActiveLayer();
+            document.getElementById('overlay-scale-slider').value = layer.scale;
+            document.getElementById('overlay-scale-value').textContent = layer.scale + '%';
+            document.getElementById('overlay-rotation-value').textContent = layer.rotation + '\u00B0';
+            document.getElementById('overlay-opacity-slider').value = layer.opacity;
+            document.getElementById('overlay-opacity-value').textContent = layer.opacity + '%';
+            document.getElementById('overlay-x-slider').value = Math.round(layer.x);
+            document.getElementById('overlay-x-value').textContent = Math.round(layer.x);
+            document.getElementById('overlay-y-slider').value = Math.round(layer.y);
+            document.getElementById('overlay-y-value').textContent = Math.round(layer.y);
+            // Background controls
+            document.getElementById('overlay-bg-enabled').checked = layer.bgEnabled;
+            document.getElementById('overlay-bg-options').style.display = layer.bgEnabled ? '' : 'none';
+            document.getElementById('overlay-bg-color').value = layer.bgColor;
+            document.getElementById('overlay-bg-hex').value = layer.bgColor;
+            document.getElementById('overlay-bg-color-preview').style.background = layer.bgColor;
+            document.getElementById('overlay-bg-padding').value = layer.bgPadding;
+            document.getElementById('overlay-bg-padding-value').textContent = layer.bgPadding + '%';
+            document.querySelectorAll('#overlay-controls-panel .shape-btn').forEach(btn => {
+                const id = btn.id;
+                if (id && id.startsWith('overlay-shape-')) {
+                    const edges = parseInt(id.replace('overlay-shape-', ''), 10);
+                    btn.classList.toggle('active', edges === layer.bgShape);
+                }
+            });
+        }
+
+        // Overlay control handlers
+        function overlayUpdateScale(val, commit) {
+            if (commit) overlayPushHistory();
+            overlayGetActiveLayer().scale = parseInt(val, 10);
+            document.getElementById('overlay-scale-value').textContent = val + '%';
+            overlayRenderWorkspace();
+        }
+
+        function overlayRotate(dir) {
+            overlayPushHistory();
+            const layer = overlayGetActiveLayer();
+            layer.rotation = (layer.rotation + dir * overlayState.rotationIncrement + 360) % 360;
+            overlayUpdateControls();
+            overlayRenderWorkspace();
+            overlayUpdateHistoryButtons();
+        }
+
+        function overlaySetIncrement(val) {
+            overlayState.rotationIncrement = val;
+            // Update button states
+            document.querySelectorAll('#overlay-controls-panel .rotation-increment .increment-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.textContent) === val);
+            });
+        }
+
+        function overlayFlipH() {
+            overlayPushHistory();
+            overlayGetActiveLayer().flipH = !overlayGetActiveLayer().flipH;
+            overlayRenderWorkspace();
+            overlayUpdateHistoryButtons();
+        }
+
+        function overlayFlipV() {
+            overlayPushHistory();
+            overlayGetActiveLayer().flipV = !overlayGetActiveLayer().flipV;
+            overlayRenderWorkspace();
+            overlayUpdateHistoryButtons();
+        }
+
+        function overlayUpdateOpacity(val, commit) {
+            if (commit) overlayPushHistory();
+            overlayGetActiveLayer().opacity = parseInt(val, 10);
+            document.getElementById('overlay-opacity-value').textContent = val + '%';
+            overlayRenderWorkspace();
+        }
+
+        function overlayUpdateX(val, commit) {
+            if (commit) overlayPushHistory();
+            overlayGetActiveLayer().x = parseInt(val, 10);
+            document.getElementById('overlay-x-value').textContent = val;
+            overlayRenderWorkspace();
+        }
+
+        function overlayUpdateY(val, commit) {
+            if (commit) overlayPushHistory();
+            overlayGetActiveLayer().y = parseInt(val, 10);
+            document.getElementById('overlay-y-value').textContent = val;
+            overlayRenderWorkspace();
+        }
+
+        function overlayNudge(dx, dy) {
+            if (dx === 0 && dy === 0) {
+                // Center button — reset position
+                overlayPushHistory();
+                const layer = overlayGetActiveLayer();
+                layer.x = 0;
+                layer.y = 0;
+                overlayUpdateControls();
+                overlayRenderWorkspace();
+                overlayUpdateHistoryButtons();
+                return;
+            }
+            overlayPushHistory();
+            const step = 2; // 2% per nudge
+            const layer = overlayGetActiveLayer();
+            layer.x += dx * step;
+            layer.y += dy * step;
+            overlayUpdateControls();
+            overlayRenderWorkspace();
+            overlayUpdateHistoryButtons();
+        }
+
+        /**
+         * Reset overlay positions to initial state
+         */
+        function overlayReset() {
+            overlayPushHistory();
+            overlayState.layers.forEach((layer, i) => {
+                layer.x = i === 0 ? 0 : 15 + (i - 1) * 5;
+                layer.y = i === 0 ? 0 : 15 + (i - 1) * 5;
+                layer.scale = i === 0 ? 100 : 60;
+                layer.rotation = 0;
+                layer.flipH = false;
+                layer.flipV = false;
+                layer.opacity = 100;
+                layer.bgEnabled = false;
+                layer.bgColor = '#ffffff';
+                layer.bgShape = 4;
+                layer.bgPadding = 5;
+            });
+            overlayUpdateControls();
+            overlayRenderWorkspace();
+            overlayUpdateHistoryButtons();
+        }
+
+        /**
+         * Discard overlay mode — return to normal editor
+         */
+        function overlayDiscard() {
+            overlayCleanupInteraction();
+            overlayCleanupSelectionBox();
+            overlayState.active = false;
+            delete document.body.dataset.overlay;
+            overlayState.history = { undoStack: [], redoStack: [], maxSize: 50 };
+            renderPreview();
+            updateControlsPanelVisibility();
+        }
+
+        function overlayCleanupSelectionBox() {
+            document.querySelectorAll('.overlay-selection-box, .overlay-handle').forEach(el => el.remove());
+        }
+
+        /**
+         * Done — merge the two layers into a single SVG and return to editor
+         */
+        function overlayDone() {
+            const vb = overlayState.viewBoxSize;
+
+            // Create the merged SVG
+            const mergedSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            mergedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            mergedSvg.setAttribute('viewBox', `0 0 ${vb} ${vb}`);
+            mergedSvg.setAttribute('width', vb);
+            mergedSvg.setAttribute('height', vb);
+
+            // Build layer groups (back to front)
+            overlayState.layers.forEach(layer => {
+                const g = overlayCreateLayerGroup(layer, state.svgItems[layer.svgIndex]);
+                g.removeAttribute('id');
+                delete g.dataset.layerIdx;
+                // Remove invisible hit-area rects (only needed for interaction)
+                g.querySelectorAll('[data-hit-area]').forEach(el => el.remove());
+                g.querySelectorAll('[data-layer-bg]').forEach(el => el.removeAttribute('data-layer-bg'));
+                mergedSvg.appendChild(g);
+            });
+
+            // Generate filename from all layer names
+            const names = overlayState.layers.map(l =>
+                state.svgItems[l.svgIndex].filename.replace(/\.svg$/i, '')
+            );
+            const mergedFilename = names.join('+') + '.svg';
+
+            // Serialize for originalSVG
+            const serializer = new XMLSerializer();
+            const mergedString = serializer.serializeToString(mergedSvg);
+
+            // Push to main editor history before adding
+            pushToHistory();
+
+            // Remove source SVGs (in reverse index order to preserve indices)
+            const sourceIndices = overlayState.layers.map(l => l.svgIndex);
+            const uniqueSorted = [...new Set(sourceIndices)].sort((a, b) => b - a);
+            uniqueSorted.forEach(idx => state.svgItems.splice(idx, 1));
+
+            // Add merged SVG to editor
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(mergedString, 'image/svg+xml');
+            const parsedSvg = doc.querySelector('svg');
+
+            state.svgItems.push({
+                filename: mergedFilename,
+                originalSVG: mergedString,
+                currentSVG: parsedSvg
+            });
+
+            // Exit overlay mode
+            overlayCleanupInteraction();
+            overlayCleanupSelectionBox();
+            overlayState.active = false;
+            delete document.body.dataset.overlay;
+            overlayState.history = { undoStack: [], redoStack: [], maxSize: 50 };
+
+            renderPreview();
+            updateControlsPanelVisibility();
+            updateSaveButton();
+            updateHistoryButtons();
+            showToast('Overlay icon created: ' + mergedFilename);
+        }
+
+        // Overlay undo/redo
+        function overlayGetSnapshot() {
+            return {
+                layers: overlayState.layers.map(l => ({ ...l })),
+                selectedLayerIdx: overlayState.selectedLayerIdx,
+            };
+        }
+
+        function overlayApplySnapshot(snap) {
+            overlayState.layers = snap.layers.map(l => ({ ...l }));
+            overlayState.selectedLayerIdx = snap.selectedLayerIdx;
+            overlayUpdateLayerList();
+            overlayUpdateControls();
+            overlayRenderWorkspace();
+        }
+
+        function overlayPushHistory() {
+            const snap = overlayGetSnapshot();
+            overlayState.history.undoStack.push(snap);
+            if (overlayState.history.undoStack.length > overlayState.history.maxSize) {
+                overlayState.history.undoStack.shift();
+            }
+            overlayState.history.redoStack = [];
+        }
+
+        function overlayUndo() {
+            const h = overlayState.history;
+            if (h.undoStack.length === 0) return;
+            h.redoStack.push(overlayGetSnapshot());
+            overlayApplySnapshot(h.undoStack.pop());
+            overlayUpdateHistoryButtons();
+        }
+
+        function overlayRedo() {
+            const h = overlayState.history;
+            if (h.redoStack.length === 0) return;
+            h.undoStack.push(overlayGetSnapshot());
+            overlayApplySnapshot(h.redoStack.pop());
+            overlayUpdateHistoryButtons();
+        }
+
+        function overlayUpdateHistoryButtons() {
+            // Reuse the main undo/redo buttons during overlay mode
+            const undoBtn = document.getElementById('undo-btn');
+            const redoBtn = document.getElementById('redo-btn');
+            if (undoBtn) undoBtn.disabled = overlayState.history.undoStack.length === 0;
+            if (redoBtn) redoBtn.disabled = overlayState.history.redoStack.length === 0;
+        }
+
+        /**
+         * Show/hide overlay button based on SVG count
+         */
+        function updateOverlayButtonVisibility() {
+            const btn = document.getElementById('overlay-btn');
+            const sep = document.getElementById('overlay-separator');
+            const show = state.svgItems.length >= 2 && !overlayState.active;
+            if (btn) btn.style.display = show ? '' : 'none';
+            if (sep) sep.style.display = show ? '' : 'none';
+        }
+
+        // ============================================
         // Icon Browser (Integrated Mode)
         // ============================================
 
@@ -10318,6 +11720,10 @@
         // -- Mode Toggle --
 
         function ibSetMode(mode) {
+            // Exit overlay mode if switching modes
+            if (overlayState.active) {
+                overlayDiscard();
+            }
             document.body.dataset.mode = mode;
             document.getElementById('ib-mode-editor').classList.toggle('active', mode === 'editor');
             document.getElementById('ib-mode-library').classList.toggle('active', mode === 'library');
@@ -11637,7 +13043,7 @@
                             pngEntries.push({ name: item.filename.replace('.svg', '.png'), data });
                         } catch (e) { }
                     }
-                    if (pngEntries.length >= 10) {
+                    if (pngEntries.length > 1) {
                         triggerDownload(createZipBlob(pngEntries), 'icons_export.zip');
                     } else {
                         for (const e of pngEntries) triggerDownload(new Blob([e.data], { type: 'image/png' }), e.name);
@@ -11648,7 +13054,7 @@
                         name: item.filename,
                         data: encoder.encode(item.svgString)
                     }));
-                    if (svgEntries.length >= 10) {
+                    if (svgEntries.length > 1) {
                         triggerDownload(createZipBlob(svgEntries), 'icons_export.zip');
                     } else {
                         for (const e of svgEntries) triggerDownload(new Blob([e.data], { type: 'image/svg+xml' }), e.name);
