@@ -2939,6 +2939,10 @@
             gap: 0;
         }
         [data-overlay="compose"] .overlay-controls-panel { display: flex; }
+        .overlay-controls-panel .control-section-content {
+            max-height: none;
+            overflow: visible;
+        }
 
         /* Overlay layer list */
         .overlay-layer-list {
@@ -3914,6 +3918,20 @@
                                 <span>Enable Background</span>
                             </div>
                             <div id="overlay-bg-options" style="display:none;margin-top:6px;">
+                                <div class="shape-options" style="margin-bottom:6px;">
+                                    <button class="shape-btn active" onclick="overlaySetBgMode('fill')" id="overlay-bgmode-fill">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" opacity="0.3"/><path d="M8 12l3 3 5-5" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                                        <span>Fill</span>
+                                    </button>
+                                    <button class="shape-btn" onclick="overlaySetBgMode('knockout')" id="overlay-bgmode-knockout">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h18v18H3V3zm4 4v10h10V7H7z" fill-rule="evenodd"/></svg>
+                                        <span>Knockout</span>
+                                    </button>
+                                </div>
+                                <div id="overlay-knockout-warning" style="display:none;font-size:10px;color:#b5852a;margin-bottom:4px;">
+                                    Knockout uses SVG masks which are not supported by FileMaker. Use Fill mode for FM output.
+                                </div>
+                                <div id="overlay-bg-fill-options">
                                 <div class="color-row">
                                     <label>Color</label>
                                     <div class="color-picker-wrapper">
@@ -3924,6 +3942,7 @@
                                         <input type="text" class="color-hex" id="overlay-bg-hex" value="#ffffff"
                                             onchange="this.value=normalizeHex(this.value); overlayUpdateBgColor(this.value)">
                                     </div>
+                                </div>
                                 </div>
                                 <div class="shape-options" style="margin-top:6px;">
                                     <button class="shape-btn" onclick="overlaySetBgShape(0)" id="overlay-shape-0">
@@ -5460,7 +5479,7 @@
     </script>
 
     <script>
-        const EDITOR_VERSION = "1.2.0";
+        const EDITOR_VERSION = "1.2.1";
         const PRODUCT_ID = '1322BB7B-1510-4893-BD2D-FF1F19E404F7';
         const _proxyBase = 'https://elemental-svg-proxy.g7hjmj8t8f.workers.dev';
 
@@ -7061,9 +7080,26 @@
                     items = [items];
                 }
 
-                // Clear existing SVGs
+                // Clear existing SVGs — preserve FM settings across reset
+                const savedFM = {
+                    fmCompatible: state.fmCompatible,
+                    fmDynamicFill: state.fmDynamicFill,
+                    fmDynamicTarget: state.fmDynamicTarget,
+                    convertStrokesToFills: state.convertStrokesToFills
+                };
                 state.svgItems = [];
                 resetState();
+                state.fmCompatible = savedFM.fmCompatible;
+                state.fmDynamicFill = savedFM.fmDynamicFill;
+                state.fmDynamicTarget = savedFM.fmDynamicTarget;
+                state.convertStrokesToFills = savedFM.convertStrokesToFills;
+                // Re-sync FM UI
+                const fmCb = document.getElementById('fm-compat');
+                if (fmCb) fmCb.checked = state.fmCompatible;
+                const dynCb = document.getElementById('fm-dynamic');
+                if (dynCb) dynCb.checked = state.fmDynamicFill;
+                setFMTarget(state.fmDynamicTarget);
+                updateFMTargetVisibility();
                 clearHistory();
 
                 // Load each item
@@ -8113,6 +8149,9 @@
          * @returns {boolean} - True if the item needs conversion
          */
         function needsStrokeConversion(item) {
+            // Skip stroke conversion for overlay/composite SVGs — Potrace would
+            // flatten the entire multi-layer structure into a single traced path
+            if (item.isOverlay) return false;
             return state.convertStrokesToFills && isStrokeBasedSVG(item.currentSVG);
         }
 
@@ -8901,9 +8940,15 @@
 
             // Detect if this is a stroke-based (outline) icon
             // These have fill="none" on root with stroke for drawing — must preserve fill="none"
-            const isStrokeBased = isStrokeBasedSVG(svg);
+            const isOverlaySVG = svg.getAttribute('data-overlay') === '1';
+            const isStrokeBased = !isOverlaySVG && isStrokeBasedSVG(svg);
 
-            if (isStrokeBased) {
+            if (isOverlaySVG) {
+                // Overlay/composite SVGs may mix fill-based and stroke-based layers.
+                // Use fill="currentColor" on root; stroke elements keep explicit stroke values.
+                svg.setAttribute('fill', 'currentColor');
+                svg.removeAttribute('data-overlay');
+            } else if (isStrokeBased) {
                 // For stroke-based icons: keep fill="none" on root, set stroke="currentColor"
                 // FM will control the stroke color via fm_fill class
                 svg.setAttribute('fill', 'none');
@@ -8945,6 +8990,7 @@
             // Common in SF Symbols and other icon sets as invisible bounding boxes
             const allElements = svg.querySelectorAll('*');
             allElements.forEach(el => {
+                if (el.closest('defs') || el.closest('mask') || el.hasAttribute('data-layer-bg')) return;
                 const opacity = el.getAttribute('opacity');
                 if (opacity !== null && parseFloat(opacity) === 0) {
                     el.remove();
@@ -8954,9 +9000,11 @@
             // Remove fill-opacity and stroke-opacity attributes (unsupported by FileMaker)
             // These can cause rendering issues; FM controls color via fm_fill class
             svg.querySelectorAll('[fill-opacity]').forEach(el => {
+                if (el.closest('defs') || el.closest('mask') || el.hasAttribute('data-layer-bg')) return;
                 el.removeAttribute('fill-opacity');
             });
             svg.querySelectorAll('[stroke-opacity]').forEach(el => {
+                if (el.closest('defs') || el.closest('mask') || el.hasAttribute('data-layer-bg')) return;
                 el.removeAttribute('stroke-opacity');
             });
 
@@ -8966,6 +9014,7 @@
             // which makes stroke-based SVGs (e.g. Inkscape exports) invisible in FM
             const styledShapes = svg.querySelectorAll('path, circle, rect, ellipse, line, polyline, polygon');
             styledShapes.forEach(el => {
+                if (el.closest('defs') || el.closest('mask') || el.hasAttribute('data-layer-bg')) return;
                 const styleAttr = el.getAttribute('style');
                 if (!styleAttr) return;
 
@@ -9027,6 +9076,7 @@
                     // Preserve 'none', 'currentColor', and 'inherit'
                     const elements = svg.querySelectorAll('*');
                     elements.forEach(el => {
+                        if (el.closest('defs') || el.closest('mask') || el.hasAttribute('data-layer-bg')) return;
                         const fill = el.getAttribute('fill');
                         if (fill && fill !== 'none' && fill !== 'currentColor' && fill !== 'inherit') {
                             el.setAttribute('fill', 'inherit');
@@ -9043,14 +9093,18 @@
             // For other elements, add stroke="none" (required by FileMaker)
             const shapeElements = svg.querySelectorAll('path, circle, rect, ellipse, line, polyline, polygon');
             shapeElements.forEach(el => {
+                // Skip elements inside <defs> or <mask> (e.g. knockout mask shapes)
+                if (el.closest('defs') || el.closest('mask') || el.hasAttribute('data-layer-bg')) return;
                 const fill = el.getAttribute('fill');
                 const stroke = el.getAttribute('stroke');
 
                 if (fill === 'none' && stroke && stroke !== 'none') {
                     // This is a stroke-only element - for FM dynamic coloring to work,
-                    // we need to set stroke to inherit so FM can control it
+                    // we need to set stroke so FM can control it
                     if (state.fmDynamicFill) {
-                        el.setAttribute('stroke', 'inherit');
+                        // For overlay SVGs, root has fill="currentColor" but no stroke attr,
+                        // so use currentColor explicitly instead of inherit
+                        el.setAttribute('stroke', isOverlaySVG ? 'currentColor' : 'inherit');
                     }
                 } else if (!stroke || stroke === '') {
                     // No stroke defined - add stroke="none" (required by FileMaker)
@@ -9619,8 +9673,15 @@
                 if (state.opacity !== 100) {
                     group.setAttribute('opacity', state.opacity / 100);
                 }
-                content.forEach(node => group.appendChild(node.cloneNode(true)));
+                content.forEach(node => {
+                    // Keep <defs> as direct children of <svg>, only wrap renderable content
+                    if (node.nodeType === 1 && node.tagName === 'defs') return;
+                    group.appendChild(node.cloneNode(true));
+                });
+                // Preserve existing <defs> (e.g. knockout masks)
+                const existingDefs = svg.querySelector('defs');
                 svg.innerHTML = '';
+                if (existingDefs) svg.appendChild(existingDefs.cloneNode(true));
                 svg.appendChild(group);
             }
 
@@ -9639,6 +9700,8 @@
             const svgStroke = svg.getAttribute('stroke');
             const elements = svg.querySelectorAll('path, circle, rect, polygon, polyline, ellipse, line');
             elements.forEach(el => {
+                // Skip elements inside <defs>/<mask> and overlay layer backgrounds (preserve their color)
+                if (el.closest('defs') || el.closest('mask') || el.hasAttribute('data-layer-bg')) return;
                 const currentFill = el.getAttribute('fill');
                 const currentStroke = el.getAttribute('stroke');
                 // Resolve effective fill: element attribute, then inherited from parent SVG
@@ -9676,6 +9739,7 @@
         function applyStroke(svg, color, width) {
             const elements = svg.querySelectorAll('path, circle, rect, polygon, polyline, ellipse, line');
             elements.forEach(el => {
+                if (el.closest('defs') || el.closest('mask') || el.hasAttribute('data-layer-bg')) return;
                 el.setAttribute('stroke', color);
                 el.setAttribute('stroke-width', width);
             });
@@ -10839,7 +10903,7 @@
                 y: i === 0 ? 0 : 15 + (i - 1) * 5,
                 scale: i === 0 ? 100 : 60,
                 rotation: 0, flipH: false, flipV: false, opacity: 100,
-                bgEnabled: false, bgColor: '#ffffff', bgShape: 4, bgPadding: 5
+                bgEnabled: false, bgColor: '#ffffff', bgShape: 4, bgPadding: 5, bgMode: 'fill'
             }));
             overlayState.selectedLayerIdx = overlayState.layers.length - 1; // select last (front)
             overlayState.history = { undoStack: [], redoStack: [], maxSize: 50 };
@@ -10899,12 +10963,60 @@
             label.textContent = 'SVG Viewport';
             svg.appendChild(label);
 
-            // Render all layers (back to front)
+            // Build knockout masks — for each knockout layer, create a mask that
+            // hides its bg shape from all layers below it
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            const knockoutMaskIds = []; // knockoutMaskIds[i] = mask id if layer i is knockout
+            overlayState.layers.forEach((layer, i) => {
+                if (layer.bgEnabled && layer.bgMode === 'knockout') {
+                    const maskId = 'overlay-knockout-mask-' + i;
+                    knockoutMaskIds[i] = maskId;
+                    const mask = document.createElementNS('http://www.w3.org/2000/svg', 'mask');
+                    mask.setAttribute('id', maskId);
+                    mask.setAttribute('maskUnits', 'userSpaceOnUse');
+                    mask.setAttribute('x', '-10');
+                    mask.setAttribute('y', '-10');
+                    mask.setAttribute('width', vb + 20);
+                    mask.setAttribute('height', vb + 20);
+                    // White background = show everything
+                    const whiteRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    whiteRect.setAttribute('x', '-10');
+                    whiteRect.setAttribute('y', '-10');
+                    whiteRect.setAttribute('width', vb + 20);
+                    whiteRect.setAttribute('height', vb + 20);
+                    whiteRect.setAttribute('fill', 'white');
+                    mask.appendChild(whiteRect);
+                    // Black knockout shape = hide this area (shape already has fill='black')
+                    const cutG = overlayCreateKnockoutShape(layer, state.svgItems[layer.svgIndex]);
+                    mask.appendChild(cutG);
+                    defs.appendChild(mask);
+                }
+            });
+            if (defs.childNodes.length > 0) svg.appendChild(defs);
+
+            // Render all layers (back to front), applying knockout masks from layers above
             overlayState.layers.forEach((layer, i) => {
                 const g = overlayCreateLayerGroup(layer, state.svgItems[layer.svgIndex]);
                 g.id = 'overlay-layer-' + i;
                 g.dataset.layerIdx = i;
-                svg.appendChild(g);
+                // Apply knockout masks from all layers above this one
+                const masksAbove = [];
+                for (let j = i + 1; j < overlayState.layers.length; j++) {
+                    if (knockoutMaskIds[j]) masksAbove.push(knockoutMaskIds[j]);
+                }
+                if (masksAbove.length > 0) {
+                    // Nest in groups, each applying one mask (SVG masks don't compose directly)
+                    let current = g;
+                    masksAbove.forEach(maskId => {
+                        const wrapper = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                        wrapper.setAttribute('mask', 'url(#' + maskId + ')');
+                        wrapper.appendChild(current);
+                        current = wrapper;
+                    });
+                    svg.appendChild(current);
+                } else {
+                    svg.appendChild(g);
+                }
             });
 
             container.appendChild(svg);
@@ -10969,8 +11081,8 @@
             hitArea.setAttribute('data-hit-area', '1');
             g.appendChild(hitArea);
 
-            // Per-layer background shape (rendered behind icon content)
-            if (layerData.bgEnabled) {
+            // Per-layer background shape (rendered behind icon content) — skip for knockout mode
+            if (layerData.bgEnabled && layerData.bgMode !== 'knockout') {
                 const padding = (layerData.bgPadding / 100) * Math.max(sw, sh);
                 const cx = sx + sw / 2;
                 const cy = sy + sh / 2;
@@ -11044,6 +11156,78 @@
                 });
                 g.appendChild(clone);
             });
+
+            return g;
+        }
+
+        // Create a knockout shape element with the same transform as a layer's bg shape.
+        // Returns a <g> containing the shape, transformed to match the layer position.
+        function overlayCreateKnockoutShape(layerData, svgItem) {
+            const vb = overlayState.viewBoxSize;
+            const srcSvg = svgItem.currentSVG;
+
+            let srcViewBox = srcSvg.getAttribute('viewBox');
+            if (!srcViewBox) {
+                const w = parseFloat(srcSvg.getAttribute('width')) || 24;
+                const h = parseFloat(srcSvg.getAttribute('height')) || 24;
+                srcViewBox = `0 0 ${w} ${h}`;
+            }
+            const [sx, sy, sw, sh] = srcViewBox.split(/\s+/).map(parseFloat);
+
+            // Build the same transform chain as overlayCreateLayerGroup
+            const fitScale = Math.min(vb / sw, vb / sh);
+            const fitX = (vb - sw * fitScale) / 2;
+            const fitY = (vb - sh * fitScale) / 2;
+            const userScale = layerData.scale / 100;
+            const offsetX = (layerData.x / 100) * vb;
+            const offsetY = (layerData.y / 100) * vb;
+
+            let t = '';
+            t += `translate(${offsetX} ${offsetY}) `;
+            if (userScale !== 1) {
+                t += `translate(${vb/2} ${vb/2}) scale(${userScale}) translate(${-vb/2} ${-vb/2}) `;
+            }
+            if (layerData.rotation !== 0) {
+                t += `rotate(${layerData.rotation} ${vb/2} ${vb/2}) `;
+            }
+            if (layerData.flipH || layerData.flipV) {
+                const fsx = layerData.flipH ? -1 : 1;
+                const fsy = layerData.flipV ? -1 : 1;
+                t += `translate(${vb/2} ${vb/2}) scale(${fsx} ${fsy}) translate(${-vb/2} ${-vb/2}) `;
+            }
+            t += `translate(${fitX} ${fitY}) scale(${fitScale}) translate(${-sx} ${-sy})`;
+
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('transform', t);
+
+            // Create the bg shape (same logic as in overlayCreateLayerGroup)
+            const padding = (layerData.bgPadding / 100) * Math.max(sw, sh);
+            const cx = sx + sw / 2;
+            const cy = sy + sh / 2;
+            const halfW = sw / 2 + padding;
+            const halfH = sh / 2 + padding;
+            let bgEl;
+            if (layerData.bgShape === 0) {
+                bgEl = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                bgEl.setAttribute('cx', cx);
+                bgEl.setAttribute('cy', cy);
+                bgEl.setAttribute('r', Math.max(halfW, halfH));
+            } else if (layerData.bgShape === 10) {
+                bgEl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                bgEl.setAttribute('x', cx - halfW);
+                bgEl.setAttribute('y', cy - halfH);
+                bgEl.setAttribute('width', halfW * 2);
+                bgEl.setAttribute('height', halfH * 2);
+                bgEl.setAttribute('rx', Math.min(halfW, halfH) * 0.3);
+            } else {
+                bgEl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                bgEl.setAttribute('x', cx - halfW);
+                bgEl.setAttribute('y', cy - halfH);
+                bgEl.setAttribute('width', halfW * 2);
+                bgEl.setAttribute('height', halfH * 2);
+            }
+            bgEl.setAttribute('fill', 'black');
+            g.appendChild(bgEl);
 
             return g;
         }
@@ -11331,6 +11515,18 @@
         }
 
         // Overlay per-layer background
+        function overlaySetBgMode(mode) {
+            overlayPushHistory();
+            overlayGetActiveLayer().bgMode = mode;
+            document.getElementById('overlay-bgmode-fill').classList.toggle('active', mode === 'fill');
+            document.getElementById('overlay-bgmode-knockout').classList.toggle('active', mode === 'knockout');
+            document.getElementById('overlay-bg-fill-options').style.display = mode === 'knockout' ? 'none' : '';
+            document.getElementById('overlay-knockout-warning').style.display =
+                mode === 'knockout' && state.fmCompatible ? '' : 'none';
+            overlayRenderWorkspace();
+            overlayUpdateHistoryButtons();
+        }
+
         function overlayToggleBg(enabled) {
             overlayPushHistory();
             overlayGetActiveLayer().bgEnabled = enabled;
@@ -11389,8 +11585,14 @@
             document.getElementById('overlay-opacity-slider').value = layer.opacity;
             document.getElementById('overlay-opacity-value').textContent = layer.opacity + '%';
             // Background controls
+            const bgMode = layer.bgMode || 'fill';
             document.getElementById('overlay-bg-enabled').checked = layer.bgEnabled;
             document.getElementById('overlay-bg-options').style.display = layer.bgEnabled ? '' : 'none';
+            document.getElementById('overlay-bgmode-fill').classList.toggle('active', bgMode === 'fill');
+            document.getElementById('overlay-bgmode-knockout').classList.toggle('active', bgMode === 'knockout');
+            document.getElementById('overlay-bg-fill-options').style.display = bgMode === 'knockout' ? 'none' : '';
+            document.getElementById('overlay-knockout-warning').style.display =
+                bgMode === 'knockout' && layer.bgEnabled && state.fmCompatible ? '' : 'none';
             document.getElementById('overlay-bg-color').value = layer.bgColor;
             document.getElementById('overlay-bg-hex').value = layer.bgColor;
             document.getElementById('overlay-bg-color-preview').style.background = layer.bgColor;
@@ -11528,8 +11730,52 @@
         /**
          * Done — merge the two layers into a single SVG and return to editor
          */
-        function overlayDone() {
+        async function overlayDone() {
             const vb = overlayState.viewBoxSize;
+            const serializer = new XMLSerializer();
+
+            // Pre-convert stroke-based source SVGs to fill-based if stroke conversion is on.
+            // This must happen per-layer BEFORE merging, because Potrace can only trace
+            // individual icons — running it on the composite destroys the overlay structure.
+            const convertedSvgMap = {}; // svgIndex -> converted SVG element
+            if (state.convertStrokesToFills) {
+                const btn = document.getElementById('overlay-done-btn');
+                const origText = btn ? btn.textContent : '';
+                if (btn) { btn.disabled = true; btn.textContent = 'Converting...'; }
+
+                for (const layer of overlayState.layers) {
+                    const idx = layer.svgIndex;
+                    if (convertedSvgMap[idx] !== undefined) continue; // already handled
+                    const srcSvg = state.svgItems[idx].currentSVG;
+                    if (isStrokeBasedSVG(srcSvg)) {
+                        const svgStr = serializer.serializeToString(srcSvg);
+                        const result = await convertStrokeToFill(svgStr);
+                        if (result.success) {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(result.svg, 'image/svg+xml');
+                            const converted = doc.querySelector('svg');
+                            if (converted) {
+                                convertedSvgMap[idx] = converted;
+                                continue;
+                            }
+                        }
+                    }
+                    convertedSvgMap[idx] = null; // no conversion needed or failed
+                }
+                if (btn) { btn.disabled = false; btn.textContent = origText; }
+            }
+
+            // Helper: get the SVG element for a layer (converted if available)
+            function getLayerSvgItem(layer) {
+                const converted = convertedSvgMap[layer.svgIndex];
+                if (converted) {
+                    return {
+                        ...state.svgItems[layer.svgIndex],
+                        currentSVG: converted
+                    };
+                }
+                return state.svgItems[layer.svgIndex];
+            }
 
             // Create the merged SVG
             const mergedSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -11537,16 +11783,61 @@
             mergedSvg.setAttribute('viewBox', `0 0 ${vb} ${vb}`);
             mergedSvg.setAttribute('width', vb);
             mergedSvg.setAttribute('height', vb);
+            mergedSvg.setAttribute('data-overlay', '1');
 
-            // Build layer groups (back to front)
-            overlayState.layers.forEach(layer => {
-                const g = overlayCreateLayerGroup(layer, state.svgItems[layer.svgIndex]);
+            // Build knockout masks into <defs> for the final SVG
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            const knockoutMaskIds = [];
+            overlayState.layers.forEach((layer, i) => {
+                if (layer.bgEnabled && layer.bgMode === 'knockout') {
+                    const maskId = 'knockout-' + i;
+                    knockoutMaskIds[i] = maskId;
+                    const mask = document.createElementNS('http://www.w3.org/2000/svg', 'mask');
+                    mask.setAttribute('id', maskId);
+                    mask.setAttribute('maskUnits', 'userSpaceOnUse');
+                    mask.setAttribute('x', '0');
+                    mask.setAttribute('y', '0');
+                    mask.setAttribute('width', vb);
+                    mask.setAttribute('height', vb);
+                    const whiteRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    whiteRect.setAttribute('x', '0');
+                    whiteRect.setAttribute('y', '0');
+                    whiteRect.setAttribute('width', vb);
+                    whiteRect.setAttribute('height', vb);
+                    whiteRect.setAttribute('fill', 'white');
+                    mask.appendChild(whiteRect);
+                    const cutG = overlayCreateKnockoutShape(layer, getLayerSvgItem(layer));
+                    mask.appendChild(cutG);
+                    defs.appendChild(mask);
+                }
+            });
+            if (defs.childNodes.length > 0) mergedSvg.appendChild(defs);
+
+            // Build layer groups (back to front), applying knockout masks
+            overlayState.layers.forEach((layer, i) => {
+                const g = overlayCreateLayerGroup(layer, getLayerSvgItem(layer));
                 g.removeAttribute('id');
                 delete g.dataset.layerIdx;
                 // Remove invisible hit-area rects (only needed for interaction)
                 g.querySelectorAll('[data-hit-area]').forEach(el => el.remove());
-                g.querySelectorAll('[data-layer-bg]').forEach(el => el.removeAttribute('data-layer-bg'));
-                mergedSvg.appendChild(g);
+                // Keep data-layer-bg on background shapes so applyFillColor can skip them
+                // Apply knockout masks from layers above this one
+                const masksAbove = [];
+                for (let j = i + 1; j < overlayState.layers.length; j++) {
+                    if (knockoutMaskIds[j]) masksAbove.push(knockoutMaskIds[j]);
+                }
+                if (masksAbove.length > 0) {
+                    let current = g;
+                    masksAbove.forEach(maskId => {
+                        const wrapper = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                        wrapper.setAttribute('mask', 'url(#' + maskId + ')');
+                        wrapper.appendChild(current);
+                        current = wrapper;
+                    });
+                    mergedSvg.appendChild(current);
+                } else {
+                    mergedSvg.appendChild(g);
+                }
             });
 
             // Generate filename from all layer names
@@ -11556,7 +11847,6 @@
             const mergedFilename = names.join('+') + '.svg';
 
             // Serialize for originalSVG
-            const serializer = new XMLSerializer();
             const mergedString = serializer.serializeToString(mergedSvg);
 
             // Push to main editor history before adding
@@ -11575,7 +11865,8 @@
             state.svgItems.push({
                 filename: mergedFilename,
                 originalSVG: mergedString,
-                currentSVG: parsedSvg
+                currentSVG: parsedSvg,
+                isOverlay: true
             });
 
             // Exit overlay mode
