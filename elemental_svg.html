@@ -3950,36 +3950,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div style="margin-top:10px;">
-                            <label style="display:block;font-size:10px;color:var(--text-secondary);margin-bottom:4px;">Position</label>
-                            <div class="adjustment-row">
-                                <label>X</label>
-                                <div class="slider-row">
-                                    <input type="range" class="stroke-slider" id="overlay-x-slider" min="-100" max="100" step="1"
-                                        value="0" oninput="overlayUpdateX(this.value)" onchange="overlayUpdateX(this.value, true)">
-                                    <span class="stroke-value" id="overlay-x-value">0</span>
-                                </div>
-                            </div>
-                            <div class="adjustment-row">
-                                <label>Y</label>
-                                <div class="slider-row">
-                                    <input type="range" class="stroke-slider" id="overlay-y-slider" min="-100" max="100" step="1"
-                                        value="0" oninput="overlayUpdateY(this.value)" onchange="overlayUpdateY(this.value, true)">
-                                    <span class="stroke-value" id="overlay-y-value">0</span>
-                                </div>
-                            </div>
-                            <div class="overlay-nudge-grid" style="margin-top:6px;">
-                                <button class="nudge-spacer"></button>
-                                <button onclick="overlayNudge(0,-1)" title="Up">&#9650;</button>
-                                <button class="nudge-spacer"></button>
-                                <button onclick="overlayNudge(-1,0)" title="Left">&#9664;</button>
-                                <button onclick="overlayNudge(0,0)" title="Center" style="font-size:10px;">&#8226;</button>
-                                <button onclick="overlayNudge(1,0)" title="Right">&#9654;</button>
-                                <button class="nudge-spacer"></button>
-                                <button onclick="overlayNudge(0,1)" title="Down">&#9660;</button>
-                                <button class="nudge-spacer"></button>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -5490,7 +5460,7 @@
     </script>
 
     <script>
-        const EDITOR_VERSION = "1.1.5";
+        const EDITOR_VERSION = "1.2.0";
         const PRODUCT_ID = '1322BB7B-1510-4893-BD2D-FF1F19E404F7';
         const _proxyBase = 'https://elemental-svg-proxy.g7hjmj8t8f.workers.dev';
 
@@ -10921,7 +10891,7 @@
             // Viewport label
             const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             label.setAttribute('x', vb / 2);
-            label.setAttribute('y', -4);
+            label.setAttribute('y', -8);
             label.setAttribute('text-anchor', 'middle');
             label.setAttribute('font-size', '7');
             label.setAttribute('fill', '#888');
@@ -11418,10 +11388,6 @@
             document.getElementById('overlay-rotation-value').textContent = layer.rotation + '\u00B0';
             document.getElementById('overlay-opacity-slider').value = layer.opacity;
             document.getElementById('overlay-opacity-value').textContent = layer.opacity + '%';
-            document.getElementById('overlay-x-slider').value = Math.round(layer.x);
-            document.getElementById('overlay-x-value').textContent = Math.round(layer.x);
-            document.getElementById('overlay-y-slider').value = Math.round(layer.y);
-            document.getElementById('overlay-y-value').textContent = Math.round(layer.y);
             // Background controls
             document.getElementById('overlay-bg-enabled').checked = layer.bgEnabled;
             document.getElementById('overlay-bg-options').style.display = layer.bgEnabled ? '' : 'none';
@@ -11488,14 +11454,12 @@
         function overlayUpdateX(val, commit) {
             if (commit) overlayPushHistory();
             overlayGetActiveLayer().x = parseInt(val, 10);
-            document.getElementById('overlay-x-value').textContent = val;
             overlayRenderWorkspace();
         }
 
         function overlayUpdateY(val, commit) {
             if (commit) overlayPushHistory();
             overlayGetActiveLayer().y = parseInt(val, 10);
-            document.getElementById('overlay-y-value').textContent = val;
             overlayRenderWorkspace();
         }
 
@@ -14234,7 +14198,8 @@ ${barsXML}</Layout></fmxmlsnippet>`;
             var cpBindings = [
                 { colorId: 'fill-color', hexId: 'fill-hex', updateFn: updateFillColor },
                 { colorId: 'stroke-color', hexId: 'stroke-hex', updateFn: updateStrokeColor },
-                { colorId: 'bg-color', hexId: 'bg-hex', updateFn: updateBgColor }
+                { colorId: 'bg-color', hexId: 'bg-hex', updateFn: updateBgColor },
+                { colorId: 'overlay-bg-color', hexId: 'overlay-bg-hex', updateFn: overlayUpdateBgColor }
             ];
             cpBindings.forEach(function (b) {
                 var swatch = document.getElementById(b.colorId).parentElement;
