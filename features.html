@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elemental SVG Editor — Feature Reference</title>
+<meta name="description" content="Explore every feature of Elemental SVG for FileMaker — search thousands of icons, customise colours and sizing, manage icon palettes, and paste SVGs directly into layouts.">
+<link rel="canonical" href="https://docs.elemental-fm.com/svg/features">
+<meta property="og:title" content="Elemental SVG — Features Overview">
+<meta property="og:description" content="Explore every feature of Elemental SVG for FileMaker — search thousands of icons, customise colours and sizing, manage icon palettes, and paste SVGs directly into layouts.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://docs.elemental-fm.com/svg/features">
+<meta property="og:image" content="https://www.elemental-fm.com/images/elemental-logo.svg">
+<meta property="og:site_name" content="Elemental FM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Elemental SVG — Features Overview">
+<meta name="twitter:description" content="Explore every feature of Elemental SVG for FileMaker — search thousands of icons, customise colours and sizing, manage icon palettes, and paste SVGs directly into layouts.">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f7fa;
+    --bg-surface: #ffffff;
+    --bg-card: #f0f2f5;
+    --text: #1a1a2e;
+    --text-muted: #5a5e6e;
+    --accent: #3a8a3a;
+    --accent-dim: rgba(58, 138, 58, 0.1);
+    --border: #d5d8e0;
+    --sidebar-w: 260px;
+  }
+
+  html { scroll-behavior: smooth; scroll-padding-top: 4rem; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 48px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 1.25rem;
+    z-index: 200;
+  }
+
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .topbar-brand span { color: var(--text-muted); }
+
+  .sidebar {
+    position: fixed;
+    top: 48px; left: 0;
+    width: var(--sidebar-w);
+    height: calc(100vh - 48px);
+    overflow-y: auto;
+    background: var(--bg-surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1.25rem;
+    z-index: 100;
+  }
+
+  .sidebar h2 {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .sidebar nav a {
+    display: block;
+    padding: 0.4rem 0.75rem;
+    margin-bottom: 2px;
+    border-radius: 6px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .sidebar nav a:hover,
+  .sidebar nav a.active {
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+
+  /* ── Main ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    max-width: 820px;
+    padding: calc(3rem + 48px) 2.5rem 6rem;
+  }
+
+  /* ── Header ── */
+  .header { margin-bottom: 3rem; }
+
+  .header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .header h1 span { color: var(--accent); }
+
+  .header .version {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: var(--bg-surface);
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+
+  /* ── Sections ── */
+  .category { margin-bottom: 3rem; }
+
+  .category h2 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--accent);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.25rem;
+  }
+
+  .feature {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.85rem 1.1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .feature strong {
+    color: var(--text);
+    font-size: 0.9rem;
+  }
+
+  .feature p {
+    margin-top: 0.2rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .feature code {
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 0.8rem;
+    background: var(--bg-card);
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    color: var(--accent);
+  }
+
+  /* ── Mobile ── */
+  .menu-btn {
+    display: none;
+    position: fixed;
+    top: calc(48px + 1rem); left: 1rem;
+    z-index: 150;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  @media (max-width: 768px) {
+    .menu-btn { display: block; }
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; padding: calc(4.5rem + 48px) 1.25rem 4rem; }
+    .overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 50;
+    }
+    .overlay.open { display: block; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="/" class="topbar-brand"><img src="/images/elemental-logo.svg" width="22" height="22" alt="Elemental FM">elemental<span>_fm</span></a>
+</div>
+
+<button class="menu-btn" id="menuBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="overlay" id="overlay"></div>
+
+<aside class="sidebar" id="sidebar">
+  <h2>Feature Reference</h2>
+  <nav>
+    <a data-section="loading">SVG Loading &amp; Import</a>
+    <a data-section="preview">Preview &amp; Display</a>
+    <a data-section="editing">SVG Editing</a>
+    <a data-section="overlay-mode">Overlay Mode</a>
+    <a data-section="conversion">Conversion Options</a>
+    <a data-section="output">Output &amp; Export</a>
+    <a data-section="icons">Icon Library</a>
+    <a data-section="filemaker">FileMaker Integration</a>
+    <a data-section="settings">Settings &amp; Preferences</a>
+    <a data-section="updates">Version &amp; Updates</a>
+    <a data-section="other">Other</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <div class="header">
+    <h1><span>Elemental SVG Editor</span> — Feature Reference</h1>
+    <span class="version">v1.1.5</span>
+  </div>
+
+  <!-- SVG Loading & Import -->
+  <section class="category" id="loading">
+    <h2>SVG Loading &amp; Import</h2>
+    <div class="feature"><strong>File Picker</strong><p>Click the "Load SVGs" button to open a file dialog. Supports multiple file selection.</p></div>
+    <div class="feature"><strong>Drag &amp; Drop</strong><p>Drag SVG files directly onto the editor preview area to load them.</p></div>
+    <div class="feature"><strong>Paste from Clipboard</strong><p>Paste SVG code or files from the clipboard. Useful in FileMaker where Cmd+V is intercepted.</p></div>
+    <div class="feature"><strong>JavaScript API</strong><p>Load SVGs programmatically via <code>loadSVG()</code>, <code>loadSVGFromString()</code>, and <code>loadSVGItems()</code> for FileMaker integration.</p></div>
+    <div class="feature"><strong>Base64 Input</strong><p>Accept Base64-encoded SVG data as input.</p></div>
+    <div class="feature"><strong>Multiple SVGs</strong><p>Load and manage multiple SVGs simultaneously in a single session.</p></div>
+  </section>
+
+  <!-- Preview & Display -->
+  <section class="category" id="preview">
+    <h2>Preview &amp; Display</h2>
+    <div class="feature"><strong>Preview Grid</strong><p>Multiple SVGs displayed in a responsive tile grid with drag-to-reorder support.</p></div>
+    <div class="feature"><strong>Single Preview</strong><p>Full-size centered display when only one SVG is loaded.</p></div>
+    <div class="feature"><strong>Zoom Controls</strong><p>Zoom in/out buttons, fit-to-view, and mouse wheel zoom with modifier key.</p></div>
+    <div class="feature"><strong>Background Options</strong><p>Checkerboard (transparency), white, black, or custom color background behind SVGs.</p></div>
+    <div class="feature"><strong>Dark / Light Theme</strong><p>Toggle between dark and light editor themes.</p></div>
+    <div class="feature"><strong>Accent Colors</strong><p>Six accent color options: orange, red, blue, green, purple, and pink.</p></div>
+    <div class="feature"><strong>File Info</strong><p>Displays SVG dimensions and file size alongside each preview.</p></div>
+  </section>
+
+  <!-- SVG Editing -->
+  <section class="category" id="editing">
+    <h2>SVG Editing</h2>
+    <div class="feature"><strong>Fill Color</strong><p>Change fill color with a color picker and hex input field.</p></div>
+    <div class="feature"><strong>Stroke Color</strong><p>Change stroke color with a color picker and hex input field.</p></div>
+    <div class="feature"><strong>Stroke Width</strong><p>Adjust stroke width from 0 to 10 in 0.5 increments.</p></div>
+    <div class="feature"><strong>Rotation</strong><p>Rotate clockwise or counter-clockwise with configurable increments (15, 30, 45, 90 degrees).</p></div>
+    <div class="feature"><strong>Flip</strong><p>Horizontal and vertical mirroring.</p></div>
+    <div class="feature"><strong>Opacity</strong><p>Adjust icon opacity from 0% to 100%.</p></div>
+    <div class="feature"><strong>Scale</strong><p>Resize the icon within its viewBox (50-150%).</p></div>
+    <div class="feature"><strong>Offset X / Y</strong><p>Reposition the icon within its viewBox.</p></div>
+    <div class="feature"><strong>Invert Colors</strong><p>Swap black and white colors in the SVG.</p></div>
+    <div class="feature"><strong>Background Shape</strong><p>Add a background shape (circle, triangle, square, pentagon, hexagon) with configurable corner radius and padding.</p></div>
+    <div class="feature"><strong>Undo / Redo</strong><p>Full history system supporting up to 50 states. <code>Cmd/Ctrl+Z</code> to undo, <code>Cmd/Ctrl+Shift+Z</code> to redo.</p></div>
+  </section>
+
+  <!-- Overlay Mode -->
+  <section class="category" id="overlay-mode">
+    <h2>Overlay Mode</h2>
+    <div class="feature"><strong>Multi-Layer Compositing</strong><p>Combine two or more SVGs into a single layered composition. Select SVGs in the editor, then click the Overlay button to enter a dedicated workspace.</p></div>
+    <div class="feature"><strong>Drag, Scale &amp; Rotate</strong><p>Click to select layers, drag to reposition, and use the scale slider (10–300%) and rotation controls to arrange each layer.</p></div>
+    <div class="feature"><strong>Per-Layer Background</strong><p>Add a background fill to any individual layer — choose from circle, square, or rounded square shapes with adjustable padding and color.</p></div>
+    <div class="feature"><strong>Layer Reordering</strong><p>Control the stacking order of layers with Bring to Front, Move Forward, Move Backward, and Send to Back.</p></div>
+    <div class="feature"><strong>Overlay Undo / Redo</strong><p>Full undo/redo history within overlay mode, separate from the main editor history.</p></div>
+    <div class="feature"><strong>Merge to Single SVG</strong><p>Finalize the composition into a single merged SVG that can be edited further or exported directly.</p></div>
+  </section>
+
+  <!-- Conversion Options -->
+  <section class="category" id="conversion">
+    <h2>Conversion Options</h2>
+    <div class="feature"><strong>Stroke to Fill</strong><p>Convert stroke-based SVGs to filled paths using Potrace bitmap tracing. Essential for FileMaker, which doesn't render strokes well in button icons.</p></div>
+    <div class="feature"><strong>Auto-Detect</strong><p>The editor automatically detects stroke-based SVGs and surfaces the conversion option.</p></div>
+    <div class="feature"><strong>Path Normalization</strong><p>Optionally normalize SVG path commands (off by default).</p></div>
+  </section>
+
+  <!-- Output & Export -->
+  <section class="category" id="output">
+    <h2>Output &amp; Export</h2>
+    <div class="feature"><strong>SVG Format</strong><p>Export as SVG (default output format).</p></div>
+    <div class="feature"><strong>PNG Format</strong><p>Export as PNG with selectable size: 32, 64, 128, 256, 512, or 1024 px.</p></div>
+    <div class="feature"><strong>Download</strong><p>Save files to disk when running in browser mode. Multiple files are automatically bundled into a ZIP.</p></div>
+    <div class="feature"><strong>Copy to Clipboard</strong><p>Copy SVG source code directly to the clipboard.</p></div>
+    <div class="feature"><strong>Copy as Button Bar</strong><p>Export selected icons as a FileMaker button bar XML snippet. Available in both the Icon Library and the Editor. Supports up to 400 icons (50 per bar, multiple bars if needed). Requires the BaseElements Plugin from Goya.</p></div>
+    <div class="feature"><strong>View Code</strong><p>Inspect the formatted SVG source code in a modal window.</p></div>
+    <div class="feature"><strong>Multi-SVG Selection</strong><p>Choose which SVGs to include in the export when multiple are loaded.</p></div>
+    <div class="feature"><strong>FileMaker Output</strong><p>Send SVG data to FileMaker via <code>PerformScript</code> in FM mode.</p></div>
+  </section>
+
+  <!-- Icon Library -->
+  <section class="category" id="icons">
+    <h2>Icon Library</h2>
+    <div class="feature"><strong>Built-in Icon Library</strong><p>Browse over 38,000 icons from eleven open-source libraries: Lucide, Tabler Icons, Heroicons, Phosphor Icons, Bootstrap Icons, Iconoir, Remix Icon, Fluent UI Icons, Material Design Icons, Ionicons, and IconPark.</p></div>
+    <div class="feature"><strong>Real-Time Search</strong><p>Instantly search across all icon libraries as you type.</p></div>
+    <div class="feature"><strong>Filter by Library</strong><p>Narrow results to a specific library.</p></div>
+    <div class="feature"><strong>Filter by Category</strong><p>Filter icons by category, with 20 categories including arrows, communication, devices, and more.</p></div>
+    <div class="feature"><strong>Filter by Style</strong><p>Filter icons by style: outline, filled, or solid.</p></div>
+    <div class="feature"><strong>Keyboard Navigation</strong><p>Use arrow keys to browse icons and Enter to select. Streamlines icon discovery without reaching for the mouse.</p></div>
+    <div class="feature"><strong>Multi-Select</strong><p>Select multiple icons with click, Shift+click for range selection, and Cmd/Ctrl+click to toggle individual icons.</p></div>
+    <div class="feature"><strong>Select All / Deselect All</strong><p>Quickly select or deselect all visible icons in the current filtered view.</p></div>
+    <div class="feature"><strong>Preview Selected</strong><p>Preview all selected icons before exporting to verify your choices.</p></div>
+    <div class="feature"><strong>Download Icons</strong><p>Download selected icons as SVG files.</p></div>
+    <div class="feature"><strong>Export to FileMaker</strong><p>Export selected icons directly to FileMaker via a script call.</p></div>
+    <div class="feature"><strong>Sidebar Counts</strong><p>Sidebar displays library counts and category counts that update dynamically as you search and filter.</p></div>
+    <div class="feature"><strong>Persistent Filters</strong><p>Remembers your last-used filter settings (library, category, style) between sessions.</p></div>
+  </section>
+
+  <!-- FileMaker Integration -->
+  <section class="category" id="filemaker">
+    <h2>FileMaker Integration</h2>
+    <div class="feature"><strong>Auto-Detection</strong><p>The editor detects whether it is running inside a FileMaker web viewer.</p></div>
+    <div class="feature"><strong>FM Mode vs Browser Mode</strong><p>UI and behavior adapt depending on the runtime context.</p></div>
+    <div class="feature"><strong>FM Compatibility</strong><p>Adds the <code>fm_fill</code> class for FileMaker dynamic color styling.</p></div>
+    <div class="feature"><strong>Dynamic Fill</strong><p>Remove fills so FileMaker can control icon colors at runtime.</p></div>
+    <div class="feature"><strong>Dynamic Target</strong><p>Choose whether FileMaker controls the "icon" or "background" colors.</p></div>
+    <div class="feature"><strong>Save to FileMaker</strong><p>Exports Base64-encoded SVG data back to FileMaker via a script call.</p></div>
+    <div class="feature"><strong>Copy as Button Bar</strong><p>Export selected icons as a FileMaker button bar XML snippet. Automatic stroke-to-fill conversion for outline icons, path normalization, and evenodd fill-rule conversion ensure FileMaker compatibility. A progress indicator is shown for large selections (10+ icons). Button bars support up to 400 icons across multiple bars (50 per bar). Requires the BaseElements Plugin from Goya.</p></div>
+    <div class="feature"><strong>Plugin Availability Check</strong><p>Checks for the BaseElements Plugin before attempting button bar export, providing a clear message if the plugin is not installed.</p></div>
+    <div class="feature"><strong>External Links</strong><p>External links now open in the default browser instead of inside the FileMaker web viewer.</p></div>
+    <div class="feature"><strong>Update from FileMaker</strong><p>Version updates trigger a FileMaker script to download and replace the editor file.</p></div>
+    <div class="feature"><strong>Initialization Config</strong><p>Configure the editor via <code>initEditor()</code> with output mode, theme, accent color, format, and size.</p></div>
+  </section>
+
+  <!-- Settings & Preferences -->
+  <section class="category" id="settings">
+    <h2>Settings &amp; Preferences</h2>
+    <div class="feature"><strong>Auto-Convert</strong><p>Toggle to automatically save or convert files when SVGs are loaded.</p></div>
+    <div class="feature"><strong>Persistent Preferences</strong><p>Theme, accent color, FM settings, preview background, and auto-convert are saved to <code>localStorage</code>.</p></div>
+    <div class="feature"><strong>Editor Config</strong><p>Initialize with specific settings via the JavaScript API.</p></div>
+  </section>
+
+  <!-- Version & Updates -->
+  <section class="category" id="updates">
+    <h2>Version &amp; Updates</h2>
+    <div class="feature"><strong>Auto Version Check</strong><p>Checks the GitHub releases API on load (after a 2-second delay).</p></div>
+    <div class="feature"><strong>Update Notification</strong><p>A banner is shown when a newer version is available.</p></div>
+    <div class="feature"><strong>Release Notes</strong><p>View the full release history in a modal.</p></div>
+    <div class="feature"><strong>FM Update</strong><p>In FileMaker mode, one-click update via script.</p></div>
+  </section>
+
+  <!-- Other -->
+  <section class="category" id="other">
+    <h2>Other</h2>
+    <div class="feature"><strong>Usage Tracking</strong><p>Anonymous usage stats sent to proxy, rate-limited to once per 30 minutes.</p></div>
+    <div class="feature"><strong>Issue Reporting</strong><p>Built-in bug report with full diagnostic data including editor state, SVG data, and browser info.</p></div>
+    <div class="feature"><strong>About Modal</strong><p>Shows Elemental product family information.</p></div>
+    <div class="feature"><strong>Keyboard Shortcuts</strong><p><code>Cmd/Ctrl+Z</code> undo, <code>Cmd/Ctrl+Shift+Z</code> redo, <code>+/-</code> zoom, <code>Escape</code> close modals.</p></div>
+    <div class="feature"><strong>Donate</strong><p>"Buy me a Coffee" button linking to a donation page.</p></div>
+    <div class="feature"><strong>Responsive Design</strong><p>Adapts to viewport size with iOS safe area support.</p></div>
+  </section>
+</main>
+
+<script>
+  // Mobile menu toggle
+  const btn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+
+  btn.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  });
+
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+
+  // Nav click — scroll without pushing to browser history
+  sidebar.querySelectorAll('a[data-section]').forEach(a => {
+    a.style.cursor = 'pointer';
+    a.addEventListener('click', () => {
+      const el = document.getElementById(a.dataset.section);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+    });
+  });
+
+  // Active link tracking
+  const sections = document.querySelectorAll('.section');
+  const links = document.querySelectorAll('.sidebar nav a');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = sidebar.querySelector(`a[data-section="${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -75% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
