@@ -2681,6 +2681,33 @@
             cursor: pointer;
         }
 
+        /* Icon Browser — Sidebar section header with master tri-state checkbox */
+        .ib-filter-section {
+            padding-bottom: 14px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .ib-filter-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .ib-section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .ib-section-header input[type="checkbox"] {
+            accent-color: var(--accent);
+            margin: 0;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
         .ib-sidebar-count {
             margin-left: auto;
             font-size: 10px;
@@ -5479,7 +5506,7 @@
     </script>
 
     <script>
-        const EDITOR_VERSION = "1.2.1";
+        const EDITOR_VERSION = "1.2.2";
         const PRODUCT_ID = '1322BB7B-1510-4893-BD2D-FF1F19E404F7';
         const _proxyBase = 'https://elemental-svg-proxy.g7hjmj8t8f.workers.dev';
 
@@ -6910,7 +6937,7 @@
             if (edBbBtn) {
                 edBbBtn.style.display = (state.fileMakerMode && hasItems) ? '' : 'none';
                 const edBbText = document.getElementById('editor-buttonbar-text');
-                if (edBbText) edBbText.textContent = count > 1 ? `Copy as Button Bar (${count})` : 'Copy as Button Bar';
+                if (edBbText) edBbText.textContent = count === 1 ? 'Copy as Button' : count > 1 ? `Copy as Button Bar (${count})` : 'Copy as Button Bar';
             }
 
             // Update text and icon based on mode, format, and count
@@ -7526,19 +7553,16 @@
             // FileMaker Web Viewer script call
             if (typeof FileMaker !== 'undefined' && FileMaker.PerformScript) {
                 FileMaker.PerformScript(scriptName, parameter);
+            } else if (window.parent !== window) {
+                // Embedded in a non-FileMaker iframe — relay via postMessage.
+                // Parse parameter from JSON so the parent receives structured data,
+                // not a raw string. Falls back to the raw string if not valid JSON.
+                let data;
+                try { data = JSON.parse(parameter); } catch(e) { data = parameter; }
+                window.parent.postMessage({ type: 'elemental-svg', action: scriptName, data }, '*');
             } else {
-                // For testing outside FileMaker - use postMessage
-                console.log('FileMaker.PerformScript("' + scriptName + '", "' + parameter.substring(0, 100) + '...")');
-                console.log('Full base64 output:', parameter);
-
-                // Send to parent window via postMessage (for test page)
-                if (window.parent !== window) {
-                    window.parent.postMessage({
-                        type: 'FileMakerScript',
-                        scriptName: scriptName,
-                        parameter: parameter
-                    }, '*');
-                }
+                // Standalone browser (dev / testing)
+                console.log('[elemental-svg] callFileMaker:', scriptName, parameter.substring(0, 200));
             }
         }
 
@@ -12023,6 +12047,10 @@
         // -- Preferences persistence --
 
         function ibSavePrefs() {
+            // Don't save before ibInit() has populated ibState — calling ibSetMode('library')
+            // triggers ibSavePrefs() before the manifest loads, which would overwrite valid
+            // saved prefs with the empty initial state ({ libraries: {}, categories: {}, types: {} }).
+            if (!ibState.initialized) return;
             try {
                 localStorage.setItem(IB_PREFS_KEY, JSON.stringify({
                     mode: document.body.dataset.mode || 'editor',
@@ -12290,7 +12318,7 @@
 
             // Library section
             if (m.libraries && m.libraries.length > 0) {
-                html += '<div style="margin-bottom:12px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-secondary);margin-bottom:6px;">Icon Set</div>';
+                html += '<div class="ib-filter-section"><label class="ib-section-header"><input type="checkbox" data-master="lib"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-primary);">Icon Set</span></label>';
                 m.libraries.forEach(lib => {
                     const id = typeof lib === 'object' ? lib.id : lib;
                     const name = typeof lib === 'object' ? lib.name : lib;
@@ -12305,7 +12333,7 @@
             const typeNames = { outline: 'Outline', filled: 'Filled', solid: 'Solid', bold: 'Bold' };
             const typeEntries = Object.keys(ibState.types);
             if (typeEntries.length > 1) {
-                html += '<div style="margin-bottom:12px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-secondary);margin-bottom:6px;">Style</div>';
+                html += '<div class="ib-filter-section"><label class="ib-section-header"><input type="checkbox" data-master="type"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-primary);">Style</span></label>';
                 typeEntries.forEach(t => {
                     const count = m.icons.filter(ic => ic.type === t).length;
                     const checked = ibState.types[t] ? 'checked' : '';
@@ -12321,7 +12349,7 @@
                 return la.localeCompare(lb);
             });
             if (categories.length > 0) {
-                html += '<div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-secondary);margin-bottom:6px;">Categories</div>';
+                html += '<div class="ib-filter-section"><label class="ib-section-header"><input type="checkbox" data-master="cat"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-primary);">Categories</span></label>';
                 categories.forEach(cat => {
                     const id = typeof cat === 'object' ? cat.id : cat;
                     const label = typeof cat === 'object' ? cat.label : cat;
@@ -12334,12 +12362,13 @@
 
             container.innerHTML = html;
 
-            // Event listeners
+            // Event listeners — individual filters
             container.querySelectorAll('input[data-lib]').forEach(cb => {
                 cb.addEventListener('change', () => {
                     ibState.libraries[cb.dataset.lib] = cb.checked;
                     ibApplyFilters();
                     ibSavePrefs();
+                    ibUpdateMasterCheckboxes();
                 });
             });
             container.querySelectorAll('input[data-type]').forEach(cb => {
@@ -12347,6 +12376,7 @@
                     ibState.types[cb.dataset.type] = cb.checked;
                     ibApplyFilters();
                     ibSavePrefs();
+                    ibUpdateMasterCheckboxes();
                 });
             });
             container.querySelectorAll('input[data-cat]').forEach(cb => {
@@ -12354,7 +12384,79 @@
                     ibState.categories[cb.dataset.cat] = cb.checked;
                     ibApplyFilters();
                     ibSavePrefs();
+                    ibUpdateMasterCheckboxes();
                 });
+            });
+
+            // Event listeners — master (select/deselect all) checkboxes
+            const libMaster = container.querySelector('input[data-master="lib"]');
+            if (libMaster) {
+                libMaster.addEventListener('change', () => {
+                    const newState = libMaster.checked;
+                    container.querySelectorAll('input[data-lib]').forEach(cb => {
+                        cb.checked = newState;
+                        ibState.libraries[cb.dataset.lib] = newState;
+                    });
+                    ibApplyFilters();
+                    ibSavePrefs();
+                    ibUpdateMasterCheckboxes();
+                });
+            }
+            const typeMaster = container.querySelector('input[data-master="type"]');
+            if (typeMaster) {
+                typeMaster.addEventListener('change', () => {
+                    const newState = typeMaster.checked;
+                    container.querySelectorAll('input[data-type]').forEach(cb => {
+                        cb.checked = newState;
+                        ibState.types[cb.dataset.type] = newState;
+                    });
+                    ibApplyFilters();
+                    ibSavePrefs();
+                    ibUpdateMasterCheckboxes();
+                });
+            }
+            const catMaster = container.querySelector('input[data-master="cat"]');
+            if (catMaster) {
+                catMaster.addEventListener('change', () => {
+                    const newState = catMaster.checked;
+                    container.querySelectorAll('input[data-cat]').forEach(cb => {
+                        cb.checked = newState;
+                        ibState.categories[cb.dataset.cat] = newState;
+                    });
+                    ibApplyFilters();
+                    ibSavePrefs();
+                    ibUpdateMasterCheckboxes();
+                });
+            }
+
+            // Initialise master checkbox states to match current filter state
+            ibUpdateMasterCheckboxes();
+        }
+
+        // Update tri-state master checkboxes based on individual checkbox states
+        function ibUpdateMasterCheckboxes() {
+            const container = document.getElementById('ib-filter-content');
+            if (!container) return;
+            [
+                { master: 'lib',  items: 'input[data-lib]' },
+                { master: 'type', items: 'input[data-type]' },
+                { master: 'cat',  items: 'input[data-cat]' },
+            ].forEach(({ master, items }) => {
+                const masterCb = container.querySelector(`input[data-master="${master}"]`);
+                if (!masterCb) return;
+                const cbs = [...container.querySelectorAll(items)];
+                if (cbs.length === 0) return;
+                const checkedCount = cbs.filter(cb => cb.checked).length;
+                if (checkedCount === 0) {
+                    masterCb.checked = false;
+                    masterCb.indeterminate = false;
+                } else if (checkedCount === cbs.length) {
+                    masterCb.checked = true;
+                    masterCb.indeterminate = false;
+                } else {
+                    masterCb.checked = false;
+                    masterCb.indeterminate = true;
+                }
             });
         }
 
@@ -12998,7 +13100,7 @@
             if (bbBtn) {
                 bbBtn.style.display = (state.fileMakerMode && count > 0) ? '' : 'none';
                 const bbText = document.getElementById('ib-buttonbar-text');
-                if (bbText) bbText.textContent = count > 0 ? `Copy as Button Bar (${count})` : 'Copy as Button Bar';
+                if (bbText) bbText.textContent = count === 1 ? 'Copy as Button' : count > 1 ? `Copy as Button Bar (${count})` : 'Copy as Button Bar';
             }
             // Show/hide Edit Selected button + update label
             const editBtn = document.getElementById('ib-edit-btn');
@@ -13471,11 +13573,13 @@
                 return;
             }
 
-            const xml = ibBuildButtonBarXML(segments);
-            callFileMaker('Build Button Bar', JSON.stringify({ buttonBarXml: xml }));
-            const numBars = Math.ceil(segments.length / 50);
-            const barLabel = numBars > 1 ? `${numBars} button bars` : 'button bar';
-            showToast(`${segments.length} icon(s) as ${barLabel} sent to FileMaker`);
+            {
+                const xml = ibBuildButtonBarXML(segments);
+                callFileMaker('Build Button Bar', JSON.stringify({ buttonBarXml: xml }));
+                const numBars = Math.ceil(segments.length / 50);
+                const barLabel = numBars > 1 ? `${numBars} button bars` : 'button bar';
+                showToast(`${segments.length} icon(s) as ${barLabel} sent to FileMaker`);
+            }
         }
 
         // Export editor SVGs as a FileMaker button bar (same as icon library version but for editor)
@@ -13560,11 +13664,13 @@
             if (cancelled) { showToast('Export cancelled'); return; }
             if (segments.length === 0) { showToast('No icons to export'); return; }
 
-            const xml = ibBuildButtonBarXML(segments);
-            callFileMaker('Build Button Bar', JSON.stringify({ buttonBarXml: xml }));
-            const numBars = Math.ceil(segments.length / 50);
-            const barLabel = numBars > 1 ? `${numBars} button bars` : 'button bar';
-            showToast(`${segments.length} icon(s) as ${barLabel} sent to FileMaker`);
+            {
+                const xml = ibBuildButtonBarXML(segments);
+                callFileMaker('Build Button Bar', JSON.stringify({ buttonBarXml: xml }));
+                const numBars = Math.ceil(segments.length / 50);
+                const barLabel = numBars > 1 ? `${numBars} button bars` : 'button bar';
+                showToast(`${segments.length} icon(s) as ${barLabel} sent to FileMaker`);
+            }
         }
 
         // Encode a string to hex (each byte → 2 hex chars)
@@ -13589,7 +13695,6 @@
             return '00000001' + typeLen + typeBytes.join('') + '00' + nameLen + nameBytes.join('');
         }
 
-        // Build FileMaker button bar XML snippet
         // Build FileMaker button bar XML snippet — template from newbuttonbar.xml (custom theme)
         // Splits into multiple button bars if segments exceed 50 (FM limit per bar)
         function ibBuildButtonBarXML(segments) {
@@ -13599,7 +13704,7 @@
             const barGap = 16; // vertical gap between bars
             const barSpacing = barH + barGap; // 76pt between bar tops
 
-            const barCSS = 'self:normal .self&#10;{&#10;&#09;border-top-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-right-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-bottom-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-left-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-top-style: solid;&#10;&#09;border-right-style: solid;&#10;&#09;border-bottom-style: solid;&#10;&#09;border-left-style: solid;&#10;&#09;border-top-width: 1pt;&#10;&#09;border-right-width: 1pt;&#10;&#09;border-bottom-width: 1pt;&#10;&#09;border-left-width: 1pt;&#10;&#09;border-top-right-radius: 5pt 5pt;&#10;&#09;border-bottom-right-radius: 5pt 5pt;&#10;&#09;border-bottom-left-radius: 5pt 5pt;&#10;&#09;border-top-left-radius: 5pt 5pt;&#10;&#09;box-shadow: none;&#10;&#09;box-sizing: content-box;&#10;}&#10;self:normal .button_bar_divider&#10;{&#10;&#09;border-top-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-right-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-bottom-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-left-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-top-style: solid;&#10;&#09;border-right-style: solid;&#10;&#09;border-bottom-style: solid;&#10;&#09;border-left-style: solid;&#10;&#09;border-top-width: 1pt;&#10;&#09;border-right-width: 1pt;&#10;&#09;border-bottom-width: 1pt;&#10;&#09;border-left-width: 1pt;&#10;&#09;border-top-right-radius: 0pt 0pt;&#10;&#09;border-bottom-right-radius: 0pt 0pt;&#10;&#09;border-bottom-left-radius: 0pt 0pt;&#10;&#09;border-top-left-radius: 0pt 0pt;&#10;&#09;box-shadow: none;&#10;&#09;box-sizing: content-box;&#10;}&#10;';
+            const barCSS ='self:normal .self&#10;{&#10;&#09;border-top-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-right-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-bottom-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-left-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-top-style: solid;&#10;&#09;border-right-style: solid;&#10;&#09;border-bottom-style: solid;&#10;&#09;border-left-style: solid;&#10;&#09;border-top-width: 1pt;&#10;&#09;border-right-width: 1pt;&#10;&#09;border-bottom-width: 1pt;&#10;&#09;border-left-width: 1pt;&#10;&#09;border-top-right-radius: 5pt 5pt;&#10;&#09;border-bottom-right-radius: 5pt 5pt;&#10;&#09;border-bottom-left-radius: 5pt 5pt;&#10;&#09;border-top-left-radius: 5pt 5pt;&#10;&#09;box-shadow: none;&#10;&#09;box-sizing: content-box;&#10;}&#10;self:normal .button_bar_divider&#10;{&#10;&#09;border-top-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-right-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-bottom-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-left-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;border-top-style: solid;&#10;&#09;border-right-style: solid;&#10;&#09;border-bottom-style: solid;&#10;&#09;border-left-style: solid;&#10;&#09;border-top-width: 1pt;&#10;&#09;border-right-width: 1pt;&#10;&#09;border-bottom-width: 1pt;&#10;&#09;border-left-width: 1pt;&#10;&#09;border-top-right-radius: 0pt 0pt;&#10;&#09;border-bottom-right-radius: 0pt 0pt;&#10;&#09;border-bottom-left-radius: 0pt 0pt;&#10;&#09;border-top-left-radius: 0pt 0pt;&#10;&#09;box-shadow: none;&#10;&#09;box-sizing: content-box;&#10;}&#10;';
 
             const segCSS = 'self:normal .self&#10;{&#10;&#09;background-image: none;&#10;&#09;background-position: 0% 0%;&#10;&#09;background-size: auto;&#10;&#09;background-repeat: repeat repeat;&#10;&#09;background-origin: padding-box;&#10;&#09;background-clip: border-box;&#10;&#09;background-color: rgba(100%,100%,100%,0);&#10;&#09;border-top-color: rgba(0%,0%,0%,0);&#10;&#09;border-right-color: rgba(0%,0%,0%,0);&#10;&#09;border-bottom-color: rgba(0%,0%,0%,0);&#10;&#09;border-left-color: rgba(0%,0%,0%,0);&#10;&#09;border-top-style: none;&#10;&#09;border-right-style: none;&#10;&#09;border-bottom-style: none;&#10;&#09;border-left-style: none;&#10;&#09;border-top-width: 0pt;&#10;&#09;border-right-width: 0pt;&#10;&#09;border-bottom-width: 0pt;&#10;&#09;border-left-width: 0pt;&#10;&#09;border-top-right-radius: 0pt 0pt;&#10;&#09;border-bottom-right-radius: 0pt 0pt;&#10;&#09;border-bottom-left-radius: 0pt 0pt;&#10;&#09;border-top-left-radius: 0pt 0pt;&#10;&#09;border-image-source: none;&#10;&#09;border-image-slice: 100% 100% 100% 100% fill;&#10;&#09;border-image-width: 1 1 1 1;&#10;&#09;border-image-outset: 0 0 0 0;&#10;&#09;border-image-repeat: stretch stretch;&#10;&#09;outline-width: 0pt;&#10;&#09;outline-style: none;&#10;&#09;outline-color: invert;&#10;&#09;outline-offset: 0pt;&#10;&#09;font-family: -fm-font-family(Helvetica Neue,HelveticaNeue);&#10;&#09;font-weight: normal;&#10;&#09;font-stretch: normal;&#10;&#09;font-style: normal;&#10;&#09;font-variant: normal;&#10;&#09;font-size: 16pt;&#10;&#09;color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;direction: ltr;&#10;&#09;line-height: 1line;&#10;&#09;block-progression: tb;&#10;&#09;text-align: center;&#10;&#09;text-transform: none;&#10;&#09;text-indent: 0pt;&#10;&#09;box-shadow: none;&#10;&#09;box-sizing: content-box;&#10;&#09;vertical-align: baseline;&#10;&#09;-fm-digit-set: roman;&#10;&#09;-fm-space-before: 0line;&#10;&#09;-fm-space-after: 0line;&#10;&#09;-fm-tab-stops: ;&#10;&#09;-fm-strikethrough: false;&#10;&#09;-fm-underline: none;&#10;&#09;-fm-glyph-variant: ;&#10;&#09;-fm-paragraph-margin-left: 0pt;&#10;&#09;-fm-paragraph-margin-right: 0pt;&#10;&#09;-fm-character-direction: ;&#10;&#09;-fm-use-default-appearance: false;&#10;&#09;-fm-override-with-classic: false;&#10;&#09;-fm-baseline-shift: 0pt;&#10;&#09;-fm-fill-effect: 0;&#10;&#09;-fm-highlight-color: rgba(0%,0%,0%,0);&#10;&#09;-fm-text-vertical-align: center;&#10;&#09;-fm-tategaki: false;&#10;&#09;-fm-rotation: 0;&#10;&#09;-fm-borders-between-reps: false;&#10;&#09;-fm-borders-baseline: false;&#10;&#09;-fm-texty-field: false;&#10;&#09;-fm-box-shadow-persist: none;&#10;}&#10;self:hover .self&#10;{&#10;&#09;background-image: none;&#10;&#09;background-color: rgba(100%,100%,100%,1);&#10;&#09;border-image-source: none;&#10;&#09;color: rgba(100%,100%,100%,1);&#10;}&#10;self:pressed .self&#10;{&#10;&#09;background-image: none;&#10;&#09;background-color: rgba(100%,100%,100%,1);&#10;&#09;border-image-source: none;&#10;&#09;color: rgba(100%,100%,100%,1);&#10;}&#10;self:focus .self&#10;{&#10;&#09;background-image: none;&#10;&#09;background-color: rgba(100%,100%,100%,1);&#10;&#09;border-image-source: none;&#10;&#09;color: rgba(100%,100%,100%,1);&#10;}&#10;self:checked .self&#10;{&#10;&#09;background-image: none;&#10;&#09;background-color: rgba(100%,100%,100%,1);&#10;&#09;border-image-source: none;&#10;&#09;color: rgba(100%,100%,100%,1);&#10;}&#10;self:normal .inner_border&#10;{&#10;&#09;border-top-color: rgba(0%,0%,0%,0);&#10;&#09;border-right-color: rgba(0%,0%,0%,0);&#10;&#09;border-bottom-color: rgba(0%,0%,0%,0);&#10;&#09;border-left-color: rgba(0%,0%,0%,0);&#10;&#09;border-top-style: none;&#10;&#09;border-right-style: none;&#10;&#09;border-bottom-style: none;&#10;&#09;border-left-style: none;&#10;&#09;border-top-width: 0pt;&#10;&#09;border-right-width: 0pt;&#10;&#09;border-bottom-width: 0pt;&#10;&#09;border-left-width: 0pt;&#10;&#09;border-top-right-radius: 0pt 0pt;&#10;&#09;border-bottom-right-radius: 0pt 0pt;&#10;&#09;border-bottom-left-radius: 0pt 0pt;&#10;&#09;border-top-left-radius: 0pt 0pt;&#10;&#09;padding-top: 0em;&#10;&#09;padding-right: 0.2em;&#10;&#09;padding-bottom: 0em;&#10;&#09;padding-left: 0.2em;&#10;&#09;margin-top: 0pt;&#10;&#09;margin-right: 0pt;&#10;&#09;margin-bottom: 0pt;&#10;&#09;margin-left: 0pt;&#10;&#09;width: auto;&#10;&#09;height: auto;&#10;&#09;top: auto;&#10;&#09;right: auto;&#10;&#09;bottom: auto;&#10;&#09;left: auto;&#10;&#09;position: static;&#10;&#09;box-shadow: none;&#10;&#09;box-sizing: content-box;&#10;}&#10;self:focus .inner_border&#10;{&#10;&#09;box-shadow: none;&#10;}&#10;self:normal .text&#10;{&#10;&#09;width: 100%;&#10;&#09;height: 100%;&#10;&#09;box-sizing: border-box;&#10;}&#10;self:normal .icon&#10;{&#10;&#09;-fm-icon-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;-fm-icon-padding: 0.5em;&#10;}&#10;self:hover .icon&#10;{&#10;&#09;-fm-icon-color: rgba(40%,69.4118%,19.6078%,1);&#10;}&#10;self:pressed .icon&#10;{&#10;&#09;-fm-icon-color: rgba(99.2157%,60.3922%,0%,1);&#10;}&#10;self:focus .icon&#10;{&#10;&#09;-fm-icon-color: rgba(100%,15.2941%,7.05882%,1);&#10;}&#10;self:checked .icon&#10;{&#10;&#09;-fm-icon-color: rgba(0%,56.8627%,80.7843%,1);&#10;}&#10;self:normal .baseline&#10;{&#10;&#09;border-top-color: rgba(0%,0%,0%,0);&#10;&#09;border-right-color: rgba(0%,0%,0%,0);&#10;&#09;border-bottom-color: rgba(0%,0%,0%,0);&#10;&#09;border-left-color: rgba(0%,0%,0%,0);&#10;&#09;border-top-style: none;&#10;&#09;border-right-style: none;&#10;&#09;border-bottom-style: none;&#10;&#09;border-left-style: none;&#10;&#09;border-top-width: 0pt;&#10;&#09;border-right-width: 0pt;&#10;&#09;border-bottom-width: 0pt;&#10;&#09;border-left-width: 0pt;&#10;}&#10;';
 
@@ -13723,6 +13828,88 @@ ${segsXML}</ButtonBarObj>
 ${barsXML}</Layout></fmxmlsnippet>`;
         }
 
+        // Build FileMaker standalone button XML snippet for a single icon.
+        // Uses the same visual style (CSS, iconSize, theme) as button bar segments.
+        // flags="0" (not 65544 which is button-bar-segment specific).
+        // No <Step> element — user assigns their own action in FileMaker.
+        function ibBuildButtonXML(segment) {
+            const btnW = 60; // points — matches button bar segment width
+            const btnH = 60; // points — matches button bar height
+
+            const segCSS = 'self:normal .self&#10;{&#10;&#09;background-image: none;&#10;&#09;background-position: 0% 0%;&#10;&#09;background-size: auto;&#10;&#09;background-repeat: repeat repeat;&#10;&#09;background-origin: padding-box;&#10;&#09;background-clip: border-box;&#10;&#09;background-color: rgba(100%,100%,100%,0);&#10;&#09;border-top-color: rgba(0%,0%,0%,0);&#10;&#09;border-right-color: rgba(0%,0%,0%,0);&#10;&#09;border-bottom-color: rgba(0%,0%,0%,0);&#10;&#09;border-left-color: rgba(0%,0%,0%,0);&#10;&#09;border-top-style: none;&#10;&#09;border-right-style: none;&#10;&#09;border-bottom-style: none;&#10;&#09;border-left-style: none;&#10;&#09;border-top-width: 0pt;&#10;&#09;border-right-width: 0pt;&#10;&#09;border-bottom-width: 0pt;&#10;&#09;border-left-width: 0pt;&#10;&#09;border-top-right-radius: 0pt 0pt;&#10;&#09;border-bottom-right-radius: 0pt 0pt;&#10;&#09;border-bottom-left-radius: 0pt 0pt;&#10;&#09;border-top-left-radius: 0pt 0pt;&#10;&#09;border-image-source: none;&#10;&#09;border-image-slice: 100% 100% 100% 100% fill;&#10;&#09;border-image-width: 1 1 1 1;&#10;&#09;border-image-outset: 0 0 0 0;&#10;&#09;border-image-repeat: stretch stretch;&#10;&#09;outline-width: 0pt;&#10;&#09;outline-style: none;&#10;&#09;outline-color: invert;&#10;&#09;outline-offset: 0pt;&#10;&#09;font-family: -fm-font-family(Helvetica Neue,HelveticaNeue);&#10;&#09;font-weight: normal;&#10;&#09;font-stretch: normal;&#10;&#09;font-style: normal;&#10;&#09;font-variant: normal;&#10;&#09;font-size: 16pt;&#10;&#09;color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;direction: ltr;&#10;&#09;line-height: 1line;&#10;&#09;block-progression: tb;&#10;&#09;text-align: center;&#10;&#09;text-transform: none;&#10;&#09;text-indent: 0pt;&#10;&#09;box-shadow: none;&#10;&#09;box-sizing: content-box;&#10;&#09;vertical-align: baseline;&#10;&#09;-fm-digit-set: roman;&#10;&#09;-fm-space-before: 0line;&#10;&#09;-fm-space-after: 0line;&#10;&#09;-fm-tab-stops: ;&#10;&#09;-fm-strikethrough: false;&#10;&#09;-fm-underline: none;&#10;&#09;-fm-glyph-variant: ;&#10;&#09;-fm-paragraph-margin-left: 0pt;&#10;&#09;-fm-paragraph-margin-right: 0pt;&#10;&#09;-fm-character-direction: ;&#10;&#09;-fm-use-default-appearance: false;&#10;&#09;-fm-override-with-classic: false;&#10;&#09;-fm-baseline-shift: 0pt;&#10;&#09;-fm-fill-effect: 0;&#10;&#09;-fm-highlight-color: rgba(0%,0%,0%,0);&#10;&#09;-fm-text-vertical-align: center;&#10;&#09;-fm-tategaki: false;&#10;&#09;-fm-rotation: 0;&#10;&#09;-fm-borders-between-reps: false;&#10;&#09;-fm-borders-baseline: false;&#10;&#09;-fm-texty-field: false;&#10;&#09;-fm-box-shadow-persist: none;&#10;}&#10;self:hover .self&#10;{&#10;&#09;background-image: none;&#10;&#09;background-color: rgba(100%,100%,100%,1);&#10;&#09;border-image-source: none;&#10;&#09;color: rgba(100%,100%,100%,1);&#10;}&#10;self:pressed .self&#10;{&#10;&#09;background-image: none;&#10;&#09;background-color: rgba(100%,100%,100%,1);&#10;&#09;border-image-source: none;&#10;&#09;color: rgba(100%,100%,100%,1);&#10;}&#10;self:focus .self&#10;{&#10;&#09;background-image: none;&#10;&#09;background-color: rgba(100%,100%,100%,1);&#10;&#09;border-image-source: none;&#10;&#09;color: rgba(100%,100%,100%,1);&#10;}&#10;self:checked .self&#10;{&#10;&#09;background-image: none;&#10;&#09;background-color: rgba(100%,100%,100%,1);&#10;&#09;border-image-source: none;&#10;&#09;color: rgba(100%,100%,100%,1);&#10;}&#10;self:normal .inner_border&#10;{&#10;&#09;border-top-color: rgba(0%,0%,0%,0);&#10;&#09;border-right-color: rgba(0%,0%,0%,0);&#10;&#09;border-bottom-color: rgba(0%,0%,0%,0);&#10;&#09;border-left-color: rgba(0%,0%,0%,0);&#10;&#09;border-top-style: none;&#10;&#09;border-right-style: none;&#10;&#09;border-bottom-style: none;&#10;&#09;border-left-style: none;&#10;&#09;border-top-width: 0pt;&#10;&#09;border-right-width: 0pt;&#10;&#09;border-bottom-width: 0pt;&#10;&#09;border-left-width: 0pt;&#10;&#09;border-top-right-radius: 0pt 0pt;&#10;&#09;border-bottom-right-radius: 0pt 0pt;&#10;&#09;border-bottom-left-radius: 0pt 0pt;&#10;&#09;border-top-left-radius: 0pt 0pt;&#10;&#09;padding-top: 0em;&#10;&#09;padding-right: 0.2em;&#10;&#09;padding-bottom: 0em;&#10;&#09;padding-left: 0.2em;&#10;&#09;margin-top: 0pt;&#10;&#09;margin-right: 0pt;&#10;&#09;margin-bottom: 0pt;&#10;&#09;margin-left: 0pt;&#10;&#09;width: auto;&#10;&#09;height: auto;&#10;&#09;top: auto;&#10;&#09;right: auto;&#10;&#09;bottom: auto;&#10;&#09;left: auto;&#10;&#09;position: static;&#10;&#09;box-shadow: none;&#10;&#09;box-sizing: content-box;&#10;}&#10;self:focus .inner_border&#10;{&#10;&#09;box-shadow: none;&#10;}&#10;self:normal .text&#10;{&#10;&#09;width: 100%;&#10;&#09;height: 100%;&#10;&#09;box-sizing: border-box;&#10;}&#10;self:normal .icon&#10;{&#10;&#09;-fm-icon-color: rgba(0%,56.8627%,80.7843%,1);&#10;&#09;-fm-icon-padding: 0.5em;&#10;}&#10;self:hover .icon&#10;{&#10;&#09;-fm-icon-color: rgba(40%,69.4118%,19.6078%,1);&#10;}&#10;self:pressed .icon&#10;{&#10;&#09;-fm-icon-color: rgba(99.2157%,60.3922%,0%,1);&#10;}&#10;self:focus .icon&#10;{&#10;&#09;-fm-icon-color: rgba(100%,15.2941%,7.05882%,1);&#10;}&#10;self:checked .icon&#10;{&#10;&#09;-fm-icon-color: rgba(0%,56.8627%,80.7843%,1);&#10;}&#10;self:normal .baseline&#10;{&#10;&#09;border-top-color: rgba(0%,0%,0%,0);&#10;&#09;border-right-color: rgba(0%,0%,0%,0);&#10;&#09;border-bottom-color: rgba(0%,0%,0%,0);&#10;&#09;border-left-color: rgba(0%,0%,0%,0);&#10;&#09;border-top-style: none;&#10;&#09;border-right-style: none;&#10;&#09;border-bottom-style: none;&#10;&#09;border-left-style: none;&#10;&#09;border-top-width: 0pt;&#10;&#09;border-right-width: 0pt;&#10;&#09;border-bottom-width: 0pt;&#10;&#09;border-left-width: 0pt;&#10;}&#10;';
+
+            const fnameHex = ibEncodeFNAM(segment.name);
+            const fnameSize = fnameHex.length / 2;
+            const svgHex = ibStrToHex(segment.svgString);
+            const svgSize = segment.svgString.length;
+
+            return `<?xml version="1.0" encoding="UTF-8"?>
+<fmxmlsnippet type="LayoutObjectList">
+<Layout enclosingRectTop="0.0000000" enclosingRectLeft="0.0000000" enclosingRectBottom="${btnH}.0000000" enclosingRectRight="${btnW}.0000000">
+<Object type="Button" key="1" LabelKey="0" flags="0" rotation="0">
+<Bounds top="0.0000000" left="0.0000000" bottom="${btnH}.0000000" right="${btnW}.0000000"/>
+<TextObj flags="2">
+<ExtendedAttributes fontHeight="10" graphicFormat="5">
+<NumFormat flags="2304" charStyle="0" negativeStyle="0" currencySymbol="$" thousandsSep="44" decimalPoint="46" negativeColor="#DD000000" decimalDigits="2" trueString="Yes" falseString="No"/>
+<DateFormat format="0" charStyle="0" monthStyle="1" dayStyle="1" separator="47">
+<DateElement>3</DateElement>
+<DateElement>1</DateElement>
+<DateElement>6</DateElement>
+<DateElement>8</DateElement>
+<DateElementSep index="0"></DateElementSep>
+<DateElementSep index="1">, </DateElementSep>
+<DateElementSep index="2"> </DateElementSep>
+<DateElementSep index="3"> </DateElementSep>
+<DateElementSep index="4"></DateElementSep>
+</DateFormat>
+<TimeFormat flags="143" charStyle="0" hourStyle="0" minsecStyle="1" separator="58" amString=" AM" pmString=" PM" ampmString=""/>
+<CharacterStyle mask="32695">
+<Font-family codeSet="Other" fontId="0" postScript="HelveticaNeue">Helvetica Neue</Font-family>
+<Font-size>16</Font-size>
+<Face>0</Face>
+<Color>#0091CE</Color>
+</CharacterStyle>
+</ExtendedAttributes>
+<Styles>
+<FullCSS>
+${segCSS}</FullCSS>
+<ThemeName>com.filemaker.theme.custom.E0B203E2_6455_4488_8FAB_92CFB662EFD6</ThemeName></Styles>
+<CharacterStyleVector>
+<Style>
+<Data></Data>
+<CharacterStyle mask="32695">
+<Font-family codeSet="Other" fontId="0" postScript="HelveticaNeue">Helvetica Neue</Font-family>
+<Font-size>16</Font-size>
+<Face>0</Face>
+<Color>#0091CE</Color>
+</CharacterStyle>
+</Style>
+</CharacterStyleVector>
+<ParagraphStyleVector>
+<Style>
+<Data></Data>
+<ParagraphStyle mask="0">
+</ParagraphStyle>
+</Style>
+</ParagraphStyleVector>
+</TextObj>
+<ButtonObj buttonFlags="0" iconSize="48" displayType="1">
+<Stream size="${fnameSize}">
+<Type>FNAM</Type>
+<HexData>${fnameHex}</HexData>
+</Stream>
+<Stream size="1">
+<Type>GLPH</Type>
+<HexData>01</HexData>
+</Stream>
+<Stream size="${svgSize}">
+<Type>SVG </Type>
+<HexData>${svgHex}</HexData>
+</Stream>
+</ButtonObj>
+</Object>
+</Layout></fmxmlsnippet>`;
+        }
 
 
         // -- Edit in Editor --
